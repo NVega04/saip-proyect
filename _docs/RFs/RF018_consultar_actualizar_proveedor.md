@@ -2,7 +2,6 @@
 
 ---
 
-# 2. Identificación
 
 ## Identificación
 
