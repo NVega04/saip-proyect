@@ -1,15 +1,34 @@
 services:
+  db:
+    image: mysql:8.0
+    container_name: saip_db_container
+    restart: always
+    environment:
+      MYSQL_DATABASE: saip_db
+      MYSQL_ROOT_PASSWORD: root_password # Pon la misma que en tu .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   backend:
     build: ./B
+    container_name: saip_backend
     ports:
       - "8000:8000"
     volumes:
       - ./B:/app
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root_password
+      - DB_HOST=db  # Importante: En Docker se usa el nombre del servicio
+      - DB_NAME=saip_db
+    depends_on:
+      - db
 
   frontend:
     build: ./F
+    container_name: saip_frontend
     ports:
       - "5173:5173"
     volumes:
