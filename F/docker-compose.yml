@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build: ./F
+    container_name: saip_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./F:/app
+      - /app/node_modules
+    depends_on:
+      - backend
