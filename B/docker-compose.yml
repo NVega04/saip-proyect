@@ -7,10 +7,10 @@ services:
       MYSQL_DATABASE: saip_db
       MYSQL_ROOT_PASSWORD: root_password # Pon la misma que en tu .env
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   backend:
     build: ./B
     container_name: saip_backend
@@ -25,17 +25,6 @@ services:
       - DB_NAME=saip_db
     depends_on:
       - db
-
-  frontend:
-    build: ./F
-    container_name: saip_frontend
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./F:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-
+      
 volumes:
   mysql_data:
