@@ -1,9 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlmodel import Session, select
 # Importamos la conexión y la función para crear tablas desde tu database.py
-from database import engine, create_db_and_tables, get_session
-# Importamos tus modelos para que SQLModel sepa qué tablas crear
-from models import Producto 
+from .database import engine, create_db_and_tables, get_session
 
 app = FastAPI(title="SAIP - Sistema de Panadería")
 
@@ -20,7 +18,6 @@ def on_startup():
 # --------------------------------------
 
 @app.get("/")
-def read_root():
+def zz():
     return {"message": "Bienvenido al Backend de SAIP"}
-
 # Aquí irán tus rutas del CRUD (POST, GET, etc.)
