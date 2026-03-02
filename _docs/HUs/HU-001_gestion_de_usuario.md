@@ -2,15 +2,14 @@
 
 ## Identificación
 
-| Campo | Valor |
-|-------|-------|
-
-| ID | HU-001 |
-| Título | Gestión de usuario |
-| Módulo | Administración / Gestión de usuarios |
-| Prioridad | Alta |
-| Estado | Pendiente |
-| RF asociados | RF001 |
+| Campo         | Valor                                    |
+|---------------|------------------------------------------|
+| **ID**            | HU-001                               |
+| **Título**        | Gestión de usuario                   |
+| **Módulo**        | Administración / Gestión de usuarios |
+| **Prioridad**     | Alta                                 |
+| **Estado**        | Pendiente                            |
+| **RF asociados**  | RF001                                |
 
 ## Historia
 
