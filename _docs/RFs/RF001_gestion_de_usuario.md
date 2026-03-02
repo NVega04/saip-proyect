@@ -8,14 +8,14 @@
 
 ## Identificación
 
-| Campo         | Valor                        |
-|---------------|------------------------------|
-| **ID**        | RF-001                       |
-| **Nombre**    | Gestión de usuario           |
+| Campo         | Valor                          |
+|---------------|--------------------------------|
+| **ID**        | RF-001                         |
+| **Nombre**    | Gestión de usuario             |
 | **Módulo**    | Autenticación y Administración |
-| **Prioridad** | Alta                         |
-| **Estado**    | implementado                 |
-| **Fecha**     | Febrero 2026                 |
+| **Prioridad** | Alta                           |
+| **Estado**    | implementado                   |
+| **Fecha**     | Febrero 2026                   |
 
 ---
 
