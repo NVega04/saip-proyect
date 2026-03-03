@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: db_saip_proyect
-      MYSQL_ROOT_PASSWORD: root_password # Pon la misma que en tu .env
+      MYSQL_ROOT_PASSWORD: root_password
     ports:
       - "3307:3306"
     volumes:
@@ -19,11 +19,11 @@ services:
       - "8000:8000"
     volumes:
       - ./:/app
-    #command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
     environment:
       - DB_USER=root
       - DB_PASSWORD=root_password
-      - DB_HOST=db  # Importante: En Docker se usa el nombre del servicio
+      - DB_HOST=db
       - DB_NAME=db_saip_proyect
       - DB_PORT=3306
     depends_on:
