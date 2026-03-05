@@ -6,7 +6,7 @@ from alembic import context
 
 from sqlmodel import SQLModel
 from src.database import mysql_url
-from src.models import User
+from B.src.models.models import User
 
 import os
 # this is the Alembic Config object, which provides
