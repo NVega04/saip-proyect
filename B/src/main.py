@@ -21,3 +21,4 @@ def on_startup():
 def zz():
     return {"message": "Bienvenido al Backend de SAIP"}
 # Aquí irán tus rutas del CRUD (POST, GET, etc.)
+
