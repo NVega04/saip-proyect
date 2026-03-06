@@ -1,7 +1,8 @@
-from datetime import datetime
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from datetime import datetime, timezone
+from typing import Optional, List
+from sqlmodel import SQLModel, Field, Relationship
 from enum import Enum
+
 
 class UserStatus(str, Enum):
     ACTIVE = "active"
@@ -23,3 +24,20 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     status: UserStatus = Field(default=UserStatus.ACTIVE)
     is_admin: bool = Field(default=False)
+
+    # Llave Foránea: Conecta este usuario con un ID de la tabla "roles"
+    role_id: int = Field(foreign_key="roles.id")
+    
+    # Relación: Permite acceder al objeto Rol directamente (ej. user.role.name)
+    role: "Role" = Relationship(back_populates="users")
+
+class Role(SQLModel, table=True):
+    
+    __tablename__= "roles"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
+    description: str = Field(max_length=500)
+    create_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+    # Relación: Un rol puede tener una lista de muchos usuarios
+    users: List["User"] = Relationship(back_populates="role")
