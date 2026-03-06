@@ -21,7 +21,7 @@ class User(SQLModel, table=True):
     password_hash: str = Field(max_length=255)
     
     # Requisitos específicos
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: UserStatus = Field(default=UserStatus.ACTIVE)
     is_admin: bool = Field(default=False)
 
