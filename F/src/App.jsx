@@ -3,8 +3,8 @@ import './App.css'; // Mantenemos el CSS base de Vite, o puedes crear uno nuevo
 
 function App() {
   return (
-    <div className="app-container">
-      <header className="app-header">
+    <div className="src-container">
+      <header className="src-header">
         <h1>SAIP</h1>
         <h2>Sistema Administrativo Integral de Productos</h2>
         <p>¡Frontend funcionando y listo para conectar con el backend!</p>

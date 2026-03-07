@@ -25,7 +25,7 @@ El sistema debe permitir que los usuarios accedan a la plataforma SAIP ingresand
 | `password`| Texto         | Sí          | No vacío (validación de longitud y formato básica en frontend) |
 ---
 ## Proceso
-1. El usuario accede al formulario de inicio de sesión en la interfaz (web o app).
+1. El usuario accede al formulario de inicio de sesión en la interfaz (web o src).
 2. Ingresa su correo electrónico (o username) y contraseña.
 3. El frontend realiza validaciones básicas (campos no vacíos, formato de email si aplica) y envía POST al backend.
 4. El backend valida los datos con Pydantic.
