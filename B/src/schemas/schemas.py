@@ -26,3 +26,17 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+
+class RoleCreate(BaseModel):
+    name: str
+    description: str
+
+class RoleResponse(BaseModel):
+    id: int
+    name: str
+    description: str
+    create_date: datetime
+
+    class Config:
+        from_attributes = True
