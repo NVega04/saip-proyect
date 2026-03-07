@@ -79,7 +79,7 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "#dc3434",
+    color: "#5c3d1e",
     marginBottom: "1.5rem",
     fontFamily: "'Roboto', sans-serif",
   },
