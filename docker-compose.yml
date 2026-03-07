@@ -12,14 +12,14 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - app
+
   backend:
-    build: ./
+    build: ./B
     container_name: saip_backend
     ports:
       - "8000:8000"
     volumes:
-      - ./:/app
-
+      - ./B:/app
     environment:
       - DB_USER=root
       - DB_PASSWORD=root_password
@@ -30,7 +30,22 @@ services:
       - db
     networks:
       - app
+
+  frontend:
+    build: ./F
+    container_name: saip_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./F:/src
+      - /src/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app
+
 volumes:
   mysql_data:
+
 networks:
   app:

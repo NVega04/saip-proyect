@@ -80,3 +80,23 @@ saip-project/
 
 ¡Bienvenidos al proyecto SAIP!  
 Este sistema busca transformar la gestión diaria de La Parmesana en algo más eficiente y sostenible, y servir como base para otras panaderías similares.
+
+
+## Uso de los componentes reutilizables
+
+Para uso del Layout, se debe usar el siguiente codigo en la vista en donde se desee usar
+
+
+import Layout from './components/Layout'
+
+export default function Dashboard() {
+  return (
+    <Layout>
+      <h1>Módulos principales</h1>
+      {/* tu contenido aquí */}
+    </Layout>
+  )
+}
+
+
+El Layout ya envuelve automáticamente con Navbar, Sidebar y Footer — solo se el contenido como children (hijo).
