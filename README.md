@@ -100,3 +100,22 @@ export default function Dashboard() {
 
 
 El Layout ya envuelve automáticamente con Navbar, Sidebar y Footer — solo se el contenido como children (hijo).
+
+### Ejemplo de uso Dashboard.tsx
+
+export default function Dashboard(): JSX.Element {
+  return (
+    <Layout>
+      <h1 style={styles.title}>Módulos principales</h1>
+      <div style={styles.grid}>
+        {modules.map((mod) => (
+          <div key={mod.id} style={styles.card}>
+            {mod.icon}
+            <div style={styles.cardLabel}>{mod.label}</div>
+            <div style={styles.cardDesc}>{mod.desc}</div>
+          </div>
+        ))}
+      </div>
+    </Layout>
+  );
+}
