@@ -1,7 +1,7 @@
-import User from './components/user'
+import Roles from "./components/Roles"
 
 function App() {
-  return <User />
+  return <Roles />
 }
 
 export default App
