@@ -19,8 +19,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./B:/app
+      - ./B:/app:Z
+      - /app/.venv
     environment:
+      - UV_LINK_MODE=copy
       - DB_USER=root
       - DB_PASSWORD=root_password
       - DB_HOST=db
@@ -37,7 +39,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./F:/src
+      - ./F:/src:Z
       - /src/node_modules
     depends_on:
       - backend
