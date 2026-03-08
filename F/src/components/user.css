@@ -1,0 +1,326 @@
+:root {
+  --dark: #5c3d1e;
+  --medium: #7d5a3c;
+  --mid: #9e7e62;
+  --light: #b8a08a;
+  --pale: #cfc0b0;
+  --bg: #f5f0ea;
+  --white: #ffffff;
+}
+
+/* Título */
+
+.user-title{
+  font-size:1.6rem;
+  font-weight:600;
+  font-family:'Poppins',sans-serif;
+  margin-bottom:1.5rem;
+}
+
+/* Tarjeta */
+
+.user-card{
+  background:var(--white);
+  border-radius:16px;
+  padding:2rem;
+  border:1px solid var(--pale);
+  box-shadow:0 10px 30px rgba(92,61,30,0.08);
+  animation: fadeIn .4s ease;
+  overflow-x:auto;
+}
+
+/* animación suave */
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform: translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+
+.user-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:1.5rem;
+}
+
+.user-actions{
+  display:flex;
+  gap:10px;
+}
+
+/* Botones */
+
+.btn-create{
+  background:var(--dark);
+  color:var(--white);
+  border:none;
+  padding:.6rem 1rem;
+  border-radius:10px;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-create:hover{
+  transform: scale(1.05);
+  box-shadow:0 6px 12px rgba(92,61,30,0.15);
+}
+
+.btn-delete{
+  background:var(--mid);
+  color:var(--white);
+  border:none;
+  padding:.6rem 1rem;
+  border-radius:10px;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-delete:hover{
+  transform: scale(1.05);
+  box-shadow:0 6px 12px rgba(92,61,30,0.15);
+}
+
+/* efecto presión */
+
+.btn-create:active,
+.btn-delete:active{
+  transform: scale(.95);
+}
+
+/* filtros */
+
+.user-filters{
+  display:flex;
+  gap:10px;
+}
+
+.input-search{
+  padding:.5rem .8rem;
+  border-radius:8px;
+  border:1px solid var(--pale);
+  background:var(--white);
+  transition:border .2s ease, box-shadow .2s ease;
+}
+
+.input-search::placeholder{
+  color:var(--mid);
+  opacity:.7;
+}
+
+.input-search:focus{
+  outline:none;
+  border-color:var(--light);
+  box-shadow:0 0 0 2px rgba(184,160,138,0.2);
+}
+
+.btn-filter{
+  padding:.5rem .8rem;
+  border-radius:8px;
+  border:none;
+  background:var(--pale);
+  cursor:pointer;
+  transition: background .2s ease;
+}
+
+.btn-filter:hover{
+  background:var(--light);
+}
+
+/* TABLA */
+
+.user-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+}
+
+.user-table th{
+  text-align:left;
+  padding:.8rem;
+  font-size:.85rem;
+  color:var(--medium);
+  border-bottom:1px solid var(--pale);
+}
+
+.user-table td{
+  padding:1rem .8rem;
+  font-size:.9rem;
+  border-bottom:1px solid var(--pale);
+}
+
+.user-table tbody tr{
+  transition: background-color .2s ease;
+}
+
+.user-table tbody tr:hover{
+  background: var(--bg);
+}
+
+/* accesos */
+
+.access-tags{
+  display:flex;
+  gap:6px;
+}
+
+.tag{
+  background:var(--bg);
+  color:var(--medium);
+  font-size:.75rem;
+  padding:4px 8px;
+  border-radius:8px;
+  transition: all .2s ease;
+}
+
+.tag:hover{
+  background: var(--pale);
+  color: var(--dark);
+}
+
+/* estado */
+
+.status-active{
+  background:var(--bg);
+  color:var(--dark);
+  font-size:.75rem;
+  padding:4px 8px;
+  border-radius:10px;
+}
+
+/* acciones */
+
+.actions{
+  display:flex;
+  gap:8px;
+}
+
+.icon-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+}
+
+.icon-btn svg{
+  stroke: var(--medium);
+  transition: stroke .2s ease, transform .15s ease;
+}
+
+.icon-btn:hover svg{
+  stroke: var(--dark);
+  transform: scale(1.15);
+}
+
+/* PAGINACIÓN */
+
+.pagination{
+  margin-top:1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:6px;
+}
+
+.page-btn{
+  padding:.35rem .75rem;
+  border-radius:6px;
+  border:1px solid var(--pale);
+  background:transparent;
+  color:var(--medium);
+  font-size:.85rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.page-btn:hover{
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}
+
+.page-btn:active{
+  transform: scale(.95);
+}
+
+.pages{
+  display:flex;
+  gap:4px;
+}
+
+.page-number{
+  padding:.35rem .65rem;
+  border-radius:6px;
+  border:1px solid var(--pale);
+  background:transparent;
+  color:var(--medium);
+  font-size:.85rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.page-number:hover{
+  background:var(--dark);
+  color: var(--white);
+  border-color:var(--dark);
+}
+
+.page-number.active{
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}
+
+.page-number:active{
+  transform: scale(.95);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px){
+
+  .user-header{
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .user-actions{
+    justify-content: space-between;
+  }
+
+  .user-filters{
+    width: 100%;
+  }
+
+  .input-search{
+    width: 100%;
+  }
+
+  .pagination{
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+}
+
+.btn-filter{
+  padding:.5rem .6rem;
+  border-radius:8px;
+  border:1px solid var(--pale);
+  background:transparent;
+  cursor:pointer;
+}
+
+.btn-filter:hover{
+  background: var(--dark);
+}
+
+.btn-filter:hover svg{
+  stroke: var(--white);
+}
