@@ -40,3 +40,12 @@ class RoleResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class LoginResponse(BaseModel):
+    session_token: str
+    expires_at: datetime
+    user: UserResponse

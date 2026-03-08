@@ -1,0 +1,73 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlmodel import Session as DBSession, select
+from datetime import datetime, timezone
+
+from src.database import get_session
+from src.models.models import User, Session as SessionModel
+from src.schemas.schemas import LoginRequest, LoginResponse
+from src.security import verify_password, create_session_token, get_session_expiry
+
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Iniciar sesión",
+)
+def login(
+    credentials: LoginRequest,
+    db: DBSession = Depends(get_session),
+):
+    # 1. Buscar usuario por email
+    user = db.exec(
+        select(User).where(User.email == credentials.email)
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas.",
+        )
+
+    # 2. Verificar que el usuario esté activo
+    if user.status.value != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="El usuario está inactivo. Contacte al administrador.",
+        )
+
+    # 3. Verificar password
+    if not verify_password(credentials.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas.",
+        )
+
+    # 4. Invalidar sesiones anteriores activas
+    old_sessions = db.exec(
+        select(SessionModel).where(
+            SessionModel.user_id == user.id,
+            SessionModel.is_active == True,
+        )
+    ).all()
+    for s in old_sessions:
+        s.is_active = False
+        db.add(s)
+
+    # 5. Crear nueva sesión
+    new_session = SessionModel(
+        user_id=user.id,
+        expires_at=get_session_expiry(),
+    )
+    db.add(new_session)
+    db.commit()
+    db.refresh(new_session)
+    db.refresh(user)
+
+    return LoginResponse(
+        session_token=new_session.id,
+        expires_at=new_session.expires_at,
+        user=user,
+    )

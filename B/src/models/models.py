@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from enum import Enum
-
+import uuid
 
 class UserStatus(str, Enum):
     ACTIVE = "active"
@@ -31,6 +31,9 @@ class User(SQLModel, table=True):
     # Relación: Permite acceder al objeto Rol directamente (ej. user.role.name)
     role: "Role" = Relationship(back_populates="users")
 
+    #Relación: Permite relacionar las sessiones del usurio
+    sessions: List["Session"] = Relationship(back_populates="user")
+
 class Role(SQLModel, table=True):
     
     __tablename__= "roles"
@@ -41,3 +44,14 @@ class Role(SQLModel, table=True):
     create_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
     # Relación: Un rol puede tener una lista de muchos usuarios
     users: List["User"] = Relationship(back_populates="role")
+
+class Session(SQLModel, table=True):
+    __tablename__ = "sessions"
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    user_id: int = Field(foreign_key="users.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: datetime
+    is_active: bool = Field(default=True)
+
+    user: "User" = Relationship(back_populates="sessions")
