@@ -62,19 +62,19 @@ def desactivate_role(
         raise HTTPException(status_code=404, detail="Rol no encontrado")
     # Ya esta desactivado -- para informar 
     if not role.is_active:
-        raise HTTPException(status_code=410, details="El rol ya esta desactivado")
+        raise HTTPException(status_code=410, detail="El rol ya esta desactivado")
     # Proteccion de roles del sistema 
     protected = {"admin"}
     if role.name.lower() in protected:
                        raise HTTPException(
-                           satus_code=status.HTTP_403_FORBIDDEN,
-                           detail=f"No se puede desactivar el rol de sistema '{role.name}"
+                           status_code=status.HTTP_403_FORBIDDEN,
+                           detail=f"No se puede desactivar el rol de sistema '{role.name}'"
                        )
     # Realizar soft delete
     role.is_active = False
     role.deleted_at = datetime.now(timezone.utc)
 
-    session.delete(role)
+    session.add(role) # persistir cambios
     session.commit()
 
     return None # 204 No content
