@@ -28,6 +28,8 @@ El proyecto se desarrollará de forma iterativa, comenzando con los módulos pri
 ## Estructura del Proyecto
 
 El repositorio está organizado de la siguiente manera:
+
+``
 saip-project/
 ├── _docs/                  # Documentación general del proyecto
 │   ├── RFs/                # Requerimientos funcionales (cada RF en su archivo .md)
@@ -43,7 +45,7 @@ saip-project/
 ├── docs/                   # Documentos adicionales (diagramas, mockups, flujogramas)
 ├── README.md               # Este archivo (introducción general al proyecto)
 └── [archivos de configuración: .gitignore, docker-compose, etc.]
-
+``
 
 ## Fases del Proyecto (Resumen)
 
@@ -119,3 +121,8 @@ export default function Dashboard(): JSX.Element {
     </Layout>
   );
 }
+
+
+## Modelo de base de datos
+
+![Modelo de base de datos](./images/saip_erd.svg)
