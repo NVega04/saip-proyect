@@ -34,6 +34,10 @@ class User(SQLModel, table=True):
 
     deleted_at: Optional[datetime] = Field(default=None)
     deleted_by: Optional[int] = Field(default=None, foreign_key="users.id")
+      
+class RoleStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
 
 class Role(SQLModel, table=True):
     
@@ -43,9 +47,16 @@ class Role(SQLModel, table=True):
     name: str = Field(max_length=100)
     description: str = Field(max_length=500)
     create_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+    
+    # -- Auditoria de actualización-------------------
+    update_at: Optional[datetime] = Field(default=None, nullable=True)
+    update_by: Optional[int] = Field(default=None, nullable=True, foreign_key="users.id")
+
     # ── Campos para soft delete ─────────────────────────────
-    is_active: bool = Field(default=True, index=True)
+    status: RoleStatus = Field(default=RoleStatus.ACTIVE, index=True) 
     deleted_at: Optional[datetime] = Field(default=None, nullable=True)
+    deleted_by: Optional[int] = Field(default=None, nullable=True, foreign_key="users.id")
+    
     # Relación: Un rol puede tener una lista de muchos usuarios
     users: List["User"] = Relationship(back_populates="role")
 
