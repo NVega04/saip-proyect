@@ -17,7 +17,7 @@ def get_current_user(
             detail="Sesión no encontrada"
         )
     # Validar que no haya expirado
-    if datetime.now(timezone.utc) > user_session.expires_at:
+    if datetime.now(timezone.utc) > user_session.expires_at.replace(tzinfo=timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sesión expirada"

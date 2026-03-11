@@ -55,7 +55,7 @@ def create_role(
            403: {"descripcion": "No se puede modificar un rol protegido"},
     }
 )
-def update_role(
+def updated_role(
     role_id: int,
     role_data: RoleUpdate,
     session: Session = Depends(get_session),
