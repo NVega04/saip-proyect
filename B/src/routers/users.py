@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 import logging
-
 from src.database import get_session
-from src.models.models import User, Role
-from src.schemas.schemas import UserCreate, UserResponse
+from src.models.models import User, Role, Session, UserStatus
+from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser
 from src.security import hash_password, generate_temp_password
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
@@ -59,3 +59,62 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
     session.refresh(new_user)
 
     return new_user
+
+@router.delete("/{user_id}", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar usuario (soft delete)")
+
+def delete_user(user_id: int, admin_id: int, session: Session = Depends(get_session)):
+    # 1. Verificar que quien ejecuta es admin
+    admin = session.get(User, admin_id)
+    if not admin or not admin.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los administradores pueden eliminar usuarios.",
+        )
+
+    # 2. Buscar el usuario a eliminar
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"El usuario con id '{user_id}' no existe.",
+        )
+
+    # 3. Verificar que no esté ya eliminado
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"El usuario con id '{user_id}' ya fue eliminado.",
+        )
+
+    # 4. Verificar que el admin no se elimine a sí mismo
+    if user_id == admin_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No puedes eliminarte a ti mismo.",
+        )
+
+    # 5. Soft delete
+    now = datetime.now(timezone.utc)
+    user.deleted_at = now
+    user.deleted_by = admin_id
+    user.status = UserStatus.INACTIVE
+
+    # 6. Invalidar sesiones activas del usuario eliminado
+    active_sessions = session.exec(
+        select(Session).where(
+            Session.user_id == user_id,
+            Session.is_active == True,
+        )
+    ).all()
+    for s in active_sessions:
+        s.is_active = False
+        session.add(s)
+
+    session.add(user)
+    session.commit()
+
+    return DeleteResponseUser(
+        message=f"Usuario '{user.email}' eliminado correctamente.",
+        deleted_at=now,
+        deleted_by=admin_id,
+    )

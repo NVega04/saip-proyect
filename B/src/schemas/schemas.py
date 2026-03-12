@@ -1,8 +1,9 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from src.models.models import UserStatus
+from src.models.models import UserStatus, RoleStatus
 from datetime import datetime
 
+## Esquemas relacionados a Usuarios.
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
@@ -26,8 +27,13 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        
 
+class DeleteResponseUser(BaseModel):
+    name: str
+    deleted_at: datetime
+    deleted_by: int
+        
+## Esquemas relacionados a Roles.
 class RoleCreate(BaseModel):
     name: str
     description: str
@@ -37,6 +43,25 @@ class RoleResponse(BaseModel):
     name: str
     description: str
     create_date: datetime
+
+    class Config:
+        from_attributes = True
+
+## Esquemas relacionados a sesiones en el sistema.
+class RoleUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+class RolePublic(BaseModel):
+    id: int
+    name: str
+    description: str
+    create_date: datetime
+    status: RoleStatus
+    updated_at: Optional[datetime] = None
+    updated_by: Optional[int] = None
+    deleted_at: Optional[datetime] = None
+    deleted_by: Optional[int] = None 
 
     class Config:
         from_attributes = True
