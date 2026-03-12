@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session as DBSession, select
+from sqlmodel import Session, select
 from datetime import datetime, timezone
 
 from src.database import get_session
-from src.models.models import User, Session as SessionModel
+from src.models.models import User, SessionApp
 from src.schemas.schemas import LoginRequest, LoginResponse
 from src.security import verify_password, create_session_token, get_session_expiry
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 )
 def login(
     credentials: LoginRequest,
-    db: DBSession = Depends(get_session),
+    db: Session = Depends(get_session),
 ):
     # 1. Buscar usuario por email
     user = db.exec(
@@ -47,9 +47,9 @@ def login(
 
     # 4. Invalidar sesiones anteriores activas
     old_sessions = db.exec(
-        select(SessionModel).where(
-            SessionModel.user_id == user.id,
-            SessionModel.is_active == True,
+        select(SessionApp).where(
+            SessionApp.user_id == user.id,
+            SessionApp.is_active == True,
         )
     ).all()
     for s in old_sessions:
@@ -57,7 +57,7 @@ def login(
         db.add(s)
 
     # 5. Crear nueva sesión
-    new_session = SessionModel(
+    new_session = SessionApp(
         user_id=user.id,
         expires_at=get_session_expiry(),
     )
