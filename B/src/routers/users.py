@@ -48,7 +48,6 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
         first_name=user_data.first_name,
         last_name=user_data.last_name,
         email=user_data.email,
-        position=user_data.position,
         phone=user_data.phone,
         role_id=user_data.role_id,
         is_admin=user_data.is_admin,
@@ -75,7 +74,7 @@ def delete_user(
             detail=f"El usuario con id '{user_id}' no existe.",
         )
 
-    if not user.is_active:
+    if user.status == UserStatus.INACTIVE:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"El usuario con id '{user_id}' ya fue eliminado.",
@@ -94,7 +93,6 @@ def delete_user(
         )
 
     now = datetime.now(timezone.utc)
-    user.is_active = False
     user.deleted_at = now
     user.deleted_by = current_user.id
     user.status = UserStatus.INACTIVE
@@ -106,7 +104,7 @@ def delete_user(
         )
     ).all()
     for s in active_sessions:
-        s.is_active = False
+        s.status = UserStatus.INACTIVE
         session.add(s)
 
     session.add(user)

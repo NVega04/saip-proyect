@@ -6,7 +6,7 @@ from src.database import get_session
 from src.models.models import Session as UserSession, User
 
 def get_current_user(
-    session_token: str = Header(...),           # viene en el header de la request
+    session_token: str = Header(...),
     session: Session = Depends(get_session),
 ) -> User:
     # Buscar la sesión

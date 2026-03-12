@@ -4,7 +4,7 @@ import string
 from datetime import datetime, timezone, timedelta
 
 #Definición de duración de la sessión del usuario en horas
-SESSION_DURATION_HOURS = 1
+SESSION_DURATION_HOURS = 8
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
