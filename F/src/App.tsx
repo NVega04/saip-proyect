@@ -1,7 +1,8 @@
-import Dashboard from './components/Dashboard'
+/* import Dashboard from './components/Dashboard' */
+import Login from './components/login'
 
 function App() {
-  return <Dashboard />
+  return <Login />
 }
 
 export default App

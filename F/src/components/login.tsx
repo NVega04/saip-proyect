@@ -8,10 +8,33 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+
+    try {
+      const response = await fetch("http://172.26.0.4:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.detail || "Credenciales inválidas.");
+        return;
+      }
+
+      const data = await response.json();
+      localStorage.setItem("session_token", data.session_token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.location.href = "/dashboard";
+
+    } catch {
+      alert("Error de conexión con el servidor.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
