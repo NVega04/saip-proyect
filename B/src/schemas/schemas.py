@@ -8,7 +8,6 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    position: str
     phone: Optional[str] = None
     role_id: int
     is_admin: bool = False
@@ -18,7 +17,6 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
-    position: str
     phone: Optional[str]
     role_id: int
     is_admin: bool
@@ -29,9 +27,33 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class DeleteResponseUser(BaseModel):
-    name: str
+    message: str
     deleted_at: datetime
     deleted_by: int
+
+class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    role_id: Optional[int] = None
+    is_admin: Optional[bool] = None
+
+class UserUpdateResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str
+    phone: Optional[str]
+    role_id: int
+    is_admin: bool
+    status: UserStatus
+    created_at: datetime
+    updated_at: datetime
+    updated_by: int
+
+    class Config:
+        from_attributes = True
         
 ## Esquemas relacionados a Roles.
 class RoleCreate(BaseModel):
