@@ -42,7 +42,7 @@ class RoleResponse(BaseModel):
     id: int
     name: str
     description: str
-    create_date: datetime
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -56,7 +56,7 @@ class RolePublic(BaseModel):
     id: int
     name: str
     description: str
-    create_date: datetime
+    created_at: datetime
     status: RoleStatus
     updated_at: Optional[datetime] = None
     updated_by: Optional[int] = None
