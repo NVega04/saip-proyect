@@ -29,7 +29,7 @@ class User(SQLModel, table=True):
     role: "Role" = Relationship(back_populates="users", sa_relationship_kwargs={"foreign_keys": "User.role_id"})
 
     #Relación: Permite relacionar las sessiones del usurio
-    sessions: List["Session"] = Relationship(back_populates="user")
+    sessions: List["SessionApp"] = Relationship(back_populates="user")
 
     updated_at: Optional[datetime] = Field(default=None)
     updated_by: Optional[int] = Field(default=None, foreign_key="users.id")
@@ -64,7 +64,7 @@ class Role(SQLModel, table=True):
         sa_relationship_kwargs={"foreign_keys": "[User.role_id]"}
         )
 
-class Session(SQLModel, table=True):
+class SessionApp(SQLModel, table=True):
     __tablename__ = "sessions"
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
