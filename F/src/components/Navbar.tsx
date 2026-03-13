@@ -1,15 +1,17 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   return (
     <nav style={styles.navbar}>
-      <a href="#" style={styles.brand}>
+       <Link to="/" style={styles.brand}>  
         <div style={styles.logoBox}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.5">
-            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+            <path d="M9 21V12h6v9"/>
           </svg>
         </div>
-      </a>
+      </Link>
 
       <div style={styles.links}>
         <a href="#" style={styles.link}>Acerca de nosotros</a>
