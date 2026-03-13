@@ -1,0 +1,66 @@
+.saip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  outline: none;
+  white-space: nowrap;
+}
+
+.saip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tamaños */
+.saip-btn--sm { font-size: 0.78rem; padding: 0.35rem 0.85rem; border-radius: 6px; }
+.saip-btn--md { font-size: 0.85rem; padding: 0.5rem 1.1rem;  border-radius: 7px; }
+.saip-btn--lg { font-size: 0.9rem;  padding: 0.65rem 1.4rem; border-radius: 8px; }
+
+/* Variantes */
+.saip-btn--primary {
+  background: #5c3d1e;
+  color: #ffffff;
+  border: 1px solid #5c3d1e;
+}
+.saip-btn--primary:hover:not(:disabled) {
+  background: #7d5a3c;
+  border-color: #7d5a3c;
+}
+
+.saip-btn--secondary {
+  background: #ffffff;
+  color: #7d5a3c;
+  border: 1px solid #cfc0b0;
+}
+.saip-btn--secondary:hover:not(:disabled) {
+  background: #f5f0ea;
+}
+
+.saip-btn--danger {
+  background: #ffffff;
+  color: #b94a3a;
+  border: 1px solid #e5b4ae;
+}
+.saip-btn--danger:hover:not(:disabled) {
+  background: #fdf0ee;
+  border-color: #c9685a;
+}
+
+.saip-btn--ghost {
+  background: transparent;
+  color: #9e7e62;
+  border: none;
+}
+.saip-btn--ghost:hover:not(:disabled) {
+  color: #5c3d1e;
+}
+
+.saip-btn__icon {
+  display: flex;
+  align-items: center;
+}

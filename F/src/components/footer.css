@@ -1,0 +1,29 @@
+.app-footer{
+
+  margin-top:40px;
+
+  border-top:1px solid var(--pale);
+  background:var(--white);
+
+  padding:12px 20px;
+
+}
+
+.footer-content{
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  font-size:.85rem;
+  color:var(--medium);
+
+}
+
+.footer-version{
+
+  background:var(--bg);
+  padding:4px 8px;
+  border-radius:6px;
+
+}

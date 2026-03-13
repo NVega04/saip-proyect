@@ -1,5 +1,5 @@
 import {JSX} from "react";
-import Layout from "./Layout";
+import Layout from "../components/Layout";
 
 interface Module {
   id: string;

@@ -1,0 +1,72 @@
+.saip-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 37, 16, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: modal-fade-in 0.15s ease;
+}
+
+.saip-modal__box {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #cfc0b066;
+  box-shadow: 0 8px 32px rgba(59, 37, 16, 0.12);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modal-slide-in 0.18s ease;
+  max-width: calc(100vw - 2rem);
+}
+
+.saip-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0e8e0;
+}
+
+.saip-modal__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+}
+
+.saip-modal__close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9e7e62;
+  transition: background 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+}
+
+.saip-modal__close:hover {
+  background: #f5f0ea;
+  color: #5c3d1e;
+}
+
+.saip-modal__body {
+  padding: 1.5rem;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-slide-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

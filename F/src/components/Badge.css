@@ -1,0 +1,33 @@
+.saip-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.saip-badge--access {
+  background: #f5f0ea;
+  color: #7d5a3c;
+  border-color: #cfc0b0;
+}
+
+.saip-badge--active {
+  background: #eef5ee;
+  color: #3a6e3a;
+  border-color: #b4d4b4;
+}
+
+.saip-badge--inactive {
+  background: #fdf0ee;
+  color: #b94a3a;
+  border-color: #e5b4ae;
+}
+
+.saip-badge--warning {
+  background: #fdf8ee;
+  color: #8a6a1a;
+  border-color: #e0d0a0;
+}

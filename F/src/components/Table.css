@@ -1,0 +1,132 @@
+.saip-table-section__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 1.5rem;
+}
+
+/* Card contenedor */
+.saip-table-card {
+  background: #ffffff;
+  border: 1px solid #cfc0b066;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* Toolbar */
+.saip-table-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.saip-table-card__toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* Scroll horizontal en mobile */
+.saip-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Tabla */
+.saip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Encabezados */
+.saip-table__th {
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5c3d1e;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #e8ddd4;
+  white-space: nowrap;
+}
+
+.saip-table__th--actions {
+  text-align: right;
+}
+
+/* Filas */
+.saip-table__row {
+  transition: background 0.12s ease;
+}
+
+.saip-table__row:hover {
+  background: #faf7f4;
+}
+
+.saip-table__row:not(:last-child) td {
+  border-bottom: 1px solid #f0e8e0;
+}
+
+/* Celdas */
+.saip-table__td {
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #4a3020;
+  vertical-align: middle;
+}
+
+.saip-table__td--actions {
+  text-align: right;
+}
+
+/* Acciones inline en celda */
+.saip-table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.saip-table__action-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9e7e62;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.saip-table__action-btn:hover {
+  background: #f5f0ea;
+  color: #5c3d1e;
+}
+
+.saip-table__action-btn--danger:hover {
+  background: #fdf0ee;
+  color: #b94a3a;
+}
+
+/* Badges en celda */
+.saip-table__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Vacío */
+.saip-table__empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 0.85rem;
+  color: #9e7e62;
+  font-family: 'Roboto', sans-serif;
+}

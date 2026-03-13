@@ -1,0 +1,114 @@
+:root {
+  --dark: #5c3d1e;
+  --medium: #7d5a3c;
+  --mid: #9e7e62;
+  --light: #b8a08a;
+  --pale: #cfc0b0;
+  --bg: #f5f0ea;
+  --white: #ffffff;
+}
+
+/* ── Formulario dentro del modal ── */
+.crf {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.crf__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.crf__label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--dark);
+  font-family: 'Roboto', sans-serif;
+}
+
+.crf__input,
+.crf__textarea {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.85rem;
+  color: #3b2510;
+  background: var(--white);
+  border: 1px solid var(--pale);
+  border-radius: 7px;
+  padding: 0.55rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.crf__input::placeholder,
+.crf__textarea::placeholder {
+  color: var(--light);
+}
+
+.crf__input:focus,
+.crf__textarea:focus {
+  border-color: var(--mid);
+}
+
+.crf__input--error {
+  border-color: #c9685a !important;
+}
+
+.crf__error {
+  font-size: 0.74rem;
+  color: #b94a3a;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* ── Pills de acceso ── */
+.crf__accesos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.crf__acceso-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.79rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--pale);
+  background: var(--white);
+  color: var(--medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.crf__acceso-btn:hover {
+  background: var(--bg);
+}
+
+.crf__acceso-btn--active {
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+  font-weight: 500;
+}
+
+.crf__acceso-btn--active:hover {
+  background: var(--medium);
+  border-color: var(--medium);
+}
+
+/* ── Acciones del formulario ── */
+.crf__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0e8e0;
+  margin-top: 0.25rem;
+}
