@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2200" height="1800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="2200" height="1800" fill="#0f172a"/>
+
+  <!-- Title -->
+  <text x="1100" y="40" text-anchor="middle" fill="#f1f5f9" font-size="22" font-weight="bold">SAIP - Database Model</text>
+  <text x="1100" y="62" text-anchor="middle" fill="#64748b" font-size="13">Sistema Administrativo Integral de Productos</text>
+
+  <!-- ===================== SECTION LABELS ===================== -->
+  <text x="60" y="105" fill="#3b82f6" font-size="11" font-weight="bold" opacity="0.7">ACCESS &amp; SECURITY</text>
+  <text x="760" y="105" fill="#10b981" font-size="11" font-weight="bold" opacity="0.7">CATALOG</text>
+  <text x="1420" y="105" fill="#f59e0b" font-size="11" font-weight="bold" opacity="0.7">INVENTORY</text>
+  <text x="60" y="870" fill="#8b5cf6" font-size="11" font-weight="bold" opacity="0.7">SUPPLIERS</text>
+  <text x="560" y="870" fill="#ef4444" font-size="11" font-weight="bold" opacity="0.7">PRODUCTION</text>
+  <text x="1180" y="870" fill="#06b6d4" font-size="11" font-weight="bold" opacity="0.7">PURCHASES</text>
+  <text x="1680" y="870" fill="#f97316" font-size="11" font-weight="bold" opacity="0.7">SALES &amp; CASH</text>
+
+  <!-- ===================== TABLE MACRO ===================== -->
+  <!-- Each table: rect + header + fields -->
+
+  <!-- ===== roles ===== -->
+  <g transform="translate(60,115)">
+    <rect width="200" height="220" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="200" height="6" fill="#3b82f6"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">roles</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(100) UQ</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">is_active TINYINT</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="125" fill="#64748b" font-size="10">created_by → users</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="155" fill="#64748b" font-size="10">updated_by → users</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+    <text x="10" y="185" fill="#64748b" font-size="10">deleted_by → users</text>
+  </g>
+
+  <!-- ===== users ===== -->
+  <g transform="translate(290,115)">
+    <rect width="210" height="280" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="210" height="6" fill="#3b82f6"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">users</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">first_name VARCHAR(100)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">last_name VARCHAR(100)</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">email VARCHAR(255) UQ</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">position VARCHAR(150)</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">phone VARCHAR(50)</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">password_hash VARCHAR(255)</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">is_admin TINYINT</text>
+    <text x="10" y="185" fill="#64748b" font-size="10">role_id → roles</text>
+    <text x="10" y="200" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="215" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="230" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="245" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== sessions ===== -->
+  <g transform="translate(60,360)">
+    <rect width="200" height="130" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="200" height="6" fill="#3b82f6"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">sessions</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">expires_at TIMESTAMP</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">is_active TINYINT</text>
+  </g>
+
+  <!-- ===== password_resets ===== -->
+  <g transform="translate(60,515)">
+    <rect width="200" height="130" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="200" height="6" fill="#3b82f6"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">password_resets</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">token VARCHAR(255) UQ</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">expires_at DATETIME</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">used TINYINT</text>
+  </g>
+
+  <!-- ===== permissions ===== -->
+  <g transform="translate(290,420)">
+    <rect width="210" height="115" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="210" height="6" fill="#3b82f6"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">permissions</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(100) UQ</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">module VARCHAR(100)</text>
+  </g>
+
+  <!-- ===== role_permissions ===== -->
+  <g transform="translate(290,560)">
+    <rect width="210" height="100" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#3b82f6"/>
+    <rect y="22" width="210" height="6" fill="#3b82f6"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">role_permissions</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">role_id → roles UQ</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">permission_id → permissions UQ</text>
+  </g>
+
+  <!-- ===== units ===== -->
+  <g transform="translate(760,115)">
+    <rect width="200" height="130" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="200" height="6" fill="#10b981"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">units</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(100)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">abbreviation VARCHAR(20) UQ</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">quantity VARCHAR(50)</text>
+  </g>
+
+  <!-- ===== supply_categories ===== -->
+  <g transform="translate(990,115)">
+    <rect width="200" height="100" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="200" height="6" fill="#10b981"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">supply_categories</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(150)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+  </g>
+
+  <!-- ===== supplies ===== -->
+  <g transform="translate(760,270)">
+    <rect width="220" height="310" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="220" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="220" height="6" fill="#10b981"/>
+    <text x="110" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">supplies</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(200)</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">category_id → supply_categories</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">available_quantity DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">min_stock DEC</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">max_stock DEC</text>
+    <text x="10" y="155" fill="#64748b" font-size="10">supplier_id → suppliers</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">unit_type / unit_name</text>
+    <text x="10" y="200" fill="#cbd5e1" font-size="10">expiration_date DATE</text>
+    <text x="10" y="215" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="230" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="245" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="260" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== products ===== -->
+  <g transform="translate(1010,270)">
+    <rect width="210" height="295" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="210" height="6" fill="#10b981"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">products</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(255)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="95" fill="#64748b" font-size="10">unit_id → units</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">available_quantity DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">min_stock DEC</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">max_stock DEC</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">is_locked TINYINT</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="200" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="215" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="230" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== product_categories ===== -->
+  <g transform="translate(1240,115)">
+    <rect width="200" height="115" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="200" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="200" height="6" fill="#10b981"/>
+    <text x="100" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">product_categories</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(255)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+    <text x="10" y="95" fill="#64748b" font-size="10">parent_category_id → self</text>
+  </g>
+
+  <!-- ===== recipes ===== -->
+  <g transform="translate(1240,260)">
+    <rect width="210" height="270" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="210" height="6" fill="#10b981"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">recipes</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">product_id → products</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">name VARCHAR(255)</text>
+    <text x="10" y="95" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">supply_quantity INT</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">unit_type / unit_name</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="155" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== recipe_supplies ===== -->
+  <g transform="translate(1240,555)">
+    <rect width="210" height="130" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#10b981"/>
+    <rect y="22" width="210" height="6" fill="#10b981"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">recipe_supplies</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">recipe_id → recipes UQ</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">supply_id → supplies UQ</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">quantity DEC / unit_id</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">loss_percentage DEC</text>
+  </g>
+
+  <!-- ===== locations ===== -->
+  <g transform="translate(1420,115)">
+    <rect width="190" height="100" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect width="190" height="28" rx="6" fill="#f59e0b"/>
+    <rect y="22" width="190" height="6" fill="#f59e0b"/>
+    <text x="95" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">locations</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">name VARCHAR(150) UQ</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">description TEXT</text>
+  </g>
+
+  <!-- ===== stock ===== -->
+  <g transform="translate(1420,240)">
+    <rect width="210" height="295" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f59e0b"/>
+    <rect y="22" width="210" height="6" fill="#f59e0b"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">stock</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">item_type ENUM</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">item_id INT</text>
+    <text x="10" y="95" fill="#64748b" font-size="10">location_id → locations</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">quantity DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">batch_date DATE</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">expiration_date DATE</text>
+    <text x="10" y="155" fill="#64748b" font-size="10">supplier_id → suppliers</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">unit_cost DEC</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">batch_code VARCHAR(150)</text>
+    <text x="10" y="200" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="215" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="230" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="245" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== inventory_movements ===== -->
+  <g transform="translate(1650,115)">
+    <rect width="210" height="220" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f59e0b"/>
+    <rect y="22" width="210" height="6" fill="#f59e0b"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">inventory_movements</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">movement_type ENUM</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">reference_type VARCHAR</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">reference_id BIGINT</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">item_type ENUM</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">item_id INT</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">quantity DEC</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">unit_cost DEC</text>
+    <text x="10" y="170" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="200" fill="#cbd5e1" font-size="10">notes TEXT</text>
+  </g>
+
+  <!-- ===== stock_adjustments ===== -->
+  <g transform="translate(1650,360)">
+    <rect width="210" height="175" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f59e0b"/>
+    <rect y="22" width="210" height="6" fill="#f59e0b"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">stock_adjustments</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">item_type ENUM</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">item_id INT</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">previous_quantity DEC</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">new_quantity DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">reason VARCHAR(255)</text>
+    <text x="10" y="140" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== suppliers ===== -->
+  <g transform="translate(60,895)">
+    <rect width="210" height="265" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#8b5cf6"/>
+    <rect y="22" width="210" height="6" fill="#8b5cf6"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">suppliers</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#cbd5e1" font-size="10">contact_name VARCHAR(150)</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">company VARCHAR(200)</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">email VARCHAR(255)</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">nit VARCHAR(100) UQ</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">phone / address</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">status ENUM / notes</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="170" fill="#64748b" font-size="10">created/updated/deleted_by</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+    <text x="10" y="200" fill="#cbd5e1" font-size="10">deleted_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== supplier_contacts ===== -->
+  <g transform="translate(60,1185)">
+    <rect width="210" height="145" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#8b5cf6"/>
+    <rect y="22" width="210" height="6" fill="#8b5cf6"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">supplier_contacts</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id INT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">supplier_id → suppliers</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">name / position</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">email / phone</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">notes TEXT</text>
+  </g>
+
+  <!-- ===== production_batches ===== -->
+  <g transform="translate(560,895)">
+    <rect width="210" height="250" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#ef4444"/>
+    <rect y="22" width="210" height="6" fill="#ef4444"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">production_batches</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">product_id → products</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">recipe_id → recipes</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">batch_code VARCHAR(150)</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">produced_quantity DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">unit_cost_total DEC</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">production_date TIMESTAMP</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="170" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="200" fill="#64748b" font-size="10">created/updated_by</text>
+    <text x="10" y="215" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== production_consumptions ===== -->
+  <g transform="translate(560,1170)">
+    <rect width="210" height="145" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#ef4444"/>
+    <rect y="22" width="210" height="6" fill="#ef4444"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">production_consumptions</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">production_batch_id → batches</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">supply_id → supplies</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">consumed_quantity DEC</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">unit_cost DEC</text>
+    <text x="10" y="125" fill="#64748b" font-size="10">stock_id → stock</text>
+  </g>
+
+  <!-- ===== purchase_orders ===== -->
+  <g transform="translate(1180,895)">
+    <rect width="220" height="265" rx="6" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5"/>
+    <rect width="220" height="28" rx="6" fill="#06b6d4"/>
+    <rect y="22" width="220" height="6" fill="#06b6d4"/>
+    <text x="110" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">purchase_orders</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">supplier_id → suppliers</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">order_date TIMESTAMP</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">estimated_delivery_date DATE</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">total DEC / notes</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">received_at TIMESTAMP</text>
+    <text x="10" y="170" fill="#64748b" font-size="10">received_by → users</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">created_at TIMESTAMP</text>
+    <text x="10" y="200" fill="#64748b" font-size="10">created/updated_by</text>
+    <text x="10" y="215" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== purchase_order_items ===== -->
+  <g transform="translate(1180,1185)">
+    <rect width="220" height="145" rx="6" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5"/>
+    <rect width="220" height="28" rx="6" fill="#06b6d4"/>
+    <rect y="22" width="220" height="6" fill="#06b6d4"/>
+    <text x="110" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">purchase_order_items</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">purchase_order_id → orders</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">item_type ENUM</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">item_id INT</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">quantity / unit_price DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">subtotal DEC (generated)</text>
+  </g>
+
+  <!-- ===== cash_closings ===== -->
+  <g transform="translate(1680,895)">
+    <rect width="210" height="205" rx="6" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f97316"/>
+    <rect y="22" width="210" height="6" fill="#f97316"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">cash_closings</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="80" fill="#cbd5e1" font-size="10">opening_amount DEC</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">closing_amount DEC</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">total_sales DEC</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">opened_at / closed_at</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="155" fill="#64748b" font-size="10">created/updated_by</text>
+    <text x="10" y="170" fill="#cbd5e1" font-size="10">updated_at TIMESTAMP</text>
+  </g>
+
+  <!-- ===== sales ===== -->
+  <g transform="translate(1680,1120)">
+    <rect width="210" height="220" rx="6" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f97316"/>
+    <rect y="22" width="210" height="6" fill="#f97316"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">sales</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">user_id → users</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">cash_closing_id → cash_closings</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">customer_name / phone</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">sale_date TIMESTAMP</text>
+    <text x="10" y="125" fill="#cbd5e1" font-size="10">total DEC</text>
+    <text x="10" y="140" fill="#cbd5e1" font-size="10">payment_method VARCHAR</text>
+    <text x="10" y="155" fill="#cbd5e1" font-size="10">status ENUM</text>
+    <text x="10" y="170" fill="#64748b" font-size="10">created/updated_by</text>
+    <text x="10" y="185" fill="#cbd5e1" font-size="10">created_at / updated_at</text>
+  </g>
+
+  <!-- ===== sale_items ===== -->
+  <g transform="translate(1680,1365)">
+    <rect width="210" height="130" rx="6" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+    <rect width="210" height="28" rx="6" fill="#f97316"/>
+    <rect y="22" width="210" height="6" fill="#f97316"/>
+    <text x="105" y="18" text-anchor="middle" fill="white" font-size="12" font-weight="bold">sale_items</text>
+    <text x="10" y="50" fill="#f8fafc" font-size="10">🔑 id BIGINT PK</text>
+    <text x="10" y="65" fill="#64748b" font-size="10">sale_id → sales</text>
+    <text x="10" y="80" fill="#64748b" font-size="10">product_id → products</text>
+    <text x="10" y="95" fill="#cbd5e1" font-size="10">quantity / unit_price DEC</text>
+    <text x="10" y="110" fill="#cbd5e1" font-size="10">subtotal DEC (generated)</text>
+  </g>
+
+  <!-- ===================== RELATIONSHIP LINES ===================== -->
+  <!-- roles -> users -->
+  <line x1="260" y1="225" x2="290" y2="225" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- users -> sessions -->
+  <line x1="160" y1="395" x2="160" y2="360" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- users -> password_resets -->
+  <line x1="160" y1="515" x2="160" y2="500" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- roles -> role_permissions -->
+  <line x1="160" y1="335" x2="160" y2="600" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="160" y1="600" x2="290" y2="600" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- permissions -> role_permissions -->
+  <line x1="395" y1="535" x2="395" y2="560" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+  <!-- supply_categories -> supplies -->
+  <line x1="1090" y1="215" x2="1090" y2="270" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="1090" y1="270" x2="980" y2="310" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- units -> products -->
+  <line x1="860" y1="245" x2="860" y2="270" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="860" y1="270" x2="1010" y2="310" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- products -> recipes -->
+  <line x1="1220" y1="310" x2="1240" y2="310" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- recipes -> recipe_supplies -->
+  <line x1="1345" y1="530" x2="1345" y2="555" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- supplies -> recipe_supplies -->
+  <line x1="980" y1="580" x2="980" y2="620" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="980" y1="620" x2="1240" y2="600" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+  <!-- locations -> stock -->
+  <line x1="1515" y1="215" x2="1515" y2="240" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+  <!-- production_batches -> production_consumptions -->
+  <line x1="665" y1="1145" x2="665" y2="1170" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- purchase_orders -> purchase_order_items -->
+  <line x1="1290" y1="1160" x2="1290" y2="1185" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- cash_closings -> sales -->
+  <line x1="1785" y1="1100" x2="1785" y2="1120" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <!-- sales -> sale_items -->
+  <line x1="1785" y1="1340" x2="1785" y2="1365" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g transform="translate(60,1690)">
+    <rect width="600" height="70" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="20" y="22" fill="#94a3b8" font-size="11" font-weight="bold">LEGEND</text>
+    <text x="20" y="42" fill="#f8fafc" font-size="10">🔑 Primary Key</text>
+    <text x="120" y="42" fill="#64748b" font-size="10">→ field  Foreign Key reference</text>
+    <text x="320" y="42" fill="#cbd5e1" font-size="10">UQ  Unique constraint</text>
+    <text x="20" y="58" fill="#94a3b8" font-size="10">DEC = DECIMAL(18,4)   ENUM = enumerated values   TINYINT = boolean flag</text>
+  </g>
+
+  <!-- Views & Procedures note -->
+  <g transform="translate(700,1690)">
+    <rect width="560" height="70" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="20" y="22" fill="#94a3b8" font-size="11" font-weight="bold">VIEWS &amp; STORED PROCEDURES</text>
+    <text x="20" y="40" fill="#10b981" font-size="10">📊 vw_current_stock  |  vw_low_stock  |  vw_daily_sales  |  vw_production_costs</text>
+    <text x="20" y="57" fill="#f59e0b" font-size="10">⚙️ sp_close_cash  |  sp_adjust_stock</text>
+  </g>
+
+</svg>
