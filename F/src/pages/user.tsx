@@ -1,4 +1,5 @@
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
+import React from "react";
 import Layout from "../components/Layout";
 import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
@@ -6,19 +7,29 @@ import Button from "../components/Button";
 import Badge from "../components/Badge";
 import "./user.css";
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Constantes ───────────────────────────────────────────────────────────────
+
+const API_URL = "http://localhost:8000";
+
+const ACCESOS_DISPONIBLES = ["Inventario", "Proveedores", "Ventas", "Producción"];
+const ROLES_DISPONIBLES   = [
+  { value: "1", label: "Administrador" },
+  { value: "2", label: "Cajero" },
+  { value: "3", label: "Panadero" },
+];
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 interface User {
   id: number;
   first_name: string;
   last_name: string;
   email: string;
-  position: string;
-  phone?: string;
+  phone?: string | null;
   role_id: number;
   is_admin: boolean;
-  status: "Activo" | "Inactivo";
-  accesos: string[];
+  status: "active" | "inactive";  // ← coincide con la BD
+  created_at: string;
 }
 
 interface UserForm {
@@ -29,18 +40,10 @@ interface UserForm {
   phone: string;
   role_id: string;
   is_admin: boolean;
-  status: "Activo" | "Inactivo";
   accesos: string[];
 }
 
 type FormErrors = Partial<Record<keyof UserForm, string>>;
-
-const ACCESOS_DISPONIBLES = ["Inventario", "Proveedores", "Ventas", "Producción"];
-const ROLES_DISPONIBLES   = [
-  { value: "1", label: "Administrador" },
-  { value: "2", label: "Cajero" },
-  { value: "3", label: "Panadero" },
-];
 
 const emptyForm = (): UserForm => ({
   first_name: "",
@@ -50,40 +53,21 @@ const emptyForm = (): UserForm => ({
   phone:      "",
   role_id:    "",
   is_admin:   false,
-  status:     "Activo",
   accesos:    [],
 });
-
-// ─── Datos mock ───────────────────────────────────────────────────────────────
-
-const mockUsers: User[] = [
-  {
-    id: 1, first_name: "Yohan", last_name: "Martinez",
-    email: "yohan@email.com", position: "Panadero", phone: "300000000",
-    role_id: 1, is_admin: false, status: "Activo",
-    accesos: ["Inventario", "Producción", "Ventas"],
-  },
-  {
-    id: 2, first_name: "Marta", last_name: "Lopez",
-    email: "marta@email.com", position: "Administrador", phone: "300000001",
-    role_id: 2, is_admin: true, status: "Activo",
-    accesos: ["Inventario", "Producción", "Ventas"],
-  },
-];
 
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<User>[] = [
   { key: "first_name", header: "Nombre",    width: "14%" },
   { key: "last_name",  header: "Apellidos", width: "14%" },
-  { key: "position",   header: "Cargo",     width: "16%" },
+  { key: "email",      header: "Correo",    width: "20%" },
   {
-    key: "accesos",
-    header: "Accesos",
+    key: "is_admin",
+    header: "Rol",
+    width: "14%",
     render: (row) => (
-      <div className="saip-table__badges">
-        {row.accesos.map((a) => <Badge key={a} label={a} variant="access" />)}
-      </div>
+      <Badge label={row.is_admin ? "Admin" : "Usuario"} variant="access" />
     ),
   },
   {
@@ -91,7 +75,10 @@ const columns: ColumnDef<User>[] = [
     header: "Estado",
     width: "12%",
     render: (row) => (
-      <Badge label={row.status} variant={row.status === "Activo" ? "active" : "inactive"} />
+      <Badge
+        label={row.status === "active" ? "Activo" : "Inactivo"}
+        variant={row.status === "active" ? "active" : "inactive"}
+      />
     ),
   },
 ];
@@ -99,12 +86,32 @@ const columns: ColumnDef<User>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function User(): JSX.Element {
-  const [users, setUsers]           = useState<User[]>(mockUsers);
-  const [nextId, setNextId]         = useState(mockUsers.length + 1);
+  const [users, setUsers]           = useState<User[]>([]);
   const [modalOpen, setModalOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState<User | null>(null);
   const [form, setForm]             = useState<UserForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
+  const [loading, setLoading]       = useState(true);
+
+  // ── Cargar usuarios ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("session_token");
+        const response = await fetch(`${API_URL}/users/`, {
+          headers: { "session_token": token ?? "" },
+        });
+        if (!response.ok) throw new Error("Error al cargar usuarios");
+        const data: User[] = await response.json();
+        setUsers(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // ── Handlers modal ─────────────────────────────────────────────────────────
 
@@ -121,12 +128,11 @@ export default function User(): JSX.Element {
       first_name: user.first_name,
       last_name:  user.last_name,
       email:      user.email,
-      position:   user.position,
+      position:   "",
       phone:      user.phone ?? "",
       role_id:    String(user.role_id),
       is_admin:   user.is_admin,
-      status:     user.status,
-      accesos:    user.accesos,
+      accesos:    [],
     });
     setErrors({});
     setModalOpen(true);
@@ -168,78 +174,133 @@ export default function User(): JSX.Element {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (editTarget) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editTarget.id
-            ? { ...u, ...form, role_id: Number(form.role_id) }
-            : u
-        )
-      );
-    } else {
-      setUsers((prev) => [
-        ...prev,
-        { id: nextId, ...form, role_id: Number(form.role_id) },
-      ]);
-      setNextId((n) => n + 1);
+    const token = localStorage.getItem("session_token");
+
+    try {
+      if (editTarget) {
+        const response = await fetch(`${API_URL}/users/${editTarget.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "session_token": token ?? "",
+          },
+          body: JSON.stringify({
+            first_name: form.first_name,
+            last_name:  form.last_name,
+            email:      form.email,
+            phone:      form.phone || null,
+            role_id:    Number(form.role_id),
+            is_admin:   form.is_admin,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          alert(err.detail || "Error al actualizar usuario");
+          return;
+        }
+        const updated: User = await response.json();
+        setUsers((prev) => prev.map((u) => u.id === editTarget.id ? updated : u));
+
+      } else {
+        const response = await fetch(`${API_URL}/users/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "session_token": token ?? "",
+          },
+          body: JSON.stringify({
+            first_name: form.first_name,
+            last_name:  form.last_name,
+            email:      form.email,
+            phone:      form.phone || null,
+            role_id:    Number(form.role_id),
+            is_admin:   form.is_admin,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          alert(err.detail || "Error al crear usuario");
+          return;
+        }
+        const created: User = await response.json();
+        setUsers((prev) => [...prev, created]);
+      }
+      handleCerrar();
+    } catch {
+      alert("Error de conexión con el servidor.");
     }
-    handleCerrar();
   };
 
-  const handleEliminar = (id: number) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+  const handleEliminar = async (id: number) => {
+    const token = localStorage.getItem("session_token");
+    try {
+      const response = await fetch(`${API_URL}/users/${id}`, {
+        method: "DELETE",
+        headers: { "session_token": token ?? "" },
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.detail || "Error al eliminar usuario");
+        return;
+      }
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch {
+      alert("Error de conexión con el servidor.");
+    }
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Layout>
-      <Table
-        title="Gestión de usuarios"
-        columns={columns}
-        data={users}
-        searchPlaceholder="Buscar usuario"
-        onFilter={() => console.log("filtrar")}
-        headerActions={
-          <>
+      {loading ? (
+        <div className="saip-loading">Cargando usuarios...</div>
+      ) : (
+        <Table
+          title="Gestión de usuarios"
+          columns={columns}
+          data={users}
+          searchPlaceholder="Buscar usuario"
+          onFilter={() => console.log("filtrar")}
+          headerActions={
             <Button variant="primary" onClick={handleCrear}>
               Crear usuario
             </Button>
-          </>
-        }
-        renderActions={(row) => (
-          <div className="saip-table__actions">
-            <button
-              className="saip-table__action-btn"
-              title="Editar"
-              onClick={() => handleEditar(row)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button
-              className="saip-table__action-btn saip-table__action-btn--danger"
-              title="Eliminar"
-              onClick={() => handleEliminar(row.id)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-              </svg>
-            </button>
-          </div>
-        )}
-      />
+          }
+          renderActions={(row) => (
+            <div className="saip-table__actions">
+              <button
+                className="saip-table__action-btn"
+                title="Editar"
+                onClick={() => handleEditar(row)}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button
+                className="saip-table__action-btn saip-table__action-btn--danger"
+                title="Eliminar"
+                onClick={() => handleEliminar(row.id)}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        />
+      )}
 
       {/* ── MODAL ────────────────────────────────────────────────────────── */}
       <Modal
@@ -250,7 +311,6 @@ export default function User(): JSX.Element {
       >
         <form className="cuf" onSubmit={handleSubmit}>
 
-          {/* Nombre + Apellido */}
           <div className="cuf__row">
             <div className="cuf__group">
               <label className="cuf__label">Nombre</label>
@@ -274,7 +334,6 @@ export default function User(): JSX.Element {
             </div>
           </div>
 
-          {/* Email */}
           <div className="cuf__group">
             <label className="cuf__label">Correo electrónico</label>
             <input
@@ -287,7 +346,6 @@ export default function User(): JSX.Element {
             {errors.email && <span className="cuf__error">{errors.email}</span>}
           </div>
 
-          {/* Cargo + Teléfono */}
           <div className="cuf__row">
             <div className="cuf__group">
               <label className="cuf__label">Cargo</label>
@@ -310,7 +368,6 @@ export default function User(): JSX.Element {
             </div>
           </div>
 
-          {/* Rol */}
           <div className="cuf__group">
             <label className="cuf__label">Rol</label>
             <select
@@ -326,7 +383,6 @@ export default function User(): JSX.Element {
             {errors.role_id && <span className="cuf__error">{errors.role_id}</span>}
           </div>
 
-          {/* Accesos */}
           <div className="cuf__group">
             <label className="cuf__label">Módulos con acceso</label>
             <div className="cuf__accesos">
@@ -353,8 +409,6 @@ export default function User(): JSX.Element {
             {errors.accesos && <span className="cuf__error">{errors.accesos}</span>}
           </div>
 
-
-          {/* Acciones */}
           <div className="cuf__actions">
             <Button variant="secondary" type="button" onClick={handleCerrar}>
               Cancelar
