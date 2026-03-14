@@ -1,4 +1,5 @@
-import { useState, FormEvent, ChangeEvent} from "react";
+import { useState, ChangeEvent } from "react";
+import React from "react";
 import './login.css';
 
 export default function Login() {
@@ -8,12 +9,12 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://172.26.0.4:8000/auth/login", {
+      const response = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -113,7 +114,7 @@ export default function Login() {
 
                 <button type="submit" className="btn-submit" disabled={isLoading}>
                   {isLoading && <span className="btn-spinner" />}
-                  {isLoading ? "Verificando..." : "Iniciar Sesión"}
+                  {isLoading ? "Verificando..." : "Iniciar sesión"}
                 </button>
               </form>
 

@@ -160,3 +160,13 @@ def update_user(
     session.refresh(user)
 
     return user
+
+@router.get("/", response_model=list[UserResponse], status_code=status.HTTP_200_OK, summary="Listar todos los usuarios activos",)
+def get_all_users(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    users = session.exec(
+        select(User).where(User.status == UserStatus.ACTIVE)
+    ).all()
+    return users

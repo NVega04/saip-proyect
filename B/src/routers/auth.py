@@ -10,16 +10,8 @@ from src.security import verify_password, create_session_token, get_session_expi
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post(
-    "/login",
-    response_model=LoginResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Iniciar sesión",
-)
-def login(
-    credentials: LoginRequest,
-    db: Session = Depends(get_session),
-):
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK, summary="Iniciar sesión")
+def login(credentials: LoginRequest, db: Session = Depends(get_session)):
     # 1. Buscar usuario por email
     user = db.exec(
         select(User).where(User.email == credentials.email)
