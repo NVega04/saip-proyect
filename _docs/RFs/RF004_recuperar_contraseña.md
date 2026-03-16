@@ -53,8 +53,8 @@ El sistema debe ofrecer a los usuarios registrados recuperar su contraseña en c
 ## Endpoint asociado
 | Método | Ruta                                      | Auth requerida |
 |--------|-------------------------------------------|----------------|
-| POST   | `/api/v1/auth/forgot-password`            | No             |
-| POST   | `/api/v1/auth/reset-password`             | No             |
+| POST   | `/api/v1/session/forgot-password`            | No             |
+| POST   | `/api/v1/session/reset-password`             | No             |
 ---
 ## Reglas de negocio
 - RN-023: Recuperación solo válida si el correo corresponde a usuario existente.

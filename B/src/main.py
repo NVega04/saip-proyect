@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from src.routers import users
 from src.routers import roles
-from src.routers import auth
+from src.routers import session
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="SAIP", version="1.0.0")
@@ -17,4 +17,4 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(roles.router)
-app.include_router(auth.router)
+app.include_router(session.router)

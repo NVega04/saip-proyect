@@ -50,7 +50,7 @@ El sistema debe permitir que los usuarios accedan a la plataforma SAIP ingresand
 ## Endpoint asociado
 | Método | Ruta                       | Auth requerida |
 |--------|----------------------------|----------------|
-| POST   | `/api/v1/auth/login`       | No             |
+| POST   | `/api/v1/session/login`       | No             |
 ---
 ## Reglas de negocio
 - RN-008: El acceso al sistema solo se concede si las credenciales (email/username + contraseña) coinciden exactamente con las almacenadas en la base de datos y el usuario está activo.
