@@ -58,6 +58,7 @@ const emptyForm = (): UserForm => ({
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<User>[] = [
+  { key: "id", header: "ID",    width: "5%" },
   { key: "first_name", header: "Nombre",    width: "14%" },
   { key: "last_name",  header: "Apellidos", width: "14%" },
   { key: "email",      header: "Correo",    width: "20%" },
