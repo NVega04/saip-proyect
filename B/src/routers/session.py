@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
@@ -6,8 +6,9 @@ from src.database import get_session
 from src.models.models import User, SessionApp
 from src.schemas.schemas import LoginRequest, LoginResponse
 from src.security import verify_password, create_session_token, get_session_expiry
+from src.dependencies import get_current_user
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(prefix="/session", tags=["Session"])
 
 
 @router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK, summary="Iniciar sesión")
@@ -63,3 +64,21 @@ def login(credentials: LoginRequest, db: Session = Depends(get_session)):
         expires_at=new_session.expires_at,
         user=user,
     )
+@router.post("/logout",status_code=status.HTTP_200_OK, summary="Cerrar sesión")
+def logout(db: Session = Depends(get_session), current_user: User = Depends(get_current_user), session_token: str = Header(...),
+):
+    #Buscar la sesión activa
+    user_session = db.get(
+        SessionApp, session_token)
+    if not user_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Sesión no encontrada"
+        )
+    
+    # Invalidar la sesión
+    user_session.is_active = False
+    db.add(user_session)
+    db.commit()
+
+    return{"message": "Sesión cerrada correctamante"}

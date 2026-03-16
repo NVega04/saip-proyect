@@ -45,7 +45,7 @@ El sistema debe permitir a los usuarios autenticados cerrar su sesión de forma 
 ## Endpoint asociado
 | Método | Ruta                       | Auth requerida |
 |--------|----------------------------|----------------|
-| POST   | `/api/v1/auth/logout`      | Sí (JWT)       |
+| POST   | `/api/v1/session/logout`      | Sí (JWT)       |
 ---
 ## Reglas de negocio
 - RN-030: El cierre de sesión invalida inmediatamente el token de acceso activo en el servidor (mediante blacklist o invalidación si es necesario).

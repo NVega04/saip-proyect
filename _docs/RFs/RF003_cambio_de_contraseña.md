@@ -51,7 +51,7 @@ El sistema debe permitir a los usuarios autenticados cambiar su contraseña actu
 ## Endpoint asociado
 | Método | Ruta                                 | Auth requerida |
 |--------|--------------------------------------|----------------|
-| POST   | `/api/v1/auth/change-password`       | Sí (JWT)       |
+| POST   | `/api/v1/session/change-password`       | Sí (JWT)       |
 ---
 ## Reglas de negocio
 - RN-015: El cambio de contraseña solo es posible para usuarios autenticados (token JWT válido).

@@ -140,3 +140,17 @@ def desactivate_role(
     session.commit()
 
     return None # 204 No content
+@router.get(
+    "/",
+    response_model=list[RolePublic],
+    status_code=status.HTTP_200_OK,
+    summary="Listar todos los roles",
+)
+def get_roles(
+       session: Session = Depends(get_session),
+       current_user: User = Depends(get_current_user),
+):
+       roles = session.exac(
+              select(Role).where(Role.status == RoleStatus.ACTIVE)
+       ).all()
+       return roles 
