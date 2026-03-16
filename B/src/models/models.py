@@ -67,7 +67,8 @@ class Role(SQLModel, table=True):
 class SessionApp(SQLModel, table=True):
     __tablename__ = "sessions"
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True, index=True)
     user_id: int = Field(foreign_key="users.id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: datetime
