@@ -150,7 +150,7 @@ def get_roles(
        session: Session = Depends(get_session),
        current_user: User = Depends(get_current_user),
 ):
-       roles = session.exac(
+       roles = session.exec(
               select(Role).where(Role.status == RoleStatus.ACTIVE)
        ).all()
        return roles 
