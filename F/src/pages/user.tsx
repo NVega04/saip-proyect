@@ -5,11 +5,10 @@ import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
+import { apiFetch } from "../utils/api";  // ← import apiFetch
 import "./user.css";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
-
-const API_URL = "http://localhost:8000";
 
 const ACCESOS_DISPONIBLES = ["Inventario", "Proveedores", "Ventas", "Producción"];
 const ROLES_DISPONIBLES   = [
@@ -28,7 +27,7 @@ interface User {
   phone?: string | null;
   role_id: number;
   is_admin: boolean;
-  status: "active" | "inactive";  // ← coincide con la BD
+  status: "active" | "inactive";
   created_at: string;
 }
 
@@ -97,10 +96,7 @@ export default function User(): JSX.Element {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("session_token");
-        const response = await fetch(`${API_URL}/users/`, {
-          headers: { "session_token": token ?? "" },
-        });
+        const response = await apiFetch("/users/");
         if (!response.ok) throw new Error("Error al cargar usuarios");
         const data: User[] = await response.json();
         setUsers(data);
@@ -178,16 +174,10 @@ export default function User(): JSX.Element {
     e.preventDefault();
     if (!validate()) return;
 
-    const token = localStorage.getItem("session_token");
-
     try {
       if (editTarget) {
-        const response = await fetch(`${API_URL}/users/${editTarget.id}`, {
+        const response = await apiFetch(`/users/${editTarget.id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "session_token": token ?? "",
-          },
           body: JSON.stringify({
             first_name: form.first_name,
             last_name:  form.last_name,
@@ -206,12 +196,8 @@ export default function User(): JSX.Element {
         setUsers((prev) => prev.map((u) => u.id === editTarget.id ? updated : u));
 
       } else {
-        const response = await fetch(`${API_URL}/users/`, {
+        const response = await apiFetch("/users/", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "session_token": token ?? "",
-          },
           body: JSON.stringify({
             first_name: form.first_name,
             last_name:  form.last_name,
@@ -236,12 +222,8 @@ export default function User(): JSX.Element {
   };
 
   const handleEliminar = async (id: number) => {
-    const token = localStorage.getItem("session_token");
     try {
-      const response = await fetch(`${API_URL}/users/${id}`, {
-        method: "DELETE",
-        headers: { "session_token": token ?? "" },
-      });
+      const response = await apiFetch(`/users/${id}`, { method: "DELETE" });
       if (!response.ok) {
         const err = await response.json();
         alert(err.detail || "Error al eliminar usuario");
@@ -265,7 +247,6 @@ export default function User(): JSX.Element {
           columns={columns}
           data={users}
           searchPlaceholder="Buscar usuario"
-          onFilter={() => console.log("filtrar")}
           headerActions={
             <Button variant="primary" onClick={handleCrear}>
               Crear usuario
@@ -310,7 +291,6 @@ export default function User(): JSX.Element {
         width="520px"
       >
         <form className="cuf" onSubmit={handleSubmit}>
-
           <div className="cuf__row">
             <div className="cuf__group">
               <label className="cuf__label">Nombre</label>
