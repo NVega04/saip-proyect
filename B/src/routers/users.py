@@ -167,6 +167,6 @@ def get_all_users(
     current_user: User = Depends(get_current_user),
 ):
     users = session.exec(
-        select(User).where(User.status == UserStatus.ACTIVE)
+        select(User)
     ).all()
     return users
