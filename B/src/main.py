@@ -4,14 +4,19 @@ from src.routers import roles
 from src.routers import session
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="SAIP", version="1.0.0")
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    # "https://saip.tudominio.com", ← CUANDO SE CARGUE A PRODUCCION
+]
+
+app = FastAPI(title="SAIP - Sistema administrativo integral de productos", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS, #Acceso desde el fronted al API
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "session-token"],
 )
 
 
