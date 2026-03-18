@@ -134,7 +134,7 @@ export default function Roles(): JSX.Element {
         columns={columns}
         data={roles}
         searchPlaceholder="Buscar rol"
-        onFilter={() => console.log("filtrar")}
+        sortKey="id"
         headerActions={
           <>
             <Button variant="primary" onClick={handleCrear}>

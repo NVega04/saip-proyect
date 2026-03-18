@@ -1,4 +1,4 @@
-import {JSX} from "react";
+import React, {JSX} from "react";
 import { Link} from "react-router-dom";
 
 interface MenuItem {
@@ -14,6 +14,20 @@ interface SidebarProps {
 }
 
 const menuItems: MenuItem[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+    ),
+  },
+
   {
     id: "inventario",
     label: "Inventario",
@@ -132,22 +146,6 @@ export default function Sidebar({ activeMenu, onMenuChange }: SidebarProps): JSX
   </Link>
 ))}
       </nav>
-
-      <div style={styles.footer}>
-        <div style={styles.userInfo}>
-          <div style={styles.avatar}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.5">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <div>
-            <div style={styles.userName}>Usuario</div>
-            <div style={styles.userRole}>Rol</div>
-          </div>
-        </div>
-        <button style={styles.logoutBtn}>Cerrar sesión</button>
-      </div>
     </aside>
   );
 }
@@ -193,45 +191,5 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#f5f0ea",
     color: "#5c3d1e",
     fontWeight: 500,
-  },
-  footer: {
-    padding: "1rem 1rem 0",
-    borderTop: "1px solid #cfc0b066",
-  },
-  userInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    marginBottom: "0.85rem",
-  },
-  avatar: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "50%",
-    background: "#cfc0b0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  userName: {
-    fontSize: "0.82rem",
-    fontWeight: 500,
-    color: "#5c3d1e",
-  },
-  userRole: {
-    fontSize: "0.72rem",
-    fontWeight: 300,
-    color: "#9e7e62",
-  },
-  logoutBtn: {
-    fontSize: "0.8rem",
-    fontWeight: 400,
-    color: "#9e7e62",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    padding: 0,
-    fontFamily: "'Roboto', sans-serif",
   },
 };
