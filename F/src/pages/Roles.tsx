@@ -1,54 +1,46 @@
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
+import React from "react";
 import Layout from "../components/Layout";
 import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
+import { apiFetch } from "../utils/api";
 import "../pages/roles.css";
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 interface Role {
   id: number;
   name: string;
   description: string;
-  accesos: string[];
+  status: "active" | "inactive";
 }
 
 interface RoleForm {
   name: string;
   description: string;
-  accesos: string[];
 }
 
 type FormErrors = Partial<Record<keyof RoleForm, string>>;
 
-const ACCESOS_DISPONIBLES = ["Inventario", "Proveedores", "Ventas", "Producción"];
-
-const emptyForm = (): RoleForm => ({ name: "", description: "", accesos: [] });
-
-// ─── Datos mock ───────────────────────────────────────────────────────────────
-
-const mockRoles: Role[] = [
-  { id: 1, name: "Administrador", description: "Control total del sistema", accesos: ["Inventario", "Ventas", "Producción"] },
-  { id: 2, name: "Cajero",        description: "Gestiona ventas",           accesos: ["Ventas"] },
-  { id: 3, name: "Panadero",      description: "Gestiona producción",       accesos: ["Producción", "Inventario"] },
-];
+const emptyForm = (): RoleForm => ({ name: "", description: "" });
 
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Role>[] = [
-  { key: "name",        header: "Nombre",      width: "20%" },
-  { key: "description", header: "Descripción", width: "35%" },
+  { key: "id",        header: "ID",      width: "5%" },
+  { key: "name",        header: "Nombre",      width: "25%" },
+  { key: "description", header: "Descripción", width: "50%" },
   {
-    key: "accesos",
-    header: "Accesos",
+    key: "status",
+    header: "Estado",
+    width: "15%",
     render: (row) => (
-      <div className="saip-table__badges">
-        {row.accesos.map((a) => (
-          <Badge key={a} label={a} variant="access" />
-        ))}
-      </div>
+      <Badge
+        label={row.status === "active" ? "Activo" : "Inactivo"}
+        variant={row.status === "active" ? "active" : "inactive"}
+      />
     ),
   },
 ];
@@ -56,12 +48,30 @@ const columns: ColumnDef<Role>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Roles(): JSX.Element {
-  const [roles, setRoles]           = useState<Role[]>(mockRoles);
-  const [nextId, setNextId]         = useState(mockRoles.length + 1);
+  const [roles, setRoles]           = useState<Role[]>([]);
   const [modalOpen, setModalOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState<Role | null>(null);
   const [form, setForm]             = useState<RoleForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
+  const [loading, setLoading]       = useState(true);
+
+  // ── Cargar roles ───────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await apiFetch("/roles/");
+        if (!response.ok) throw new Error("Error al cargar roles");
+        const data: Role[] = await response.json();
+        setRoles(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   // ── Handlers modal ─────────────────────────────────────────────────────────
 
@@ -74,7 +84,7 @@ export default function Roles(): JSX.Element {
 
   const handleEditar = (role: Role) => {
     setEditTarget(role);
-    setForm({ name: role.name, description: role.description, accesos: role.accesos });
+    setForm({ name: role.name, description: role.description });
     setErrors({});
     setModalOpen(true);
   };
@@ -87,90 +97,133 @@ export default function Roles(): JSX.Element {
 
   // ── Formulario ─────────────────────────────────────────────────────────────
 
-  const toggleAcceso = (acceso: string) => {
-    setForm((prev) => ({
-      ...prev,
-      accesos: prev.accesos.includes(acceso)
-        ? prev.accesos.filter((a) => a !== acceso)
-        : [...prev.accesos, acceso],
-    }));
-    setErrors((prev) => ({ ...prev, accesos: undefined }));
+  const setField = (field: keyof RoleForm, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const validate = (): boolean => {
     const e: FormErrors = {};
-    if (!form.name.trim())         e.name        = "El nombre es requerido";
-    if (!form.description.trim())  e.description = "La descripción es requerida";
-    if (form.accesos.length === 0) e.accesos     = "Selecciona al menos un módulo";
+    if (!form.name.trim())        e.name        = "El nombre es requerido";
+    if (!form.description.trim()) e.description = "La descripción es requerida";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (editTarget) {
-      setRoles((prev) =>
-        prev.map((r) => r.id === editTarget.id ? { ...r, ...form } : r)
-      );
-    } else {
-      setRoles((prev) => [...prev, { id: nextId, ...form }]);
-      setNextId((n) => n + 1);
+    try {
+      if (editTarget) {
+        const response = await apiFetch(`/roles/${editTarget.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            name:        form.name,
+            description: form.description,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          alert(err.detail || "Error al actualizar rol");
+          return;
+        }
+        const updated: Role = await response.json();
+        setRoles((prev) => prev.map((r) => r.id === editTarget.id ? updated : r));
+
+      } else {
+        const response = await apiFetch("/roles/", {
+          method: "POST",
+          body: JSON.stringify({
+            name:        form.name,
+            description: form.description,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          alert(err.detail || "Error al crear rol");
+          return;
+        }
+        const created: Role = await response.json();
+        setRoles((prev) => [...prev, {... created, status: "active"}]);
+      }
+      handleCerrar();
+    } catch {
+      alert("Error de conexión con el servidor.");
     }
-    handleCerrar();
   };
 
-  const handleEliminar = (id: number) => {
-    setRoles((prev) => prev.filter((r) => r.id !== id));
+  const handleEliminar = async (id: number) => {
+    try {
+      const response = await apiFetch(`/roles/${id}`, { method: "DELETE" });
+      if (response.status === 410) {
+        alert("El rol ya está desactivado.");
+        return;
+      }
+      if (response.status === 403) {
+        alert("No se puede desactivar un rol del sistema.");
+        return;
+      }
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.detail || "Error al desactivar rol");
+        return;
+      }
+      // Soft delete: quitar de la lista (ya no aparece en GET /roles/)
+      setRoles((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      alert("Error de conexión con el servidor.");
+    }
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Layout>
-      <Table
-        title="Gestión de roles"
-        columns={columns}
-        data={roles}
-        searchPlaceholder="Buscar rol"
-        onFilter={() => console.log("filtrar")}
-        headerActions={
-          <>
+      {loading ? (
+        <div className="saip-loading">Cargando roles...</div>
+      ) : (
+        <Table
+          title="Gestión de roles"
+          columns={columns}
+          data={roles}
+          searchPlaceholder="Buscar rol"
+          onFilter={() => console.log("filtrar")}
+          headerActions={
             <Button variant="primary" onClick={handleCrear}>
               Crear rol
             </Button>
-          </>
-        }
-        renderActions={(row) => (
-          <div className="saip-table__actions">
-            <button
-              className="saip-table__action-btn"
-              title="Editar"
-              onClick={() => handleEditar(row)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button
-              className="saip-table__action-btn saip-table__action-btn--danger"
-              title="Eliminar"
-              onClick={() => handleEliminar(row.id)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-              </svg>
-            </button>
-          </div>
-        )}
-      />
+          }
+          renderActions={(row) => (
+            <div className="saip-table__actions">
+              <button
+                className="saip-table__action-btn"
+                title="Editar"
+                onClick={() => handleEditar(row)}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button
+                className="saip-table__action-btn saip-table__action-btn--danger"
+                title="Desactivar"
+                onClick={() => handleEliminar(row.id)}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        />
+      )}
 
       {/* ── MODAL ────────────────────────────────────────────────────────── */}
       <Modal
@@ -186,10 +239,7 @@ export default function Roles(): JSX.Element {
               className={`crf__input ${errors.name ? "crf__input--error" : ""}`}
               placeholder="Ej: Administrador, Cajero…"
               value={form.name}
-              onChange={(e) => {
-                setForm({ ...form, name: e.target.value });
-                setErrors((prev) => ({ ...prev, name: undefined }));
-              }}
+              onChange={(e) => setField("name", e.target.value)}
             />
             {errors.name && <span className="crf__error">{errors.name}</span>}
           </div>
@@ -201,38 +251,9 @@ export default function Roles(): JSX.Element {
               placeholder="Describe las responsabilidades de este rol…"
               rows={3}
               value={form.description}
-              onChange={(e) => {
-                setForm({ ...form, description: e.target.value });
-                setErrors((prev) => ({ ...prev, description: undefined }));
-              }}
+              onChange={(e) => setField("description", e.target.value)}
             />
             {errors.description && <span className="crf__error">{errors.description}</span>}
-          </div>
-
-          <div className="crf__group">
-            <label className="crf__label">Módulos con acceso</label>
-            <div className="crf__accesos">
-              {ACCESOS_DISPONIBLES.map((acceso) => {
-                const checked = form.accesos.includes(acceso);
-                return (
-                  <button
-                    key={acceso}
-                    type="button"
-                    onClick={() => toggleAcceso(acceso)}
-                    className={`crf__acceso-btn ${checked ? "crf__acceso-btn--active" : ""}`}
-                  >
-                    {checked && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2.5">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                    {acceso}
-                  </button>
-                );
-              })}
-            </div>
-            {errors.accesos && <span className="crf__error">{errors.accesos}</span>}
           </div>
 
           <div className="crf__actions">
