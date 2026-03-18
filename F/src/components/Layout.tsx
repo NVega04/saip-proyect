@@ -29,20 +29,21 @@ export default function Layout({ children }: LayoutProps) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  
   root: {
-    minHeight: "100vh",
+    height: "100vh",        
     display: "flex",
     flexDirection: "column",
     background: "#f5f0ea",
+    overflow: "hidden",   
   },
   body: {
     display: "flex",
     flex: 1,
+    overflow: "hidden",     
   },
   content: {
     flex: 1,
     padding: "2rem 2.5rem",
-    overflowY: "auto",
+    overflowY: "auto",     
   },
 };

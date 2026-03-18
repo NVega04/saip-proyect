@@ -162,8 +162,6 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     justifyContent: "space-between",
     padding: "1.2rem 0",
-    position: "sticky",
-    top: "56px",
     height: "calc(100vh - 56px)",
     fontFamily: "'Roboto', sans-serif",
   },

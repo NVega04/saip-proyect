@@ -37,8 +37,6 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "space-between",
     padding: "0 1.5rem",
-    position: "sticky",
-    top: 0,
     zIndex: 100,
     fontFamily: "'Roboto', sans-serif",
   },
