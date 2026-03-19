@@ -19,3 +19,12 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
 
   return response;
 }
+
+export async function logout(): Promise<void> {
+  try {
+    await apiFetch("/session/logout", { method: "POST" });
+  } finally {
+    localStorage.clear();
+    window.location.href = "/";
+  }
+}

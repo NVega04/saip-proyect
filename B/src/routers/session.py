@@ -1,18 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlmodel import Session, select
-from datetime import datetime, timezone
 from src.database import get_session
 from src.models.models import User, SessionApp
 from src.schemas.schemas import LoginRequest, LoginResponse
-from src.security import verify_password, create_session_token, get_session_expiry
+from src.security import verify_password, get_session_expiry
 from src.dependencies import get_current_user
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 import uuid
 
 router = APIRouter(prefix="/session", tags=["Session"])
 
+limiter = Limiter(key_func=get_remote_address)
 
 @router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK, summary="Iniciar sesión")
-def login(credentials: LoginRequest, db: Session = Depends(get_session)):
+@limiter.limit("5/minute")  # ← máximo 5 intentos por minuto por IP
+def login(request: Request, credentials: LoginRequest, db: Session = Depends(get_session)):
     # 1. Buscar usuario por email
     user = db.exec(
         select(User).where(User.email == credentials.email)
@@ -68,11 +71,16 @@ def login(credentials: LoginRequest, db: Session = Depends(get_session)):
     )
 
 @router.post("/logout",status_code=status.HTTP_200_OK, summary="Cerrar sesión")
-def logout(db: Session = Depends(get_session), current_user: User = Depends(get_current_user), session_token: str = Header(...),
+def logout(db: Session = Depends(get_session), current_user: User = Depends(get_current_user), session_token: str = Header(..., alias="session_token"),
 ):
     #Buscar la sesión activa
-    user_session = db.get(
-        SessionApp, session_token)
+    user_session = db.exec(
+        select(SessionApp).where(
+            SessionApp.token == session_token,
+            SessionApp.is_active == True,
+        )
+    ).first()
+
     if not user_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

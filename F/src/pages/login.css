@@ -131,16 +131,6 @@ body {
   display: block;
 }
 
-.field-input {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border: 1.5px solid var(--bg);
-  background: var(--bg);
-  border-radius: 12px;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
 .field-input:focus {
   outline: none;
   background: var(--white);
@@ -233,4 +223,47 @@ body {
   .panel-image { display: none; }
   .card-outer { border-radius: 0; padding: 0; box-shadow: none; }
   .login-body { padding: 0; }
+}
+
+.field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%; /* hereda el ancho del contenedor padre */
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  padding-right: 2.75rem;
+  border: 1.5px solid var(--bg);
+  background: var(--bg);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.toggle-pw {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0a99f;
+  line-height: 1;
+}
+
+.toggle-pw:hover {
+  color: #7a736b;
+}
+
+.card-inner {
+  grid-template-columns: 0.8fr 1.2fr; /* antes: 1.1fr 0.9fr */
 }
