@@ -1,20 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../utils/api";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-const menuRef = useRef<HTMLDivElement>(null);
-const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-useEffect(() => {
-  const handleClickOutside = (e: MouseEvent) => {
-    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-      setMenuOpen(false);
-    }
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ── Cerrar sesion ─────────────────────────────────────────────────────────
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    await logout();
   };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
 
   return (
     <nav style={styles.navbar}>
@@ -56,7 +63,7 @@ useEffect(() => {
         Ver perfil
       </button>
       <div style={styles.divider} />
-      <button style={{ ...styles.dropdownItem, color: "#c0392b" }} onClick={() => setMenuOpen(false)}>
+      <button style={{ ...styles.dropdownItem, color: "#c0392b" }} onClick={handleLogout}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
           <polyline points="16 17 21 12 16 7"/>

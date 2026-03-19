@@ -117,11 +117,6 @@ export default function Login() {
                   {isLoading ? "Verificando..." : "Iniciar sesión"}
                 </button>
               </form>
-
-              <div className="register-row">
-                ¿No tiene una cuenta?{" "}
-                <a href="#" className="register-link">Regístrese</a>
-              </div>
             </div>
 
           </div>
