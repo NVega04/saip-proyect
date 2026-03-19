@@ -34,6 +34,7 @@ def create_role(
     new_role = Role(
         name=role_data.name,
         description=role_data.description,
+        status=RoleStatus.ACTIVE,
     )
 
     session.add(new_role)
@@ -151,6 +152,6 @@ def get_roles(
        current_user: User = Depends(get_current_user),
 ):
        roles = session.exec(
-              select(Role).where(Role.status == RoleStatus.ACTIVE)
+              select(Role)
        ).all()
        return roles 
