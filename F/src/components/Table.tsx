@@ -35,6 +35,7 @@ interface SAIPTableProps<T extends { id: string | number }> {
   onSearch?: (value: string) => void;
   /** Callback del botón filtro */
   onFilter?: () => void;
+  sortKey?: string;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -51,8 +52,10 @@ export default function Table<T extends { id: string | number }>({
   searchPlaceholder = "Buscar",
   onSearch,
   onFilter,
+  sortKey,
 }: SAIPTableProps<T>) {
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filtrado interno (si no hay onSearch externo)
@@ -63,9 +66,18 @@ export default function Table<T extends { id: string | number }>({
           String(val ?? "").toLowerCase().includes(search.toLowerCase())
         )
       );
+    const sorted = sortKey && sortOrder
+  ? [...filtered].sort((a, b) => {
+      const aVal = String((a as Record<string, unknown>)[sortKey] ?? "").toLowerCase();
+      const bVal = String((b as Record<string, unknown>)[sortKey] ?? "").toLowerCase();
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    })
+  : filtered;
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleSearch = (val: string) => {
     setSearch(val);
@@ -87,11 +99,16 @@ export default function Table<T extends { id: string | number }>({
           </div>
           {searchable && (
             <SearchBar
-              value={search}
-              onChange={handleSearch}
-              placeholder={searchPlaceholder}
-              onFilter={onFilter}
-            />
+        value={search}
+        onChange={handleSearch}
+        placeholder={searchPlaceholder}
+        sortOrder={sortOrder}
+        onFilter={onFilter ?? (() => {
+        setSortOrder((prev) =>
+      prev === null ? "asc" : prev === "asc" ? "desc" : null
+    );
+  })}
+/>
           )}
         </div>
 

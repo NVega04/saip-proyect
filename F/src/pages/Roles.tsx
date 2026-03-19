@@ -180,16 +180,14 @@ export default function Roles(): JSX.Element {
 
   return (
     <Layout>
-      {loading ? (
-        <div className="saip-loading">Cargando roles...</div>
-      ) : (
-        <Table
-          title="Gestión de roles"
-          columns={columns}
-          data={roles}
-          searchPlaceholder="Buscar rol"
-          onFilter={() => console.log("filtrar")}
-          headerActions={
+      <Table
+        title="Gestión de roles"
+        columns={columns}
+        data={roles}
+        searchPlaceholder="Buscar rol"
+        sortKey="id"
+        headerActions={
+          <>
             <Button variant="primary" onClick={handleCrear}>
               Crear rol
             </Button>
