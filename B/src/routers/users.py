@@ -170,3 +170,9 @@ def get_all_users(
         select(User)
     ).all()
     return users
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK, summary="Obtener usuario autenticado")
+def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user

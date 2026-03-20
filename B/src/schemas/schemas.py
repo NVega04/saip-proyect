@@ -12,6 +12,13 @@ class UserCreate(BaseModel):
     role_id: int
     is_admin: bool = False
 
+class RoleBasic(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 class UserResponse(BaseModel):
     id: int
     first_name: str
@@ -19,6 +26,7 @@ class UserResponse(BaseModel):
     email: str
     phone: Optional[str]
     role_id: int
+    role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime

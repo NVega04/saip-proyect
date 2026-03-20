@@ -244,6 +244,7 @@ export default function User(): JSX.Element {
         <div className="saip-loading">Cargando usuarios...</div>
       ) : (
         <Table
+          sortKey="first_name"
           title="Gestión de usuarios"
           columns={columns}
           data={users}

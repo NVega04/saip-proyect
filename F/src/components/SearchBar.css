@@ -56,3 +56,67 @@
 .searchbar__filter-btn:hover {
   background: #f5f0ea;
 }
+
+/* ── Sort dropdown ─────────────────────────────────────── */
+.searchbar__sort-wrapper {
+  position: relative;
+}
+
+.searchbar__filter-btn--active {
+  background-color: #f0e6da;   
+}
+
+.sort-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #e8d9cc;
+  border-radius: 10px;
+  padding: 8px 6px;
+  min-width: 190px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+}
+
+.sort-dropdown__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a08060;
+  padding: 4px 10px 2px;
+  margin: 0;
+}
+
+.sort-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #4a3728;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.sort-dropdown__item:hover {
+  background: #f7f0ea;
+}
+
+.sort-dropdown__item--selected {
+  background: #f0e6da;
+  font-weight: 600;
+  color: #7d5a3c;
+}
+
+.sort-dropdown__divider {
+  height: 1px;
+  background: #ede0d4;
+  margin: 6px 8px;
+}
