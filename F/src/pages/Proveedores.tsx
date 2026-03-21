@@ -46,10 +46,7 @@ export default function Proveedores() {
         headerActions={
           <>
             <Button variant="primary" onClick={() => console.log("crear")}>
-              Agregar Proveedor
-            </Button>
-            <Button variant="danger" onClick={() => console.log("eliminar")}>
-              Eliminar Proveedor
+              Agregar Proveedores
             </Button>
           </>
         }
