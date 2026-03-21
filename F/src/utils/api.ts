@@ -28,3 +28,21 @@ export async function logout(): Promise<void> {
     window.location.href = "/";
   }
 }
+
+export interface UserProfile {
+  first_name: string;
+  last_name: string;
+  role: {
+    name: string;
+  };
+}
+
+export async function getMe(): Promise<UserProfile | null> {
+  try {
+    const res = await apiFetch("/users/me");
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}

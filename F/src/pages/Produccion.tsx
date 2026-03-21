@@ -47,7 +47,7 @@ export default function Produccion() {
         columns={columns}
         data={ordenes}
         searchPlaceholder="Buscar orden"
-        onFilter={() => console.log("filtrar")}
+        sortKey="producto"
         headerActions={
           <>
             <Button variant="primary" onClick={() => console.log("nueva orden")}>

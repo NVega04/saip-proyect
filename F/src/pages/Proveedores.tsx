@@ -42,7 +42,7 @@ export default function Proveedores() {
         columns={columns}
         data={proveedores}
         searchPlaceholder="Buscar proveedor"
-        onFilter={() => console.log("filtrar")}
+        sortKey="nombre"
         headerActions={
           <>
             <Button variant="primary" onClick={() => console.log("crear")}>

@@ -185,7 +185,7 @@ return (
         columns={columns}
         data={roles}
         searchPlaceholder="Buscar rol"
-        sortKey="id"
+        sortKey="name"
         headerActions={
           <>
             <Button variant="primary" onClick={handleCrear}>
