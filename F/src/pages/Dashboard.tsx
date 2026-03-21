@@ -1,4 +1,5 @@
 import {JSX} from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
 interface Module {
@@ -10,19 +11,9 @@ interface Module {
 
 const modules: Module[] = [
   {
-    id: "inventario",
-    label: "Inventario",
-    desc: "Gestión detallada de productos y existencias.",
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
-        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
-      </svg>
-    ),
-  },
-  {
-    id: "proveedores",
-    label: "Proveedores",
-    desc: "Administración de contactos y contratos de proveedores.",
+    id: "usuarios",
+    label: "Gestión de usuarios",
+    desc: "Gestión detallada de los usuarios.",
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -33,38 +24,56 @@ const modules: Module[] = [
     ),
   },
   {
-    id: "ventas",
-    label: "Ventas",
-    desc: "Seguimiento de pedidos, transacciones y clientes.",
+    id: "roles",
+    label: "Gestión de roles",
+    desc: "Administración, creación y distribución de roles.",
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
-        <line x1="12" y1="1" x2="12" y2="23"/>
-        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
       </svg>
     ),
   },
   {
-    id: "produccion",
-    label: "Producción",
-    desc: "Control de procesos de fabricación y recursos.",
+    id: "recetario",
+    label: "Recetas",
+    desc: "Gestión detallada de las recetas.",
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
-        <rect x="2" y="7" width="20" height="14" rx="1"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-        <line x1="12" y1="12" x2="12" y2="16"/>
-        <line x1="10" y1="14" x2="14" y2="14"/>
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+        <line x1="9" y1="7" x2="15" y2="7"/>
+        <line x1="9" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="12" y2="15"/>
+      </svg>
+    ),
+  },
+  {
+    id: "proveedores",
+    label: "Proveedores",
+    desc: "Administración de contactos y contratos de proveedores.",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="1" y="3" width="15" height="13" rx="1"/>
+        <path d="M16 8h4l3 5v4h-7V8z"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
       </svg>
     ),
   },
 ];
 
 export default function Dashboard(): JSX.Element {
+  const navigate = useNavigate();
+
   return (
     <Layout>
       <h1 style={styles.title}>Módulos principales</h1>
       <div style={styles.grid}>
         {modules.map((mod) => (
-          <div key={mod.id} style={styles.card}>
+          <div key={mod.id} 
+          style={styles.card}
+          onClick={() => navigate(`/${mod.id}`)}
+          >
             {mod.icon}
             <div style={styles.cardLabel}>{mod.label}</div>
             <div style={styles.cardDesc}>{mod.desc}</div>

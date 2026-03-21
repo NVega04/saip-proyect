@@ -65,7 +65,6 @@ export default function Login() {
                     autoComplete="username"
                   />
                 </div>
-
                 <div className="field-group">
                   <label className="field-label" htmlFor="password">Contraseña</label>
                   <div className="field-wrapper">
@@ -118,7 +117,6 @@ export default function Login() {
                 </button>
               </form>
             </div>
-
           </div>
         </div>
       </div>
