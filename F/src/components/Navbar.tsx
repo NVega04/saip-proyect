@@ -4,7 +4,7 @@ import { logout, getMe } from "../utils/api";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ nombre: string; rol: string } | null>(null);
+  const [user, setUser] = useState<{ nombre: string; rol: string; isAdmin: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -15,6 +15,7 @@ export default function Navbar() {
         setUser({
           nombre: `${data.first_name} ${data.last_name}`,
           rol: data.role.name,
+          isAdmin: data.is_admin,
         });
       }
     });
@@ -55,15 +56,31 @@ export default function Navbar() {
 
       <div ref={menuRef} style={{ position: "relative" }}>
         <div style={styles.userTrigger} onClick={() => setMenuOpen(!menuOpen)}>
-          <div style={styles.userText}>
-            <span style={styles.userName}>{user?.nombre ?? "..."}</span> {/* 👈 */}
-            <span style={styles.userRole}>{user?.rol ?? ""}</span>       {/* 👈 */}
-          </div>
+
+<div style={styles.userText}>
+  <span style={styles.userName}>{user?.nombre ?? "..."}</span>
+  <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+    <span style={styles.userRole}>{user?.rol ?? ""}</span>
+    {user && (
+      <span style={{
+        fontSize: "0.62rem",
+        fontWeight: 600,
+        color: user.isAdmin ? "#7d5a3c" : "#9e7e62",
+        background: user.isAdmin ? "#f0e8df" : "#f5f0ea",
+        borderRadius: "4px",
+        padding: "0px 5px",
+        letterSpacing: "0.04em",
+      }}>
+        {user.isAdmin ? "ADMIN" : "USER"}
+      </span>
+    )}
+  </div>
+</div>
+
           <div style={styles.avatar}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.5">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+           {user
+           ? `${user.nombre.split(" ")[0]?.[0] ?? ""}${user.nombre.split(" ")[1]?.[0] ?? ""}`.toUpperCase()
+            : ""}
           </div>
         </div>
 
@@ -142,6 +159,10 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
+    fontSize: "0.72rem",
+    fontWeight: 600,
+    color: "#5c3d1e",
+    fontFamily: "'Poppins', sans-serif",
   },
   userTrigger: {
     display: "flex",

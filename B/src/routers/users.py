@@ -53,7 +53,12 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
 
     return new_user
 
-
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK, summary="Obtener usuario autenticado")
+def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    
+    return current_user
 @router.delete("/{user_id}", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar usuario (soft delete)")
 def delete_user(
     user_id: int,
@@ -171,8 +176,3 @@ def get_all_users(
     ).all()
     return users
 
-@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK, summary="Obtener usuario autenticado")
-def get_me(
-    current_user: User = Depends(get_current_user),
-):
-    return current_user

@@ -30,11 +30,14 @@ export async function logout(): Promise<void> {
 }
 
 export interface UserProfile {
+  id: number;
   first_name: string;
   last_name: string;
-  role: {
-    name: string;
-  };
+  phone: string | null;
+  email: string;
+  role: { name: string };
+  is_admin: boolean;
+  created_at: string;
 }
 
 export async function getMe(): Promise<UserProfile | null> {
