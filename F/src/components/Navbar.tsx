@@ -4,7 +4,7 @@ import { logout, getMe } from "../utils/api";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ nombre: string; rol: string } | null>(null); // 👈
+  const [user, setUser] = useState<{ nombre: string; rol: string } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
