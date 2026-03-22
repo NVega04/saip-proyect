@@ -21,13 +21,10 @@ services:
     volumes:
       - ./B:/app:Z
       - /app/.venv
+    env_file:
+      - .env
     environment:
       - UV_LINK_MODE=copy
-      - DB_USER=root
-      - DB_PASSWORD=root_password
-      - DB_HOST=db
-      - DB_NAME=db_saip_proyect
-      - DB_PORT=3306
     depends_on:
       - db
     networks:

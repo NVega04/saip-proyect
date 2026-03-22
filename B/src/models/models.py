@@ -83,3 +83,15 @@ class SessionApp(SQLModel, table=True):
     expires_at: datetime
     is_active: bool = Field(default=True)
     user: "User" = Relationship(back_populates="sessions")
+
+class PasswordReset(SQLModel, table=True):
+    __tablename__ = "password_resets"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(unique=True, index=True, max_length=255)
+    user_id: int = Field(foreign_key="users.id")
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    used: bool = Field(default=False)
+
+    user: "User" = Relationship()

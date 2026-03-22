@@ -105,3 +105,10 @@ class LoginResponse(BaseModel):
     session_token: str
     expires_at: datetime
     user: UserResponse
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
