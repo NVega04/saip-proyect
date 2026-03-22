@@ -36,7 +36,12 @@ export default function Proveedores() {
   const [proveedores, setProveedores] = useState<Proveedor[]>(mockProveedores);
 
   return (
-    <Layout>
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Proveedores" },
+      ]}
+     >
       <Table
         title="Proveedores"
         columns={columns}
@@ -46,7 +51,7 @@ export default function Proveedores() {
         headerActions={
           <>
             <Button variant="primary" onClick={() => console.log("crear")}>
-              Agregar Proveedores
+              Agregar proveedores
             </Button>
           </>
         }

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const styles: Record<string, React.CSSProperties> = {
   footer: {
     background: "#ffffff",
@@ -136,11 +138,11 @@ export default function Footer() {
         {/* Columna 2: Navegación */}
         <div style={styles.col}>
           <span style={styles.colTitle}>Navegación</span>
-          <div style={styles.linkList}>
-            <a href="#" style={styles.link}>Inventario</a>
-            <a href="#" style={styles.link}>Proveedores</a>
-            <a href="#" style={styles.link}>Ventas</a>
-            <a href="#" style={styles.link}>Producción</a>
+            <div style={styles.linkList}>
+              <a href="#" style={styles.link}>Inventario</a>
+              <Link to="/proveedores" style={styles.link}>Proveedores</Link>
+              <a href="#" style={styles.link}>Ventas</a>
+              <Link to="/produccion" style={styles.link}>Producción</Link>
           </div>
         </div>
 

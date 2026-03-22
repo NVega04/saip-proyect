@@ -179,7 +179,12 @@ export default function Roles(): JSX.Element {
   // ── Render ─────────────────────────────────────────────────────────────────
 
 return (
-    <Layout>
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Gestión de roles" },
+      ]}
+    >
       <Table
         title="Gestión de roles"
         columns={columns}
@@ -232,7 +237,9 @@ return (
       >
         <form className="crf" onSubmit={handleSubmit}>
           <div className="crf__group">
-            <label className="crf__label">Nombre del rol</label>
+            <label 
+              className="crf__label">Nombre del rol<span className="crf__required">*</span>
+            </label>
             <input
               className={`crf__input ${errors.name ? "crf__input--error" : ""}`}
               placeholder="Ej: Administrador, Cajero…"

@@ -164,7 +164,6 @@ export default function User(): JSX.Element {
     if (!form.last_name.trim())  e.last_name  = "El apellido es requerido";
     if (!form.email.trim())      e.email      = "El correo es requerido";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Correo inválido";
-    if (!form.position.trim())   e.position   = "El cargo es requerido";
     if (!form.role_id)           e.role_id    = "Selecciona un rol";
     if (form.accesos.length === 0) e.accesos  = "Selecciona al menos un módulo";
     setErrors(e);
@@ -239,7 +238,12 @@ export default function User(): JSX.Element {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Layout>
+   <Layout
+     breadcrumbs={[
+      { label: "Dashboard", to: "/dashboard" },
+      { label: "Gestión de usuarios" },
+    ]}
+    >
       {loading ? (
         <div className="saip-loading">Cargando usuarios...</div>
       ) : (
@@ -295,7 +299,9 @@ export default function User(): JSX.Element {
         <form className="cuf" onSubmit={handleSubmit}>
           <div className="cuf__row">
             <div className="cuf__group">
-              <label className="cuf__label">Nombre</label>
+              <label className="cuf__label">
+                Nombre <span className="cuf__required">*</span>
+              </label>
               <input
                 className={`cuf__input ${errors.first_name ? "cuf__input--error" : ""}`}
                 placeholder="Ej: Yohan"
@@ -304,8 +310,11 @@ export default function User(): JSX.Element {
               />
               {errors.first_name && <span className="cuf__error">{errors.first_name}</span>}
             </div>
+
             <div className="cuf__group">
-              <label className="cuf__label">Apellido</label>
+              <label className="cuf__label">
+                Apellido <span className="cuf__required">*</span>
+              </label>
               <input
                 className={`cuf__input ${errors.last_name ? "cuf__input--error" : ""}`}
                 placeholder="Ej: Martinez"
@@ -315,9 +324,11 @@ export default function User(): JSX.Element {
               {errors.last_name && <span className="cuf__error">{errors.last_name}</span>}
             </div>
           </div>
-
+          <div className="cuf__row">
           <div className="cuf__group">
-            <label className="cuf__label">Correo electrónico</label>
+            <label className="cuf__label">
+              Correo electrónico <span className="cuf__required">*</span>
+            </label>
             <input
               className={`cuf__input ${errors.email ? "cuf__input--error" : ""}`}
               type="email"
@@ -327,31 +338,24 @@ export default function User(): JSX.Element {
             />
             {errors.email && <span className="cuf__error">{errors.email}</span>}
           </div>
-
-          <div className="cuf__row">
             <div className="cuf__group">
-              <label className="cuf__label">Cargo</label>
+              <label  
+                className="cuf__label">Teléfono
+              </label>
               <input
-                className={`cuf__input ${errors.position ? "cuf__input--error" : ""}`}
-                placeholder="Ej: Cajero"
-                value={form.position}
-                onChange={(e) => setField("position", e.target.value)}
-              />
-              {errors.position && <span className="cuf__error">{errors.position}</span>}
-            </div>
-            <div className="cuf__group">
-              <label className="cuf__label">Teléfono</label>
-              <input
-                className="cuf__input"
+                className={`cuf__input ${errors.phone ? "cuf__input--error" : ""}`}
                 placeholder="300 000 0000"
                 value={form.phone}
                 onChange={(e) => setField("phone", e.target.value)}
               />
+              {errors.phone && <span className="cuf__error">{errors.phone}</span>}
             </div>
           </div>
 
           <div className="cuf__group">
-            <label className="cuf__label">Rol</label>
+            <label className="cuf__label">
+              Rol <span className="cuf__required">*</span>
+            </label>
             <select
               className={`cuf__select ${errors.role_id ? "cuf__input--error" : ""}`}
               value={form.role_id}
@@ -366,7 +370,9 @@ export default function User(): JSX.Element {
           </div>
 
           <div className="cuf__group">
-            <label className="cuf__label">Módulos con acceso</label>
+            <label className="cuf__label">
+              Módulos con acceso <span className="cuf__required">*</span>
+            </label>
             <div className="cuf__accesos">
               {ACCESOS_DISPONIBLES.map((acceso) => {
                 const checked = form.accesos.includes(acceso);

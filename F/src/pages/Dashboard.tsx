@@ -60,6 +60,35 @@ const modules: Module[] = [
       </svg>
     ),
   },
+    {
+    id: "ventas",
+    label: "Ventas",
+    desc: "Detalle y administración de las ventas.",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    ),
+  }, 
+     {
+    id: "produccion",
+    label: "Producción",
+    desc: "Detalle y control de la producción",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20"/>
+        <line x1="2" y1="20" x2="22" y2="20"/>
+        <line x1="14" y1="20" x2="14" y2="10"/>
+        <line x1="14" y1="10" x2="22" y2="10"/>
+        <line x1="22" y1="10" x2="22" y2="20"/>
+        <rect x="17" y="4" width="3" height="6" rx="0"/>
+        <circle cx="18.5" cy="2.5" r="0.7"/>
+        <circle cx="20" cy="1.5" r="0.5"/>
+      </svg>
+    ),
+  }, 
+  
 ];
 
 export default function Dashboard(): JSX.Element {
