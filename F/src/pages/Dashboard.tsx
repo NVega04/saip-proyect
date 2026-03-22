@@ -34,7 +34,7 @@ const modules: Module[] = [
     ),
   },
   {
-    id: "recetario",
+    id: "recetas",
     label: "Recetas",
     desc: "Gestión detallada de las recetas.",
     icon: (
