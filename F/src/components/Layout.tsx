@@ -18,13 +18,11 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const location = useLocation();
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
-  const handleMenuChange = (menu: string) => { };
-
   return (
     <div style={styles.root}>
       <Navbar />
       <div style={styles.body}>
-        <Sidebar activeMenu={activeMenu} onMenuChange={handleMenuChange} />
+        <Sidebar activeMenu={activeMenu} onMenuChange={() => {}} />
         <main style={styles.content}>
           {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
           {children}
