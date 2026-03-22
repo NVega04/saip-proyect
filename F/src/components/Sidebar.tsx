@@ -67,11 +67,29 @@ const menuItems: MenuItem[] = [
     label: "Producción",
     path: "/produccion",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-        <rect x="2" y="7" width="20" height="14" rx="1"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-        <line x1="12" y1="12" x2="12" y2="16"/>
-        <line x1="10" y1="14" x2="14" y2="14"/>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20"/>
+        <line x1="2" y1="20" x2="22" y2="20"/>
+        <line x1="14" y1="20" x2="14" y2="10"/>
+        <line x1="14" y1="10" x2="22" y2="10"/>
+        <line x1="22" y1="10" x2="22" y2="20"/>
+        <rect x="17" y="4" width="3" height="6" rx="0"/>
+        <circle cx="18.5" cy="2.5" r="0.7"/>
+        <circle cx="20" cy="1.5" r="0.5"/>
+      </svg>
+    ),
+  },
+   {
+    id: "recetario",
+    label: "Recetas",
+    path: "/recetas",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+        <line x1="9" y1="7" x2="15" y2="7"/>
+        <line x1="9" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="12" y2="15"/>
       </svg>
     ),
   },

@@ -1,0 +1,35 @@
+.saip-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #8b6b4a;
+}
+
+.saip-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.saip-breadcrumb__link {
+  color: #8b6b4a;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.saip-breadcrumb__link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+.saip-breadcrumb__current {
+  color: #4e342e;
+  font-weight: 600;
+}
+
+.saip-breadcrumb__separator {
+  color: #b89b7a;
+}
