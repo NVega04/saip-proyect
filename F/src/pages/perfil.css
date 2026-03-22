@@ -18,7 +18,7 @@
   font-family: 'Roboto', sans-serif;
 }
 
-/* ── Topbar: ocupa todo el ancho de la página ── */
+/* ── Topbar ── */
 .perfil-topbar {
   width: 100%;
   max-width: 100%;
@@ -67,6 +67,8 @@
   gap: 8px;
   z-index: 999;
   animation: slideIn 0.25s ease;
+  /* en móvil no se sale de la pantalla */
+  max-width: calc(100vw - 3rem);
 }
 
 .perfil-toast--success { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
@@ -123,6 +125,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0; /* evita overflow del nombre largo */
 }
 
 .perfil-fullname {
@@ -131,6 +134,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--dark);
+  word-break: break-word;
 }
 
 .perfil-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -165,6 +169,7 @@
   font-weight: 500;
   transition: all 0.2s ease;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .perfil-edit-btn:hover {
@@ -190,6 +195,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .perfil-readonly-tag {
@@ -204,7 +210,7 @@
   letter-spacing: 0.03em;
 }
 
-/* ── Grid: 2 columnas fijas para info personal ── */
+/* ── Grid: 2 columnas ── */
 .perfil-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -301,6 +307,7 @@
 .perfil-btn-save {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 0.75rem 1.5rem;
   background: var(--dark);
@@ -333,6 +340,7 @@
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -355,13 +363,127 @@
 
 .perfil-error { color: var(--mid); text-align: center; font-size: 0.9rem; }
 
-/* ── Responsive ── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Tablet (≤ 768px) ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .perfil-page {
+    padding: 1.5rem 0.75rem 2rem;
+  }
+
+  .perfil-topbar {
+    padding: 0 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .perfil-card {
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  .perfil-header {
+    padding: 1.4rem;
+    gap: 1rem;
+  }
+
+  .perfil-section {
+    padding: 1.25rem 1.4rem;
+  }
+
+  .perfil-actions {
+    padding: 1rem 1.4rem;
+  }
+}
+
+/* ── Móvil (≤ 600px) ─────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .perfil-topbar { padding: 0 1rem; }
-  .perfil-header { flex-direction: column; align-items: flex-start; }
-  .perfil-edit-btn { margin-left: 0; width: 100%; justify-content: center; }
-  .perfil-grid { grid-template-columns: 1fr; }         /* 1 col en móvil */
-  .perfil-actions { flex-direction: column; }
+  .perfil-page {
+    padding: 1rem 0.5rem 2rem;
+  }
+
+  .perfil-topbar {
+    padding: 0 0.5rem;
+  }
+
+  .perfil-card {
+    border-radius: 12px;
+    padding: 6px;
+  }
+
+  /* Header apilado verticalmente */
+  .perfil-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+    gap: 0.85rem;
+  }
+
+  /* Avatar + info en la misma fila */
+  .perfil-header > .perfil-avatar {
+    align-self: center;
+  }
+
+  /* Botón editar ocupa todo el ancho */
+  .perfil-edit-btn {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Grid a 1 columna */
+  .perfil-grid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .perfil-section {
+    padding: 1rem 1.25rem;
+  }
+
+  /* Toast pegado arriba en móvil */
+  .perfil-toast {
+    top: auto;
+    bottom: 1rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    max-width: 100%;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Acciones apiladas */
+  .perfil-actions {
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+    gap: 0.6rem;
+  }
+
   .perfil-btn-cancel,
-  .perfil-btn-save { width: 100%; justify-content: center; }
+  .perfil-btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Móvil pequeño (≤ 400px) ─────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .perfil-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+  }
+
+  .perfil-fullname {
+    font-size: 1.05rem;
+  }
+
+  .perfil-section-title {
+    font-size: 0.72rem;
+  }
 }

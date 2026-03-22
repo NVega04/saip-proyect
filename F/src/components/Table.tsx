@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SearchBar, { SortOrder, SortCriteria } from "./SearchBar"; 
+import SearchBar, { SortOrder, SortCriteria } from "./SearchBar";
 import Pagination from "./Pagination";
 import "./Table.css";
 
@@ -34,9 +34,9 @@ interface SAIPTableProps<T extends { id: string | number }> {
   /** Callback externo de búsqueda (si quieres manejarla fuera) */
   onSearch?: (value: string) => void;
   /** Clave para orden alfabético */
-  sortKey?: string;    
-  /** Clave numérica para ordenar por ID (default "id") */  
-  idKey?: string;     
+  sortKey?: string;
+  /** Clave numérica para ordenar por ID (default "id") */
+  idKey?: string;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -56,9 +56,10 @@ export default function Table<T extends { id: string | number }>({
   idKey,
 }: SAIPTableProps<T>) {
   const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<SortOrder>(null);   
-  const [sortCriteria, setSortCriteria] = useState<SortCriteria>("id"); 
+  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const [sortCriteria, setSortCriteria] = useState<SortCriteria>("id");
   const [currentPage, setCurrentPage] = useState(1);
+
   const filtered = onSearch
     ? data
     : data.filter((row) =>
@@ -67,28 +68,28 @@ export default function Table<T extends { id: string | number }>({
         )
       );
 
-    const sorted = (() => {
-  if (!sortOrder) return filtered;
+  const sorted = (() => {
+    if (!sortOrder) return filtered;
 
-  return [...filtered].sort((a, b) => {
-    const rec = a as Record<string, unknown>;
-    const recB = b as Record<string, unknown>;
+    return [...filtered].sort((a, b) => {
+      const rec = a as Record<string, unknown>;
+      const recB = b as Record<string, unknown>;
 
-    if (sortCriteria === "id") {
-      const aId = Number(rec[idKey ?? "id"] ?? 0);
-      const bId = Number(recB[idKey ?? "id"] ?? 0);
-      return sortOrder === "asc" ? aId - bId : bId - aId;
-    }
+      if (sortCriteria === "id") {
+        const aId = Number(rec[idKey ?? "id"] ?? 0);
+        const bId = Number(recB[idKey ?? "id"] ?? 0);
+        return sortOrder === "asc" ? aId - bId : bId - aId;
+      }
 
-    // orden alfabético
-    const aVal = String(rec[sortKey ?? "name"] ?? "").toLowerCase();
-    const bVal = String(recB[sortKey ?? "name"] ?? "").toLowerCase();
+      // orden alfabético
+      const aVal = String(rec[sortKey ?? "name"] ?? "").toLowerCase();
+      const bVal = String(recB[sortKey ?? "name"] ?? "").toLowerCase();
 
-    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-})();
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  })();
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -112,19 +113,18 @@ export default function Table<T extends { id: string | number }>({
             {headerActions}
           </div>
           {searchable && (
-
-         <SearchBar
-     value={search}
-     onChange={handleSearch}
-     placeholder={searchPlaceholder}
-     sortOrder={sortOrder}
-     sortCriteria={sortCriteria}
-     onSort={(order, criteria) => {
-     setSortOrder(order);
-     setSortCriteria(criteria);
-     setCurrentPage(1);
-  }}
-/>
+            <SearchBar
+              value={search}
+              onChange={handleSearch}
+              placeholder={searchPlaceholder}
+              sortOrder={sortOrder}
+              sortCriteria={sortCriteria}
+              onSort={(order, criteria) => {
+                setSortOrder(order);
+                setSortCriteria(criteria);
+                setCurrentPage(1);
+              }}
+            />
           )}
         </div>
 
@@ -191,5 +191,3 @@ export default function Table<T extends { id: string | number }>({
     </section>
   );
 }
-
-

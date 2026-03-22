@@ -34,6 +34,7 @@
 /* Scroll horizontal en mobile */
 .saip-table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* scroll suave en iOS */
 }
 
 /* Tabla */
@@ -129,4 +130,96 @@
   font-size: 0.85rem;
   color: #9e7e62;
   font-family: 'Roboto', sans-serif;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Tablet (≤ 1024px) ───────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .saip-table__th,
+  .saip-table__td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.82rem;
+  }
+}
+
+/* ── Móvil (≤ 767px) ─────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* Título más pequeño */
+  .saip-table-section__title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Card con menos padding */
+  .saip-table-card {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  /* Toolbar: acciones arriba, buscador abajo ocupando todo el ancho */
+  .saip-table-card__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .saip-table-card__toolbar-left {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* El SearchBar ocupa todo el ancho en móvil */
+  .saip-table-card__toolbar > *:last-child {
+    width: 100%;
+  }
+
+  /* Celdas más compactas */
+  .saip-table__th,
+  .saip-table__td {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  /* Botones de acción ligeramente más grandes para touch */
+  .saip-table__action-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Estado vacío más compacto */
+  .saip-table__empty {
+    padding: 2rem 1rem;
+  }
+}
+
+/* ── Móvil pequeño (≤ 480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .saip-table__th,
+  .saip-table__td {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  /* Hint visual de scroll horizontal */
+  .saip-table-wrapper {
+    position: relative;
+  }
+
+  .saip-table-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.85));
+    pointer-events: none;
+    border-radius: 0 8px 8px 0;
+  }
 }
