@@ -41,7 +41,12 @@ export default function Produccion() {
   const [ordenes, setOrdenes] = useState<OrdenProduccion[]>(mockOrdenes);
 
   return (
-    <Layout>
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Producción" },
+      ]}
+    >
       <Table
         title="Producción"
         columns={columns}
@@ -51,10 +56,7 @@ export default function Produccion() {
         headerActions={
           <>
             <Button variant="primary" onClick={() => console.log("nueva orden")}>
-              Nueva Orden
-            </Button>
-            <Button variant="danger" onClick={() => console.log("eliminar")}>
-              Eliminar Orden
+              Nueva orden
             </Button>
           </>
         }

@@ -188,7 +188,12 @@ const handleSubmit = async (e: React.FormEvent) => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
 return (
-    <Layout>
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Gestión de roles" },
+      ]}
+    >
       <Table
         title="Gestión de roles"
         columns={columns}
@@ -243,7 +248,7 @@ return (
           {/* ── Nombre: siempre en creación, solo admins en edición ── */}
           {(!editTarget || isCurrentUserAdmin) && (
             <div className="crf__group">
-              <label className="crf__label">Nombre del rol</label>
+              <label className="crf__label">Nombre del rol<span className="crf__required">*</span>
               <input
                 className={`crf__input ${errors.name ? "crf__input--error" : ""}`}
                 placeholder="Ej: Administrador, Cajero…"

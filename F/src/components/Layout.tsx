@@ -1,36 +1,41 @@
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import Footer from "./Footer"; // ← componente nuevo
+import Footer from "./Footer";
+import Breadcrumb from "./Breadcrumb";
+
+interface BreadcrumbItem {
+  label: string;
+  to?: string;
+}
 
 interface LayoutProps {
   children: React.ReactNode;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const location = useLocation();
-
-  // Deriva el activeMenu desde la ruta actual en lugar de estado local
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
+  const handleMenuChange = (menu: string) => { };
+
   return (
-    <>
-      <div style={styles.root}>
-        <Navbar />
-        <div style={styles.body}>
-          <Sidebar activeMenu={activeMenu} onMenuChange={() => {}} />
-          <main style={styles.content}>
-            {children}
-          </main>
-        </div>
-        <Footer />
+    <div style={styles.root}>
+      <Navbar />
+      <div style={styles.body}>
+        <Sidebar activeMenu={activeMenu} onMenuChange={handleMenuChange} />
+        <main style={styles.content}>
+          {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
+          {children}
+        </main>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  
   root: {
     minHeight: "100vh",
     display: "flex",

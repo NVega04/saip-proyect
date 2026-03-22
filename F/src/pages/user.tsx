@@ -273,7 +273,12 @@ export default function User(): JSX.Element {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Layout>
+   <Layout
+     breadcrumbs={[
+      { label: "Dashboard", to: "/dashboard" },
+      { label: "Gestión de usuarios" },
+    ]}
+    >
       {loading ? (
         <div className="saip-loading">Cargando usuarios...</div>
       ) : (
@@ -333,7 +338,9 @@ export default function User(): JSX.Element {
           {/* ── Nombre y Apellido (siempre visibles) ── */}
           <div className="cuf__row">
             <div className="cuf__group">
-              <label className="cuf__label">Nombre</label>
+              <label className="cuf__label">
+                Nombre <span className="cuf__required">*</span>
+              </label>
               <input
                 className={`cuf__input ${errors.first_name ? "cuf__input--error" : ""}`}
                 placeholder="Ej: Yohan"
@@ -342,8 +349,11 @@ export default function User(): JSX.Element {
               />
               {errors.first_name && <span className="cuf__error">{errors.first_name}</span>}
             </div>
+
             <div className="cuf__group">
-              <label className="cuf__label">Apellido</label>
+              <label className="cuf__label">
+                Apellido <span className="cuf__required">*</span>
+              </label>
               <input
                 className={`cuf__input ${errors.last_name ? "cuf__input--error" : ""}`}
                 placeholder="Ej: Martinez"
@@ -354,9 +364,10 @@ export default function User(): JSX.Element {
             </div>
           </div>
 
-          {/* ── Correo (siempre visible) ── */}
           <div className="cuf__group">
-            <label className="cuf__label">Correo electrónico</label>
+            <label className="cuf__label">
+              Correo electrónico <span className="cuf__required">*</span>
+            </label>
             <input
               className={`cuf__input ${errors.email ? "cuf__input--error" : ""}`}
               type="email"
