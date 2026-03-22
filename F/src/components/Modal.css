@@ -8,6 +8,8 @@
   justify-content: center;
   z-index: 200;
   animation: modal-fade-in 0.15s ease;
+  /* padding para que no toque los bordes en desktop/tablet */
+  padding: 1rem;
 }
 
 .saip-modal__box {
@@ -18,7 +20,9 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: modal-slide-in 0.18s ease;
-  max-width: calc(100vw - 2rem);
+  /* usa CSS variable pasada desde el prop width; fallback 480px */
+  width: 100%;
+  max-width: var(--modal-width, 480px);
 }
 
 .saip-modal__header {
@@ -27,6 +31,7 @@
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #f0e8e0;
+  gap: 0.75rem;
 }
 
 .saip-modal__title {
@@ -35,6 +40,8 @@
   color: #3b2510;
   font-family: 'Roboto', sans-serif;
   margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .saip-modal__close {
@@ -69,4 +76,50 @@
 @keyframes modal-slide-in {
   from { opacity: 0; transform: translateY(-12px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Móvil (≤ 767px): bottom sheet ──────────────────────────────────────── */
+@media (max-width: 767px) {
+  .saip-modal__overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .saip-modal__box {
+    border-radius: 16px 16px 0 0;
+    max-height: 92vh;
+    max-width: 100%;
+    width: 100%;
+    animation: modal-slide-up 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .saip-modal__header {
+    padding: 1rem 1.25rem;
+  }
+
+  .saip-modal__body {
+    padding: 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Móvil pequeño (≤ 480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .saip-modal__title {
+    font-size: 0.95rem;
+  }
+
+  .saip-modal__body {
+    padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@keyframes modal-slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
 }

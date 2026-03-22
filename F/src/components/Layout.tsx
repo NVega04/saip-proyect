@@ -16,12 +16,21 @@ interface LayoutProps {
 
 export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div style={styles.root}>
-      <Navbar />
+      <Navbar
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        sidebarOpen={sidebarOpen}
+      />
       <div style={styles.body}>
-        <Sidebar activeMenu={activeMenu} onMenuChange={setActiveMenu} />
+        <Sidebar
+          activeMenu={activeMenu}
+          onMenuChange={setActiveMenu}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
         <main style={styles.content}>
           {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
           {children}
@@ -47,5 +56,6 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: "2rem 2.5rem",
     overflowY: "auto",
+    minWidth: 0, // evita overflow del flex child en móvil
   },
 };

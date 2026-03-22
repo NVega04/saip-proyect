@@ -37,7 +37,8 @@ export default function Modal({
     <div className="saip-modal__overlay" onClick={onClose}>
       <div
         className="saip-modal__box"
-        style={{ width }}
+        // CSS variable: usada en desktop; el media query móvil la ignora
+        style={{ "--modal-width": width } as React.CSSProperties}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="saip-modal__header">

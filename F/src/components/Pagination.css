@@ -4,6 +4,7 @@
   justify-content: flex-end;
   gap: 0.35rem;
   margin-top: 1.25rem;
+  flex-wrap: wrap; /* evita overflow si hay muchas páginas */
 }
 
 .pagination__btn {
@@ -40,4 +41,44 @@
 .pagination__btn--active:hover {
   background: #7d5a3c;
   border-color: #7d5a3c;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Móvil (≤ 767px) ─────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .pagination {
+    justify-content: center; /* centrado en móvil es más natural */
+    margin-top: 1rem;
+    gap: 0.3rem;
+  }
+
+  /* Botones de número de página más grandes para touch */
+  .pagination__btn {
+    min-width: 38px;
+    height: 38px;
+    font-size: 0.82rem;
+  }
+}
+
+/* ── Móvil pequeño (≤ 480px): ocultar números intermedios ───────────────── */
+@media (max-width: 480px) {
+  /* Muestra solo Anterior, página activa y Siguiente.
+     Los números sin clase activa se ocultan para no saturar. */
+  .pagination__btn:not(.pagination__btn--active):not(:first-child):not(:last-child) {
+    display: none;
+  }
+
+  /* Indicador de página actual más visible */
+  .pagination__btn--active {
+    min-width: 42px;
+  }
+
+  /* Anterior y Siguiente más anchos para ser fácilmente tocables */
+  .pagination__btn:first-child,
+  .pagination__btn:last-child {
+    padding: 0 1rem;
+  }
 }

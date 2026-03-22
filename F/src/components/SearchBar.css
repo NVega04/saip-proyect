@@ -63,7 +63,7 @@
 }
 
 .searchbar__filter-btn--active {
-  background-color: #f0e6da;   
+  background-color: #f0e6da;
 }
 
 .sort-dropdown {
@@ -119,4 +119,40 @@
   height: 1px;
   background: #ede0d4;
   margin: 6px 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Móvil (≤ 767px) ─────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Cuando Table.css pone el toolbar en columna, el searchbar ocupa todo el ancho */
+  .searchbar {
+    width: 100%;
+  }
+
+  .searchbar__input-wrapper {
+    flex: 1;
+  }
+
+  .searchbar__input {
+    width: 100%;
+  }
+
+  /* Evita que el dropdown se salga de pantalla */
+  .sort-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* ── Móvil pequeño (≤ 480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sort-dropdown__item {
+    font-size: 12px;
+    padding: 8px 10px; /* más alto para touch */
+  }
 }
