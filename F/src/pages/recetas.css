@@ -1,0 +1,367 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   Recetas.css  —  Gestión de Recetas
+   Sigue el mismo sistema de diseño que user.css (prefijo: rcf)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Badge de conteo de ingredientes ────────────────────────────────────────── */
+.rcf__badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  background: var(--color-primary-light, #cfc0b066);
+  color: var(--color-primary, #3d2314);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FORM — prefijo rcf (recipe-create-form)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Contenedor principal del formulario */
+.rcf {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Grupo genérico (label + control + error) ───────────────────────────────── */
+.rcf__group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ── Label ──────────────────────────────────────────────────────────────────── */
+.rcf__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #374151);
+  line-height: 1.4;
+}
+
+.rcf__required {
+  color: var(--color-danger, #ef4444);
+  margin-left: 2px;
+}
+
+/* ── Input base ─────────────────────────────────────────────────────────────── */
+.rcf__input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #fff);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.rcf__input:focus {
+  border-color: var(--color-primary, #cfc0b066);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+.rcf__input--error {
+  border-color: var(--color-danger, #ef4444);
+}
+
+.rcf__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Tamaño reducido para la tabla de ingredientes */
+.rcf__input--sm {
+  height: 32px;
+  font-size: 13px;
+  padding: 0 8px;
+}
+
+/* Campo de unidad: sólo lectura cuando se auto-completa */
+.rcf__input--unit {
+  background: var(--color-surface-muted, #f9fafb);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.rcf__input--unit:not([readonly]) {
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #111827);
+}
+
+/* ── Textarea ───────────────────────────────────────────────────────────────── */
+.rcf__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #fff);
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.rcf__textarea:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+/* ── Select ─────────────────────────────────────────────────────────────────── */
+.rcf__select {
+  width: 100%;
+  height: 36px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #fff)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 9px center;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.rcf__select:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+.rcf__select--sm {
+  height: 32px;
+  font-size: 13px;
+  padding: 0 22px 0 8px;
+  background-position: right 6px center;
+}
+
+/* ── Mensaje de error ───────────────────────────────────────────────────────── */
+.rcf__error {
+  font-size: 11.5px;
+  color: var(--color-danger, #ef4444);
+  margin-top: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SECCIÓN DE INGREDIENTES
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Cabecera de la sección (label + botón agregar) */
+.rcf__ing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+/* Botón "Agregar ingrediente" */
+.rcf__add-ing-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-primary, #3d2314);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-primary, #3d2314);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.rcf__add-ing-btn:hover {
+  background: var(--color-primary, #cfc0b066);
+  color: #fff;
+}
+
+/* Contenedor de la lista de ingredientes */
+.rcf__ing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--color-surface-muted, #f9fafb);
+}
+
+/* Cabecera de columnas */
+.rcf__ing-cols-header {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 30px;
+  gap: 8px;
+  padding: 0 2px 4px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.rcf__ing-cols-header span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Fila de ingrediente */
+.rcf__ing-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 30px;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Botón eliminar ingrediente */
+.rcf__remove-ing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-text-muted, #9ca3af);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.rcf__remove-ing-btn:hover:not(:disabled) {
+  background: var(--color-danger-light, #fee2e2);
+  color: var(--color-danger, #ef4444);
+}
+
+.rcf__remove-ing-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Acciones del formulario ────────────────────────────────────────────────── */
+.rcf__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MODAL DETALLE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.rcf-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Encabezado: nombre + badge */
+.rcf-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rcf-detail__nombre {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Descripción */
+.rcf-detail__desc {
+  font-size: 13.5px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: var(--color-surface-muted, #f9fafb);
+  border-radius: 6px;
+  border-left: 3px solid var(--color-primary, #4f46e5);
+}
+
+/* Sección ingredientes */
+.rcf-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rcf-detail__section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted, #9ca3af);
+  margin: 0;
+}
+
+/* Lista de ingredientes en detalle */
+.rcf-detail__ing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rcf-detail__ing-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--color-border, #f3f4f6);
+  transition: background 0.1s;
+}
+
+.rcf-detail__ing-item:last-child {
+  border-bottom: none;
+}
+
+.rcf-detail__ing-item:nth-child(even) {
+  background: var(--color-surface-muted, #f9fafb);
+}
+
+.rcf-detail__ing-nombre {
+  color: var(--color-text, #111827);
+  font-weight: 500;
+}
+
+.rcf-detail__ing-cantidad {
+  color: var(--color-primary, #4f46e5);
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--color-primary-light, #eef2ff);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+/* Footer del modal detalle */
+.rcf-detail__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}

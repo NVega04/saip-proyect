@@ -6,6 +6,7 @@ import Roles from "./pages/Roles";
 import Login from "./pages/login";
 import Proveedores from "./pages/Proveedores";
 import Produccion from "./pages/Produccion";
+import Recetas from "./pages/Recetas";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
 
@@ -22,6 +23,7 @@ function App() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
       <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
+      <Route path="/recetas" element={<ProtectedRoute><Recetas /></ProtectedRoute>} />
       <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
       <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
       <Route path="/perfil" element={<Perfil />} />
