@@ -99,7 +99,7 @@ export default function SearchBar({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
                 </svg>
-                1 → 9
+                ASC
               </button>
               <button
                 className={`sort-dropdown__item ${isActive("desc", "id") ? "sort-dropdown__item--selected" : ""}`}
@@ -108,7 +108,7 @@ export default function SearchBar({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
                 </svg>
-                9 → 1
+                DESC
               </button>
 
               <div className="sort-dropdown__divider" />

@@ -9,6 +9,7 @@ import Produccion from "./pages/Produccion";
 import Recetas from "./pages/Recetas";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   const { pathname } = useLocation();
@@ -18,16 +19,18 @@ function App() {
   }, [pathname]);
 
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
-      <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
-      <Route path="/recetas" element={<ProtectedRoute><Recetas /></ProtectedRoute>} />
-      <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
-      <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
-      <Route path="/perfil" element={<Perfil />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
+        <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
+        <Route path="/recetas" element={<ProtectedRoute><Recetas /></ProtectedRoute>} />
+        <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
+        <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
+        <Route path="/perfil" element={<Perfil />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 

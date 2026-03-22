@@ -54,11 +54,12 @@ class UserUpdateResponse(BaseModel):
     email: str
     phone: Optional[str]
     role_id: int
+    role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime
-    updated_at: datetime
-    updated_by: int
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
 
     class Config:
         from_attributes = True

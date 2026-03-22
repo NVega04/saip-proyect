@@ -5,17 +5,9 @@ import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
-import { apiFetch } from "../utils/api";  // ← import apiFetch
+import { apiFetch } from "../utils/api";
 import "./user.css";
-
-// ─── Constantes ───────────────────────────────────────────────────────────────
-
-const ACCESOS_DISPONIBLES = ["Inventario", "Proveedores", "Ventas", "Producción"];
-const ROLES_DISPONIBLES   = [
-  { value: "1", label: "Administrador" },
-  { value: "2", label: "Cajero" },
-  { value: "3", label: "Panadero" },
-];
+import { useAuth } from "../context/AuthContext";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -26,6 +18,7 @@ interface User {
   email: string;
   phone?: string | null;
   role_id: number;
+  role: Role;
   is_admin: boolean;
   status: "active" | "inactive";
   created_at: string;
@@ -35,11 +28,15 @@ interface UserForm {
   first_name: string;
   last_name: string;
   email: string;
-  position: string;
   phone: string;
   role_id: string;
   is_admin: boolean;
   accesos: string[];
+}
+
+interface Role {
+  id: number;
+  name: string;
 }
 
 type FormErrors = Partial<Record<keyof UserForm, string>>;
@@ -48,7 +45,6 @@ const emptyForm = (): UserForm => ({
   first_name: "",
   last_name:  "",
   email:      "",
-  position:   "",
   phone:      "",
   role_id:    "",
   is_admin:   false,
@@ -58,16 +54,25 @@ const emptyForm = (): UserForm => ({
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<User>[] = [
-  { key: "id", header: "ID",    width: "5%" },
-  { key: "first_name", header: "Nombre",    width: "14%" },
-  { key: "last_name",  header: "Apellidos", width: "14%" },
-  { key: "email",      header: "Correo",    width: "20%" },
+  { key: "id",         header: "ID",        width: "5%"  },
+  { key: "first_name", header: "Nombre",    width: "12%" },
+  { key: "last_name",  header: "Apellidos", width: "12%" },
+  { key: "email",      header: "Correo",    width: "15%" },
+  { key: "phone",      header: "Número",    width: "10%" },
   {
-    key: "is_admin",
+    key: "col_is_admin",
+    header: "Usuario",
+    width: "10%",
+    render: (row) => (
+      <Badge label={row.is_admin ? "Admin" : "Usuario"} variant="access" />
+    ),
+  },
+  {
+    key: "col_role",
     header: "Rol",
     width: "14%",
     render: (row) => (
-      <Badge label={row.is_admin ? "Admin" : "Usuario"} variant="access" />
+      <Badge label={row.role.name} variant="access" />
     ),
   },
   {
@@ -76,7 +81,7 @@ const columns: ColumnDef<User>[] = [
     width: "12%",
     render: (row) => (
       <Badge
-        label={row.status === "active" ? "Activo" : "Inactivo"}
+        label={row.status === "active" ? "ACTIVO" : "INACTIVO"}
         variant={row.status === "active" ? "active" : "inactive"}
       />
     ),
@@ -92,6 +97,10 @@ export default function User(): JSX.Element {
   const [form, setForm]             = useState<UserForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
   const [loading, setLoading]       = useState(true);
+
+
+  const { currentUser } = useAuth();
+  const isCurrentUserAdmin = currentUser?.is_admin ?? false;
 
   // ── Cargar usuarios ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -110,6 +119,15 @@ export default function User(): JSX.Element {
     fetchUsers();
   }, []);
 
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  useEffect(() => {
+    apiFetch("/roles/")
+      .then((res) => res.json())
+      .then((data: Role[]) => setRoles(data))
+      .catch((err) => console.error("Error al cargar roles:", err));
+  }, []);
+
   // ── Handlers modal ─────────────────────────────────────────────────────────
 
   const handleCrear = () => {
@@ -120,12 +138,12 @@ export default function User(): JSX.Element {
   };
 
   const handleEditar = (user: User) => {
+    console.log("handleEditar llamado", user); 
     setEditTarget(user);
     setForm({
       first_name: user.first_name,
       last_name:  user.last_name,
       email:      user.email,
-      position:   "",
       phone:      user.phone ?? "",
       role_id:    String(user.role_id),
       is_admin:   user.is_admin,
@@ -148,7 +166,7 @@ export default function User(): JSX.Element {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  const toggleAcceso = (acceso: string) => {
+ /*  const toggleAcceso = (acceso: string) => {
     setForm((prev) => ({
       ...prev,
       accesos: prev.accesos.includes(acceso)
@@ -156,7 +174,7 @@ export default function User(): JSX.Element {
         : [...prev.accesos, acceso],
     }));
     setErrors((prev) => ({ ...prev, accesos: undefined }));
-  };
+  }; */
 
   const validate = (): boolean => {
     const e: FormErrors = {};
@@ -164,8 +182,13 @@ export default function User(): JSX.Element {
     if (!form.last_name.trim())  e.last_name  = "El apellido es requerido";
     if (!form.email.trim())      e.email      = "El correo es requerido";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Correo inválido";
-    if (!form.role_id)           e.role_id    = "Selecciona un rol";
-    if (form.accesos.length === 0) e.accesos  = "Selecciona al menos un módulo";
+
+    // Validaciones exclusivas de creación
+    if (!editTarget) {
+      if (!form.role_id)             e.role_id = "Selecciona un rol";
+      if (form.accesos.length === 0) e.accesos = "Selecciona al menos un módulo";
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -176,16 +199,22 @@ export default function User(): JSX.Element {
 
     try {
       if (editTarget) {
+        // ── Edición ──
+        const body: Record<string, unknown> = {
+          first_name: form.first_name,
+          last_name:  form.last_name,
+          email:      form.email,
+          phone:      form.phone || null,
+        };
+
+        if (isCurrentUserAdmin) {
+          body.role_id  = Number(form.role_id);
+          body.is_admin = form.is_admin;
+        }
+
         const response = await apiFetch(`/users/${editTarget.id}`, {
           method: "PUT",
-          body: JSON.stringify({
-            first_name: form.first_name,
-            last_name:  form.last_name,
-            email:      form.email,
-            phone:      form.phone || null,
-            role_id:    Number(form.role_id),
-            is_admin:   form.is_admin,
-          }),
+          body: JSON.stringify(body),
         });
         if (!response.ok) {
           const err = await response.json();
@@ -193,8 +222,14 @@ export default function User(): JSX.Element {
           return;
         }
         const updated: User = await response.json();
-        setUsers((prev) => prev.map((u) => u.id === editTarget.id ? updated : u));
 
+        const updatedWithRole: User = {
+          ...updated,
+          role: roles.find((r) => r.id === updated.role_id) ?? editTarget.role,
+        };
+
+        setUsers((prev) => prev.map((u) => u.id === editTarget.id ? updatedWithRole : u));
+        
       } else {
         const response = await apiFetch("/users/", {
           method: "POST",
@@ -261,6 +296,7 @@ export default function User(): JSX.Element {
           renderActions={(row) => (
             <div className="saip-table__actions">
               <button
+                type="button"
                 className="saip-table__action-btn"
                 title="Editar"
                 onClick={() => handleEditar(row)}
@@ -272,6 +308,7 @@ export default function User(): JSX.Element {
                 </svg>
               </button>
               <button
+                type="button"
                 className="saip-table__action-btn saip-table__action-btn--danger"
                 title="Eliminar"
                 onClick={() => handleEliminar(row.id)}
@@ -297,6 +334,8 @@ export default function User(): JSX.Element {
         width="520px"
       >
         <form className="cuf" onSubmit={handleSubmit}>
+
+          {/* ── Nombre y Apellido (siempre visibles) ── */}
           <div className="cuf__row">
             <div className="cuf__group">
               <label className="cuf__label">
@@ -324,7 +363,7 @@ export default function User(): JSX.Element {
               {errors.last_name && <span className="cuf__error">{errors.last_name}</span>}
             </div>
           </div>
-          <div className="cuf__row">
+
           <div className="cuf__group">
             <label className="cuf__label">
               Correo electrónico <span className="cuf__required">*</span>
@@ -338,64 +377,78 @@ export default function User(): JSX.Element {
             />
             {errors.email && <span className="cuf__error">{errors.email}</span>}
           </div>
+
+          {/* ── Teléfono (siempre visible) ── */}
+          <div className="cuf__group">
+            <label className="cuf__label">Teléfono</label>
+            <input
+              className="cuf__input"
+              placeholder="300 000 0000"
+              value={form.phone}
+              onChange={(e) => setField("phone", e.target.value)}
+            />
+          </div>
+
+          {/* ── Rol e is_admin: siempre en creación, solo admin en edición ── */}
+          {(!editTarget || isCurrentUserAdmin) && (
+            <>
+              <div className="cuf__group">
+                <label className="cuf__label">Rol</label>
+                <select
+                  className={`cuf__select ${errors.role_id ? "cuf__input--error" : ""}`}
+                  value={form.role_id}
+                  onChange={(e) => setField("role_id", e.target.value)}
+                >
+                  <option value="">Seleccionar rol…</option>
+                  {roles.map((r) => (
+                    <option key={r.id} value={String(r.id)}>{r.name}</option>
+                  ))}
+                </select>
+                {errors.role_id && <span className="cuf__error">{errors.role_id}</span>}
+              </div>
+
+              <div className="cuf__group">
+                <label className="cuf__label cuf__label--checkbox">
+                  <input
+                    type="checkbox"
+                    checked={form.is_admin}
+                    onChange={(e) => setField("is_admin", e.target.checked)}
+                  />
+                  Es administrador
+                </label>
+              </div>
+            </>
+          )}
+
+          {/* ── Módulos con acceso: solo en creación ── */}
+
+          {/* {!editTarget && (
             <div className="cuf__group">
-              <label  
-                className="cuf__label">Teléfono
-              </label>
-              <input
-                className={`cuf__input ${errors.phone ? "cuf__input--error" : ""}`}
-                placeholder="300 000 0000"
-                value={form.phone}
-                onChange={(e) => setField("phone", e.target.value)}
-              />
-              {errors.phone && <span className="cuf__error">{errors.phone}</span>}
+              <label className="cuf__label">Módulos con acceso</label>
+              <div className="cuf__accesos">
+                {ACCESOS_DISPONIBLES.map((acceso) => {
+                  const checked = form.accesos.includes(acceso);
+                  return (
+                    <button
+                      key={acceso}
+                      type="button"
+                      onClick={() => toggleAcceso(acceso)}
+                      className={`cuf__acceso-btn ${checked ? "cuf__acceso-btn--active" : ""}`}
+                    >
+                      {checked && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                      {acceso}
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.accesos && <span className="cuf__error">{errors.accesos}</span>}
             </div>
-          </div>
-
-          <div className="cuf__group">
-            <label className="cuf__label">
-              Rol <span className="cuf__required">*</span>
-            </label>
-            <select
-              className={`cuf__select ${errors.role_id ? "cuf__input--error" : ""}`}
-              value={form.role_id}
-              onChange={(e) => setField("role_id", e.target.value)}
-            >
-              <option value="">Seleccionar rol…</option>
-              {ROLES_DISPONIBLES.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
-            {errors.role_id && <span className="cuf__error">{errors.role_id}</span>}
-          </div>
-
-          <div className="cuf__group">
-            <label className="cuf__label">
-              Módulos con acceso <span className="cuf__required">*</span>
-            </label>
-            <div className="cuf__accesos">
-              {ACCESOS_DISPONIBLES.map((acceso) => {
-                const checked = form.accesos.includes(acceso);
-                return (
-                  <button
-                    key={acceso}
-                    type="button"
-                    onClick={() => toggleAcceso(acceso)}
-                    className={`cuf__acceso-btn ${checked ? "cuf__acceso-btn--active" : ""}`}
-                  >
-                    {checked && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2.5">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                    {acceso}
-                  </button>
-                );
-              })}
-            </div>
-            {errors.accesos && <span className="cuf__error">{errors.accesos}</span>}
-          </div>
+          )} */}
 
           <div className="cuf__actions">
             <Button variant="secondary" type="button" onClick={handleCerrar}>

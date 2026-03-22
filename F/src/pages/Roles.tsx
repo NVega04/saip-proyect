@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import Badge from "../components/Badge";
 import { apiFetch } from "../utils/api";
 import "../pages/roles.css";
+import { useAuth } from "../context/AuthContext";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -54,6 +55,8 @@ export default function Roles(): JSX.Element {
   const [form, setForm]             = useState<RoleForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
   const [loading, setLoading]       = useState(true);
+  const { currentUser } = useAuth();
+  const isCurrentUserAdmin = currentUser?.is_admin ?? false;
 
   // ── Cargar roles ───────────────────────────────────────────────────────────
 
@@ -104,24 +107,30 @@ export default function Roles(): JSX.Element {
 
   const validate = (): boolean => {
     const e: FormErrors = {};
-    if (!form.name.trim())        e.name        = "El nombre es requerido";
+    if (isCurrentUserAdmin || !editTarget) {
+      if (!form.name.trim()) e.name = "El nombre es requerido";
+    }
     if (!form.description.trim()) e.description = "La descripción es requerida";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    try {
+  try {
       if (editTarget) {
+        const body: Record<string, string> = {
+          description: form.description,
+        };
+        if (isCurrentUserAdmin) {
+          body.name = form.name;
+        }
+
         const response = await apiFetch(`/roles/${editTarget.id}`, {
           method: "PATCH",
-          body: JSON.stringify({
-            name:        form.name,
-            description: form.description,
-          }),
+          body: JSON.stringify(body),
         });
         if (!response.ok) {
           const err = await response.json();
@@ -145,7 +154,7 @@ export default function Roles(): JSX.Element {
           return;
         }
         const created: Role = await response.json();
-        setRoles((prev) => [...prev, {... created, status: "active"}]);
+        setRoles((prev) => [...prev, { ...created, status: "active" }]);
       }
       handleCerrar();
     } catch {
@@ -236,19 +245,21 @@ return (
         width="480px"
       >
         <form className="crf" onSubmit={handleSubmit}>
-          <div className="crf__group">
-            <label 
-              className="crf__label">Nombre del rol<span className="crf__required">*</span>
-            </label>
-            <input
-              className={`crf__input ${errors.name ? "crf__input--error" : ""}`}
-              placeholder="Ej: Administrador, Cajero…"
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
-            />
-            {errors.name && <span className="crf__error">{errors.name}</span>}
-          </div>
+          {/* ── Nombre: siempre en creación, solo admins en edición ── */}
+          {(!editTarget || isCurrentUserAdmin) && (
+            <div className="crf__group">
+              <label className="crf__label">Nombre del rol<span className="crf__required">*</span>
+              <input
+                className={`crf__input ${errors.name ? "crf__input--error" : ""}`}
+                placeholder="Ej: Administrador, Cajero…"
+                value={form.name}
+                onChange={(e) => setField("name", e.target.value)}
+              />
+              {errors.name && <span className="crf__error">{errors.name}</span>}
+            </div>
+          )}
 
+          {/* ── Descripción: todos ── */}
           <div className="crf__group">
             <label className="crf__label">Descripción</label>
             <textarea

@@ -141,6 +141,7 @@ def desactivate_role(
     session.commit()
 
     return None # 204 No content
+    
 @router.get(
     "/",
     response_model=list[RolePublic],
