@@ -1,25 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout, getMe } from "../utils/api";
+import { logout } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ nombre: string; rol: string; isAdmin: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // ── Cargar usuario autenticado ────────────────────────────────────────────
-  useEffect(() => {
-    getMe().then((data) => {
-      if (data) {
-        setUser({
-          nombre: `${data.first_name} ${data.last_name}`,
-          rol: data.role.name,
-          isAdmin: data.is_admin,
-        });
+  const { currentUser } = useAuth();
+
+  const user = currentUser
+    ? {
+        nombre:  `${currentUser.first_name} ${currentUser.last_name}`,
+        rol:     currentUser.role.name,
+        isAdmin: currentUser.is_admin,
       }
-    });
-  }, []);
+    : null;
 
   // ── Cerrar menu al click fuera ────────────────────────────────────────────
   useEffect(() => {

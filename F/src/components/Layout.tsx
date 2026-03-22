@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer"; // ← componente nuevo
@@ -8,21 +8,22 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [activeMenu, setActiveMenu] = useState<string>("dashboard");
+  const location = useLocation();
+
+  // Deriva el activeMenu desde la ruta actual en lugar de estado local
+  const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
   return (
     <>
-
-
       <div style={styles.root}>
         <Navbar />
         <div style={styles.body}>
-          <Sidebar activeMenu={activeMenu} onMenuChange={setActiveMenu} />
+          <Sidebar activeMenu={activeMenu} onMenuChange={() => {}} />
           <main style={styles.content}>
             {children}
           </main>
         </div>
-        <Footer /> {/* ← reemplaza el <footer> inline que tenías */}
+        <Footer />
       </div>
     </>
   );
