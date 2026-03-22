@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout, getMe } from "../utils/api";
+import { logout } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 
 interface NavbarProps {
@@ -10,12 +11,23 @@ interface NavbarProps {
 
 export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<{ nombre: string; rol: string; isAdmin: boolean } | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const [isMobile, setIsMobile]   = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const menuRef                   = useRef<HTMLDivElement>(null);
+  const navigate                  = useNavigate();
 
+  // ── Usuario desde contexto global (reemplaza getMe) ──────────────────────
+  const { currentUser } = useAuth();
+
+  const user = currentUser
+    ? {
+        nombre:  `${currentUser.first_name} ${currentUser.last_name}`,
+        rol:     currentUser.role.name,
+        isAdmin: currentUser.is_admin,
+      }
+    : null;
+
+  // ── Responsive ────────────────────────────────────────────────────────────
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -23,20 +35,11 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // ── Scroll ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    getMe().then((data) => {
-      if (data) setUser({
-        nombre: `${data.first_name} ${data.last_name}`,
-        rol: data.role.name,
-        isAdmin: data.is_admin,
-      });
-    });
   }, []);
 
   useEffect(() => {

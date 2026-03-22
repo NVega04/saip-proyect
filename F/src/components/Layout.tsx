@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
@@ -17,6 +17,8 @@ interface LayoutProps {
 export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
   return (
     <div style={styles.root}>
