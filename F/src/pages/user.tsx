@@ -138,7 +138,6 @@ export default function User(): JSX.Element {
   };
 
   const handleEditar = (user: User) => {
-    console.log("handleEditar llamado", user); 
     setEditTarget(user);
     setForm({
       first_name: user.first_name,
@@ -186,7 +185,7 @@ export default function User(): JSX.Element {
     // Validaciones exclusivas de creación
     if (!editTarget) {
       if (!form.role_id)             e.role_id = "Selecciona un rol";
-      if (form.accesos.length === 0) e.accesos = "Selecciona al menos un módulo";
+      /* if (form.accesos.length === 0) e.accesos = "Selecciona al menos un módulo"; */
     }
 
     setErrors(e);

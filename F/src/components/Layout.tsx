@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -15,7 +16,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
-  const [activeMenu, setActiveMenu] = useState<string>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
@@ -29,7 +29,7 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
       <div style={styles.body}>
         <Sidebar
           activeMenu={activeMenu}
-          onMenuChange={setActiveMenu}
+          onMenuChange={() => {}}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
@@ -58,6 +58,6 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: "2rem 2.5rem",
     overflowY: "auto",
-    minWidth: 0, // evita overflow del flex child en móvil
+    minWidth: 0,
   },
 };

@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 1000;
   animation: modal-fade-in 0.15s ease;
   /* padding para que no toque los bordes en desktop/tablet */
   padding: 1rem;

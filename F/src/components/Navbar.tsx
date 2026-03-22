@@ -255,7 +255,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
               borderRadius: "11px",
               boxShadow: "0 4px 20px rgba(59,31,8,0.12)",
-              minWidth: "190px", zIndex: 200, overflow: "hidden",
+              minWidth: "190px", zIndex: 300, overflow: "hidden",
               animation: "saip-drop 0.18s ease",
             }}>
               {isMobile && user && (
