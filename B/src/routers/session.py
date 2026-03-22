@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlmodel import Session, select
 from src.database import get_session
-from src.models.models import User, SessionApp
-from src.schemas.schemas import LoginRequest, LoginResponse
-from src.security import verify_password, get_session_expiry
+from src.models.models import User, SessionApp, PasswordReset
+from src.schemas.schemas import LoginRequest, LoginResponse, ForgotPasswordRequest, ResetPasswordRequest
+from src.security import verify_password, get_session_expiry, hash_password
 from src.dependencies import get_current_user
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 import uuid
+import os
+from datetime import datetime, timedelta, timezone
+import secrets
+from src.email import send_reset_email
 
 router = APIRouter(prefix="/session", tags=["Session"])
 
@@ -93,3 +97,108 @@ def logout(db: Session = Depends(get_session), current_user: User = Depends(get_
     db.commit()
 
     return{"message": "Sesión cerrada correctamante"}
+
+PASSWORD_RESET_EXPIRE_MINUTES = 30
+
+
+@router.post(
+    "/forgot-password",
+    status_code=status.HTTP_200_OK,
+    summary="Solicitar recuperación de contraseña",
+)
+@limiter.limit("3/minute")
+def forgot_password(
+    request: Request,
+    body: ForgotPasswordRequest,
+    db: Session = Depends(get_session),
+):
+    user = db.exec(
+        select(User).where(User.email == body.email, User.deleted_at == None)
+    ).first()
+
+    if not user or user.status.value != "active":
+        return {"message": "Si el correo está registrado, recibirás instrucciones."}
+
+    old_tokens = db.exec(
+        select(PasswordReset).where(
+            PasswordReset.user_id == user.id,
+            PasswordReset.used == False,
+        )
+    ).all()
+    for t in old_tokens:
+        t.used = True
+        db.add(t)
+
+    raw_token = secrets.token_urlsafe(32)
+    reset_entry = PasswordReset(
+        user_id=user.id,
+        token=raw_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
+    )
+    db.add(reset_entry)
+    db.commit()
+
+    reset_link = f"{os.getenv('FRONTEND_URL')}/reset-password?token={raw_token}"  
+    try:
+        send_reset_email(user.email, reset_link)
+    except Exception as e:
+        print(f"[EMAIL ERROR] No se pudo enviar a {user.email}: {e}")
+
+    return {"message": "Si el correo está registrado, recibirás instrucciones."}
+
+
+@router.post(
+    "/reset-password",
+    status_code=status.HTTP_200_OK,
+    summary="Restablecer contraseña con token",
+)
+def reset_password(
+    body: ResetPasswordRequest,
+    db: Session = Depends(get_session),
+):
+    reset_entry = db.exec(
+        select(PasswordReset).where(PasswordReset.token == body.token)
+    ).first()
+
+    if not reset_entry:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token inválido.",
+        )
+
+    if reset_entry.used:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El token ya fue utilizado.",
+        )
+
+    if datetime.now(timezone.utc) > reset_entry.expires_at.replace(tzinfo=timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El token ha expirado.",
+        )
+
+    # Actualizar contraseña
+    user = reset_entry.user
+    user.password_hash = hash_password(body.new_password)
+    user.updated_at = datetime.now(timezone.utc)
+    db.add(user)
+
+    # Marcar token como usado
+    reset_entry.used = True
+    db.add(reset_entry)
+
+    # Invalidar todas las sesiones activas por seguridad
+    active_sessions = db.exec(
+        select(SessionApp).where(
+            SessionApp.user_id == user.id,
+            SessionApp.is_active == True,
+        )
+    ).all()
+    for s in active_sessions:
+        s.is_active = False
+        db.add(s)
+
+    db.commit()
+
+    return {"message": "Contraseña actualizada correctamente."}
