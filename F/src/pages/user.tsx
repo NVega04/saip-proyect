@@ -288,9 +288,11 @@ export default function User(): JSX.Element {
           data={users}
           searchPlaceholder="Buscar usuario"
           headerActions={
-            <Button variant="primary" onClick={handleCrear}>
-              Crear usuario
-            </Button>
+            isCurrentUserAdmin ? (
+              <Button variant="primary" onClick={handleCrear}>
+                Crear usuario
+              </Button>
+            ) : undefined
           }
           renderActions={(row) => (
             <div className="saip-table__actions">
