@@ -9,7 +9,9 @@ import Produccion from "./pages/Produccion";
 import Recetas from "./pages/Recetas";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
+import './variables.css'
 import { AuthProvider } from "./context/AuthContext";
+import RecuperarPassword from "./pages/RecuperarPassword";
 
 function App() {
   const { pathname } = useLocation();
@@ -29,6 +31,7 @@ function App() {
         <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
         <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/reset-password" element={<RecuperarPassword />} />
       </Routes>
     </AuthProvider>
   );
