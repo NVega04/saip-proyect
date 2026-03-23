@@ -1,6 +1,7 @@
 import { useState, ChangeEvent } from "react";
 import React from "react";
 import './login.css';
+import ForgotPasswordModal from "../components/ForgotPasswordModal.tsx";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -8,6 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showForgot, setShowForgot] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -108,7 +110,7 @@ export default function Login() {
                     />
                     Recordar contraseña
                   </label>
-                  <a href="#" className="forgot-link">¿Olvidó su contraseña?</a>
+                  <a href="#" className="forgot-link" onClick={(e) => {e.preventDefault(); setShowForgot(true); }}>¿Olvidó su contraseña?</a>
                 </div>
 
                 <button type="submit" className="btn-submit" disabled={isLoading}>
@@ -142,6 +144,7 @@ export default function Login() {
           </div>
         </div>
       </footer>
+      {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
     </div>
   );
 }

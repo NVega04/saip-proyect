@@ -10,6 +10,7 @@ import Recetas from "./pages/Recetas";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
 import { AuthProvider } from "./context/AuthContext";
+import ResetPassword from "./pages/ResetPassword.tsx";
 
 function App() {
   const { pathname } = useLocation();
@@ -22,6 +23,7 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
         <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
