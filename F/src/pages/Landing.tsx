@@ -166,7 +166,7 @@ export default function Landing() {
             </p>
           </div>
           <div className="landing-about__pills">
-            {["Proyecto universitario", "Código abierto", "Hecho con ❤️", "React + FastAPI", "Para negocios"].map((p) => (
+            {["Proyecto académico", "Código abierto", "Hecho con 🤎", "React + FastAPI", "Para negocios"].map((p) => (
               <span key={p} className="landing-about__pill">{p}</span>
             ))}
           </div>
