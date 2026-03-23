@@ -16,7 +16,7 @@ export default function Landing() {
             </svg>
           </div>
           <span className="landing-nav__name">SAIP</span>
-          <span className="landing-nav__sub">Sistema administrativo integral de productos</span>
+          <span className="landing-nav__sub">Sistema de administración integral de productos</span>
         </div>
         <button className="landing-nav__btn" onClick={() => navigate("/login")}>
           Iniciar sesión
@@ -25,16 +25,16 @@ export default function Landing() {
 
       {/* ── HERO ───────────────────────────────────────────────── */}
       <section className="landing-hero">
-         <div className="landing-hero__waves">
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                <path className="wave wave--1"
-                    d="M0,160 C360,240 1080,80 1440,160 L1440,320 L0,320 Z"/>
-                <path className="wave wave--2"
-                    d="M0,192 C480,100 960,260 1440,192 L1440,320 L0,320 Z"/>
-                <path className="wave wave--3"
-                    d="M0,224 C400,160 1040,280 1440,224 L1440,320 L0,320 Z"/>
-            </svg>
-  </div>
+
+        {/* Olas animadas de fondo */}
+        <div className="landing-hero__waves">
+          <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path className="wave wave--1" d="M0,160 C360,240 1080,80 1440,160 L1440,320 L0,320 Z"/>
+            <path className="wave wave--2" d="M0,192 C480,100 960,260 1440,192 L1440,320 L0,320 Z"/>
+            <path className="wave wave--3" d="M0,224 C400,160 1040,280 1440,224 L1440,320 L0,320 Z"/>
+          </svg>
+        </div>
+
         <div className="landing-hero__content">
           <span className="landing-hero__tag">🥖 Gestión para negocios</span>
           <h1 className="landing-hero__title">
@@ -55,26 +55,69 @@ export default function Landing() {
             <a href="#features" className="landing-btn-ghost">Ver características</a>
           </div>
         </div>
+
+        {/* Ilustración SVG animada */}
         <div className="landing-hero__visual">
-          <div className="landing-hero__card">
-            <div className="landing-hero__card-row">
-              <span className="landing-hero__card-dot landing-hero__card-dot--green" />
-              <span className="landing-hero__card-label">Inventario al día</span>
-            </div>
-            <div className="landing-hero__card-row">
-              <span className="landing-hero__card-dot landing-hero__card-dot--amber" />
-              <span className="landing-hero__card-label">Ventas del día: 24</span>
-            </div>
-            <div className="landing-hero__card-row">
-              <span className="landing-hero__card-dot landing-hero__card-dot--brown" />
-              <span className="landing-hero__card-label">Recetas activas: 8</span>
-            </div>
-            <div className="landing-hero__card-divider" />
-            <div className="landing-hero__card-stat">
-              <span className="landing-hero__card-num">98%</span>
-              <span className="landing-hero__card-desc">Control del negocio</span>
-            </div>
-          </div>
+          <svg className="landing-hero__svg" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+
+            {/* Fondo tarjeta */}
+            <rect x="20" y="20" width="280" height="240" rx="18" fill="#ffffff" stroke="#e8ddd4" strokeWidth="1.5"/>
+
+            {/* Header tarjeta */}
+            <rect x="20" y="20" width="280" height="48" rx="18" fill="#f5f0ea"/>
+            <rect x="20" y="50" width="280" height="18" fill="#f5f0ea"/>
+            <circle cx="48" cy="44" r="10" fill="#cfc0b0"/>
+            <rect x="64" y="38" width="80" height="8" rx="4" fill="#cfc0b0"/>
+            <rect x="64" y="50" width="50" height="6" rx="3" fill="#e8ddd4"/>
+
+            {/* Barras de gráfica animadas */}
+            <rect x="50" y="180" width="28" height="50" rx="6" fill="#c9a87c">
+              <animate attributeName="height" values="50;70;50" dur="2.5s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="180;160;180" dur="2.5s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="90" y="160" width="28" height="70" rx="6" fill="#9e7e62">
+              <animate attributeName="height" values="70;50;70" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="160;180;160" dur="2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="130" y="150" width="28" height="80" rx="6" fill="#7d5a3c">
+              <animate attributeName="height" values="80;95;80" dur="3s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="150;135;150" dur="3s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="170" y="165" width="28" height="65" rx="6" fill="#9e7e62">
+              <animate attributeName="height" values="65;80;65" dur="2.2s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="165;150;165" dur="2.2s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="210" y="145" width="28" height="85" rx="6" fill="#5c3d1e">
+              <animate attributeName="height" values="85;65;85" dur="2.8s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="145;165;145" dur="2.8s" repeatCount="indefinite"/>
+            </rect>
+
+            {/* Línea base */}
+            <line x1="40" y1="232" x2="280" y2="232" stroke="#e8ddd4" strokeWidth="1.5"/>
+
+            {/* Etiquetas eje X */}
+            <text x="64"  y="248" fontSize="8" fill="#b8a08a" textAnchor="middle">Lun</text>
+            <text x="104" y="248" fontSize="8" fill="#b8a08a" textAnchor="middle">Mar</text>
+            <text x="144" y="248" fontSize="8" fill="#b8a08a" textAnchor="middle">Mié</text>
+            <text x="184" y="248" fontSize="8" fill="#b8a08a" textAnchor="middle">Jue</text>
+            <text x="224" y="248" fontSize="8" fill="#b8a08a" textAnchor="middle">Vie</text>
+
+            {/* Badge flotante animado */}
+            <g>
+              <animateTransform attributeName="transform" type="translate"
+                values="0,0; 0,-6; 0,0" dur="3s" repeatCount="indefinite"/>
+              <rect x="195" y="88" width="90" height="36" rx="10" fill="#5c3d1e"/>
+              <text x="240" y="103" fontSize="9" fill="#f5f0ea" textAnchor="middle">Ventas hoy</text>
+              <text x="240" y="116" fontSize="11" fontWeight="bold" fill="#ffffff" textAnchor="middle">+12.4%</text>
+            </g>
+
+            {/* Punto de datos animado */}
+            <circle cx="224" cy="145" r="5" fill="#5c3d1e">
+              <animate attributeName="r" values="5;7;5" dur="2.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.6;1" dur="2.8s" repeatCount="indefinite"/>
+            </circle>
+
+          </svg>
         </div>
       </section>
 
@@ -106,7 +149,7 @@ export default function Landing() {
               Nació en las aulas,<br />pensado para la vida real
             </h2>
             <p className="landing-about__p">
-              SAIP comenzó como un proyecto universitario con una pregunta simple:
+              SAIP comenzó como un proyecto académico con una pregunta simple:
               ¿por qué tantos negocios locales siguen gestionando sus productos en cuadernos
               o en hojas de cálculo desconectadas?
             </p>

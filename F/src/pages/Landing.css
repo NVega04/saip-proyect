@@ -162,15 +162,13 @@
 .landing-hero__visual {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-.landing-hero__card {
-  background: var(--white);
-  border: 1px solid #e8ddd4;
-  border-radius: 16px;
-  padding: 1.75rem;
-  width: 260px;
-  box-shadow: 0 12px 40px #7d5a3c18;
+.landing-hero__svg {
+  width: 100%;
+  max-width: 340px;
+  filter: drop-shadow(0 16px 40px rgba(92, 61, 30, 0.12));
 }
 
 .landing-hero__card-row {
