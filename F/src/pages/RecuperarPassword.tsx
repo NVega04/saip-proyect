@@ -264,10 +264,6 @@ function BackLink() {
   return (
     <div className="rp-back-row">
       <Link to="/" className="rp-back-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
-        </svg>
         Volver al inicio de sesión
       </Link>
     </div>
