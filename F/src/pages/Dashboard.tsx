@@ -1,6 +1,7 @@
 import React, { JSX, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { getAllowedModules, canAccessModule } from "../utils/permissions";
 
 interface Module {
   id: string;
@@ -88,11 +89,52 @@ const modules: Module[] = [
       </svg>
     ),
   },
+  {
+    id: "inventario",
+    label: "Inventario",
+    desc: "Gestión detallada del inventario.",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+        <line x1="12" y1="22.08" x2="12" y2="12" />
+      </svg>
+    ),
+  },
+  {
+    id: "acerca",
+    label: "Acerca de SAIP",
+    desc: "Información sobre el sistema SAIP.",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    ),
+  },
+  {
+    id: "contacto",
+    label: "Contáctanos",
+    desc: "Información y canales de contacto.",
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Dashboard(): JSX.Element {
   const navigate = useNavigate();
   const [cols, setCols] = useState(2);
+  const [allowedModules, setAllowedModules] = useState<string[]>([]);
+
+  useEffect(() => {
+    setAllowedModules(getAllowedModules());
+  }, []);
+
+  const visibleModules = modules.filter(mod => canAccessModule(mod.id, allowedModules));
 
   // ── Grid responsive: 1 col móvil, 2 col tablet+, 3 col desktop ancho ─────
   useEffect(() => {
@@ -120,7 +162,7 @@ export default function Dashboard(): JSX.Element {
     <Layout>
       <h1 style={styles.title}>Módulos principales</h1>
       <div style={gridStyle}>
-        {modules.map((mod) => (
+        {visibleModules.map((mod) => (
           <div
             key={mod.id}
             style={{

@@ -11,7 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
 import './variables.css'
 import { AuthProvider } from "./context/AuthContext";
-import RecuperarPassword from "./pages/RecuperarPassword";
+import RecoverPassword from "./pages/RecoverPassword";
 import Landing from "./pages/Landing";
 
 function App() {
@@ -27,13 +27,15 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
-        <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
-        <Route path="/recetas" element={<ProtectedRoute><Recetas /></ProtectedRoute>} />
-        <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
-        <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
+        {/* <Route path="/inventario"  element={<ProtectedRoute module="inventario"> <Inventario />  </ProtectedRoute>} /> */}
+        <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
+        {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
+        <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
+        <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
+        <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
+        <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
         <Route path="/perfil" element={<Perfil />} />
-        <Route path="/reset-password" element={<RecuperarPassword />} />
+        <Route path="/reset-password" element={<RecoverPassword />} />
       </Routes>
     </AuthProvider>
   );

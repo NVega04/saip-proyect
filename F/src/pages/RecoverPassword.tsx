@@ -2,9 +2,9 @@ import { useState, useEffect, ChangeEvent } from "react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
-import "./recuperarPassword.css";
+import "./RecoverPassword.css";
 
-export default function RecuperarPassword() {
+export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
