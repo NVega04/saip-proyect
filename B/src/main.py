@@ -7,12 +7,13 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from src.routers import role_modules
+from src.routers import units
+from src.routers import products
 
 limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
-    title="SAIP - Sistema administrativo integral de productos", 
-    version="1.0.0"
+    title="SAIP - Sistema administrativo integral de productos", version="1.0.0"
 )
 
 ALLOWED_ORIGINS = [
@@ -34,3 +35,5 @@ app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(session.router)
 app.include_router(role_modules.router)
+app.include_router(units.router)
+app.include_router(products.router)

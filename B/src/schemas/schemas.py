@@ -1,7 +1,8 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
-from src.models.models import UserStatus, RoleStatus
+from src.models.models import UserStatus, RoleStatus, ProductStatus
 from datetime import datetime
+
 
 ## Esquemas relacionados a Usuarios.
 class UserCreate(BaseModel):
@@ -12,12 +13,14 @@ class UserCreate(BaseModel):
     role_id: int
     is_admin: bool = False
 
+
 class RoleBasic(BaseModel):
     id: int
     name: str
 
     class Config:
         from_attributes = True
+
 
 class UserResponse(BaseModel):
     id: int
@@ -34,10 +37,12 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class DeleteResponseUser(BaseModel):
     message: str
     deleted_at: datetime
     deleted_by: int
+
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -46,6 +51,7 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     role_id: Optional[int] = None
     is_admin: Optional[bool] = None
+
 
 class UserUpdateResponse(BaseModel):
     id: int
@@ -63,11 +69,13 @@ class UserUpdateResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        
+
+
 ## Esquemas relacionados a Roles.
 class RoleCreate(BaseModel):
     name: str
     description: str
+
 
 class RoleResponse(BaseModel):
     id: int
@@ -78,10 +86,12 @@ class RoleResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 ## Esquemas relacionados a sesiones en el sistema.
 class RoleUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+
 
 class RolePublic(BaseModel):
     id: int
@@ -92,26 +102,31 @@ class RolePublic(BaseModel):
     updated_at: Optional[datetime] = None
     updated_by: Optional[int] = None
     deleted_at: Optional[datetime] = None
-    deleted_by: Optional[int] = None 
+    deleted_by: Optional[int] = None
 
     class Config:
         from_attributes = True
 
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
 
 class LoginResponse(BaseModel):
     session_token: str
     expires_at: datetime
     user: UserResponse
 
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
+
 
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
 
 ## Esquemas relacionados a Módulos
 class ModuleResponse(BaseModel):
@@ -123,9 +138,11 @@ class ModuleResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 ## Esquemas relacionados a RoleModules
 class RoleModuleAssign(BaseModel):
     module_ids: list[int]
+
 
 class RoleModuleResponse(BaseModel):
     id: int
@@ -136,6 +153,101 @@ class RoleModuleResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+
+## Esquemas relacionados a Units (Unidades de medida)
+class UnitCreate(BaseModel):
+    name: str
+    abbreviation: str
+    description: Optional[str] = None
+    quantity: float
+
+
+class UnitUpdate(BaseModel):
+    name: Optional[str] = None
+    abbreviation: Optional[str] = None
+    description: Optional[str] = None
+    quantity: Optional[float] = None
+
+
+class UnitResponse(BaseModel):
+    id: int
+    token: str
+    name: str
+    abbreviation: str
+    description: Optional[str]
+    quantity: float
+    created_at: datetime
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
+
+    class Config:
+        from_attributes = True
+
+
+## Esquemas relacionados a Products (Productos/Ingredientes)
+class UnitBasic(BaseModel):
+    id: int
+    name: str
+    abbreviation: str
+
+    class Config:
+        from_attributes = True
+
+
+class ProductCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    unit_id: int
+    available_quantity: float = 0
+    min_stock: float = 0
+    max_stock: float = 0
+    is_locked: bool = False
+
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    unit_id: Optional[int] = None
+    available_quantity: Optional[float] = None
+    min_stock: Optional[float] = None
+    max_stock: Optional[float] = None
+    is_locked: Optional[bool] = None
+
+
+class ProductResponse(BaseModel):
+    id: int
+    token: str
+    name: str
+    description: Optional[str]
+    unit_id: int
+    unit: UnitBasic
+    available_quantity: float
+    min_stock: float
+    max_stock: float
+    is_locked: bool
+    status: ProductStatus
+    created_at: datetime
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
+
+    class Config:
+        from_attributes = True
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v):
+        if isinstance(v, str):
+            return ProductStatus(v.lower())
+        return v
