@@ -1,0 +1,41 @@
+/* src/variables.css */
+:root { 
+  /* Sidebar / Navbar */
+  --bakery-sidebar-bg:        #6B3A1F;
+  --bakery-sidebar-hover:     #6B3A1F;
+  --bakery-sidebar-active:    #7C4A22;
+  --bakery-sidebar-text:      #FFFFFF;
+
+  /* Cards doradas */
+  --bakery-accent:            #A0722A;
+  --bakery-accent-light:      #C49235;
+  --bakery-accent-text:       #FFFFFF;
+
+  /* Botones */
+  --bakery-btn-primary:       #1A3A8F;
+  --bakery-btn-primary-hover: #142E72;
+  --bakery-btn-danger:        #C0392B;
+  --bakery-btn-danger-hover:  #A02F23;
+  --bakery-btn-text:          #FFFFFF;
+
+  /* Fondos */
+  --bakery-bg:                #F5F0E8;
+  --bakery-card-bg:           #FFFFFF;
+
+  /* Texto general */
+  --bakery-text-primary:      #2C1A0E;
+  --bakery-text-secondary:    #6B5744;
+  --bakery-text-muted:        #9C8272;
+
+  /* Bordes */
+  --bakery-border:            #DDD0C0;
+  --bakery-border-focus:      #A0722A;
+
+  /* Estados */
+  --bakery-success:           #1E7E34;
+  --bakery-success-bg:        #D4EDDA;
+  --bakery-danger:            #C0392B;
+  --bakery-danger-bg:         #F8D7DA;
+  --bakery-warning:           #856404;
+  --bakery-warning-bg:        #FFF3CD;
+}

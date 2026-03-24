@@ -76,16 +76,16 @@ const Icon = {
 };
 
 const menuItems: MenuItem[] = [
-  { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
-  { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
-  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
-  { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
-  { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "recetario",        label: "Recetas",            path: "/recetas",    icon: Icon.recipes,    group: "operaciones" },
-  { id: "gestion-usuarios", label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
-  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
-  { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "contacto",         label: "Contáctanos",        path: "/contacto",   icon: Icon.contact,    group: "soporte" },
+  { id: "dashboard",        label: "Dashboard",           path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
+  { id: "inventario",       label: "Inventario",          path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
+  { id: "proveedores",      label: "Proveedores",         path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
+  { id: "ventas",           label: "Ventas",              path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
+  { id: "produccion",       label: "Producción",          path: "/produccion", icon: Icon.production, group: "operaciones" },
+  { id: "recetario",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "operaciones" },
+  { id: "gestion-usuarios", label: "Gestión de usuarios", path: "/usuarios",   icon: Icon.users,      group: "administracion" },
+  { id: "roles",            label: "Gestión de roles",    path: "/roles",      icon: Icon.roles,      group: "administracion" },
+  { id: "acerca",           label: "Acerca de SAIP",      path: "/acerca",     icon: Icon.about,      group: "soporte" },
+  { id: "contacto",         label: "Contáctanos",         path: "/contacto",   icon: Icon.contact,    group: "soporte" },
 ];
 
 const groupLabels: Record<string, string> = {
@@ -104,7 +104,6 @@ const grouped = menuItems.reduce<Record<string, MenuItem[]>>((acc, item) => {
   return acc;
 }, {});
 
-// ── NavItem: combinación C (dot) + D (recuadro sutil) ────────────────────────
 function NavItem({ item, isActive, onClick }: { item: MenuItem; isActive: boolean; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
 
@@ -119,26 +118,22 @@ function NavItem({ item, isActive, onClick }: { item: MenuItem; isActive: boolea
           borderRadius: "7px",
           fontSize: "0.81rem",
           fontWeight: isActive ? 600 : 400,
-          color: isActive ? "var(--dark, #3b1f08)" : hovered ? "var(--dark, #3b1f08)" : "var(--mid, #8c5530)",
-          background: isActive ? "var(--bg, #faf4ec)" : hovered ? "#faf4ec" : "transparent",
-          boxShadow: isActive ? "inset 0 0 0 1px rgba(107,58,24,0.22)" : "none",
+          color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
+          background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
+          boxShadow: "none",
           cursor: "pointer",
           fontFamily: "'Outfit', system-ui, sans-serif",
-          transition: "background 0.15s, color 0.15s, box-shadow 0.15s",
+          transition: "background 0.15s, color 0.15s",
         }}
       >
-        <span style={{
-          flexShrink: 0, display: "flex",
-          color: isActive ? "var(--medium, #6b3a18)" : "currentColor",
-          transition: "color 0.15s",
-        }}>
+        <span style={{ flexShrink: 0, display: "flex", color: "inherit", transition: "color 0.15s" }}>
           {item.icon}
         </span>
         <span style={{ flex: 1 }}>{item.label}</span>
         {isActive && (
           <span style={{
             width: "5px", height: "5px", borderRadius: "50%",
-            background: "var(--medium, #6b3a18)", flexShrink: 0,
+            background: "rgba(255,255,255,0.8)", flexShrink: 0,
           }} />
         )}
       </div>
@@ -158,7 +153,7 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
             <div style={{
               fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.13em",
               textTransform: "uppercase" as const,
-              color: "var(--pale, #c99870)",
+              color: "rgb(255, 229, 199)",
               padding: "0.75rem 0.9rem 0.28rem",
               fontFamily: "'Outfit', system-ui, sans-serif",
             }}>
@@ -186,17 +181,17 @@ function SidebarLogo({ withClose, onClose }: { withClose?: boolean; onClose?: ()
     <div style={{
       display: "flex", alignItems: "center", gap: "0.55rem",
       padding: "1rem 0.9rem 0.75rem",
-      borderBottom: "1px solid var(--border, rgba(107,58,24,0.18))",
+      borderBottom: "1px solid rgba(255,255,255,0.12)",
     }}>
       <div style={{
         width: "30px", height: "30px",
-        background: "var(--bg, #faf4ec)",
-        border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+        background: "var(--bakery-sidebar-active)",
+        border: "1px solid rgba(255,255,255,0.15)",
         borderRadius: "7px",
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       }}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-          stroke="var(--medium, #6b3a18)" strokeWidth="1.8" strokeLinecap="round">
+          stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round">
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
           <path d="M9 21V12h6v9"/>
         </svg>
@@ -204,17 +199,17 @@ function SidebarLogo({ withClose, onClose }: { withClose?: boolean; onClose?: ()
       <span style={{
         fontFamily: "'Outfit', system-ui, sans-serif",
         fontSize: "0.95rem", fontWeight: 700,
-        color: "var(--dark, #3b1f08)", flex: 1, letterSpacing: "0.07em",
+        color: "#ffffff", flex: 1, letterSpacing: "0.07em",
       }}>
         SAIP
       </span>
       {withClose && onClose && (
         <button onClick={onClose} aria-label="Cerrar menú" style={{
           width: "28px", height: "28px",
-          border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+          border: "1px solid rgba(255,255,255,0.2)",
           borderRadius: "7px", background: "none", cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "var(--mid, #8c5530)", flexShrink: 0,
+          color: "rgba(255,255,255,0.7)", flexShrink: 0,
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -229,9 +224,9 @@ function SidebarLogo({ withClose, onClose }: { withClose?: boolean; onClose?: ()
 const versionTag: React.CSSProperties = {
   marginTop: "auto",
   padding: "0.75rem 1rem",
-  borderTop: "1px solid var(--border, rgba(107,58,24,0.18))",
+  borderTop: "1px solid rgba(255,255,255,0.12)",
   fontSize: "0.62rem",
-  color: "var(--pale, #c99870)",
+  color: "rgba(255,255,255,0.35)",
   fontFamily: "'Outfit', system-ui, sans-serif",
   fontWeight: 500,
   letterSpacing: "0.04em",
@@ -271,9 +266,9 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
         <aside aria-hidden={!isOpen} style={{
           position: "fixed", top: 0, left: 0,
           width: "255px", height: "100vh",
-          background: "var(--white, #fff)",
-          borderRight: "1px solid var(--border-s, rgba(107,58,24,0.30))",
-          boxShadow: "6px 0 24px rgba(59,31,8,0.12)",
+          background: "var(--bakery-sidebar-bg)",
+          borderRight: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "6px 0 24px rgba(0,0,0,0.25)",
           zIndex: 200, display: "flex", flexDirection: "column",
           transform: isOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
@@ -292,8 +287,8 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
     <aside style={{
       width: "220px",
       minHeight: "calc(100vh - 58px)",
-      background: "var(--white, #fff)",
-      borderRight: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+      background: "var(--bakery-sidebar-bg)",
+      borderRight: "1px solid rgba(255,255,255,0.08)",
       display: "flex", flexDirection: "column",
       position: "sticky", top: "58px",
       height: "calc(100vh - 58px)",
