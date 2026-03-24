@@ -457,13 +457,13 @@ LOCK TABLES `recetario` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `recuperarpassword`
+-- Table structure for table `RecoverPassword`
 --
 
-DROP TABLE IF EXISTS `recuperarpassword`;
+DROP TABLE IF EXISTS `RecoverPassword`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `recuperarpassword` (
+CREATE TABLE `RecoverPassword` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_usuario` int NOT NULL,
   `token` varchar(255) NOT NULL,
@@ -478,12 +478,12 @@ CREATE TABLE `recuperarpassword` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `recuperarpassword`
+-- Dumping data for table `RecoverPassword`
 --
 
-LOCK TABLES `recuperarpassword` WRITE;
-/*!40000 ALTER TABLE `recuperarpassword` DISABLE KEYS */;
-/*!40000 ALTER TABLE `recuperarpassword` ENABLE KEYS */;
+LOCK TABLES `RecoverPassword` WRITE;
+/*!40000 ALTER TABLE `RecoverPassword` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RecoverPassword` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
