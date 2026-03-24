@@ -113,6 +113,29 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+## Esquemas relacionados a Módulos
+class ModuleResponse(BaseModel):
+    id: int
+    token: str
+    name: str
+    label: str
+
+    class Config:
+        from_attributes = True
+
+## Esquemas relacionados a RoleModules
+class RoleModuleAssign(BaseModel):
+    module_ids: list[int]
+
+class RoleModuleResponse(BaseModel):
+    id: int
+    token: str
+    role_id: int
+    module_id: int
+    module: ModuleResponse  # ← agregar relación
+
+    class Config:
+        from_attributes = True
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str

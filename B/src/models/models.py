@@ -72,6 +72,12 @@ class Role(SQLModel, table=True):
         back_populates="role",
         sa_relationship_kwargs={"foreign_keys": "[User.role_id]"}
         )
+    
+    users: List["User"] = Relationship(
+        back_populates="role",
+        sa_relationship_kwargs={"foreign_keys": "[User.role_id]"}
+    )
+    role_modules: List["RoleModule"] = Relationship(back_populates="role")
 
 class SessionApp(SQLModel, table=True):
     __tablename__ = "sessions"
@@ -95,3 +101,23 @@ class PasswordReset(SQLModel, table=True):
     used: bool = Field(default=False)
 
     user: "User" = Relationship()
+
+class Module(SQLModel, table=True):
+    __tablename__ = "modules"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True, index=True)
+    name: str = Field(max_length=100, unique=True)   # "inventario", "ventas", etc.
+    label: str = Field(max_length=100)               # "Inventario", "Ventas", etc.
+    role_modules: List["RoleModule"] = Relationship(back_populates="module")
+
+class RoleModule(SQLModel, table=True):
+    __tablename__ = "role_modules"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True, index=True)
+    role_id: int = Field(foreign_key="roles.id")
+    module_id: int = Field(foreign_key="modules.id")
+
+    role: "Role" = Relationship(back_populates="role_modules")
+    module: "Module" = Relationship(back_populates="role_modules")
