@@ -2,7 +2,7 @@ import { JSX, ReactNode } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
 import Badge from "./Badge";
-import "./Detallemodal.css";
+import "./Detailmodal.css";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 

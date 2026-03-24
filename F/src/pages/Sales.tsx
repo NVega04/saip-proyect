@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Table, { ColumnDef } from "../components/Table";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
@@ -45,7 +45,6 @@ export default function Ventas() {
       columns={columns}
       data={ventas}
       searchPlaceholder="Buscar venta"
-      onFilter={() => console.log("filtrar")}
       headerActions={
         <>
           <Button variant="primary" onClick={() => console.log("nueva venta")}>

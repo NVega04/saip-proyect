@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { apiFetch, getMe, UserProfile } from "../utils/api";
-import "./perfilModal.css";
+import "./Profilemodal.css";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 interface FormState {
