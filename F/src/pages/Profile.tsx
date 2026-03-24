@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch, getMe, UserProfile } from "../utils/api";
-import "./perfil.css";
+import "./Profile.css";
 
 interface FormState {
   first_name: string;

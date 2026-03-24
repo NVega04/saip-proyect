@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
-import PerfilModal from "./PerfilModal";
+import PerfilModal from "./Profilemodal";
 
 
 interface NavbarProps {

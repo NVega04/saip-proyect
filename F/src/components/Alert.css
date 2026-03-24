@@ -1,7 +1,7 @@
 .saip-alerta {
   position: fixed;
-  top: 24px;
-  right: 24px;
+  top: 550px;
+  right: 50px;
   z-index: 9999;
   min-width: 300px;
   max-width: 420px;

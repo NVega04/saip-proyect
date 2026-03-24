@@ -4,11 +4,11 @@ import User from "./pages/user";
 import Dashboard from "./pages/Dashboard";
 import Roles from "./pages/Roles";
 import Login from "./pages/login";
-import Proveedores from "./pages/Proveedores";
-import Produccion from "./pages/Produccion";
-import Recetas from "./pages/Recetas";
+import Proveedores from "./pages/Suppliers";
+import Produccion from "./pages/Production";
+import Recetas from "./pages/Recipes";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Perfil from "./pages/Perfil";
+import Perfil from "./pages/Profile";
 import './variables.css'
 import { AuthProvider } from "./context/AuthContext";
 import RecuperarPassword from "./pages/RecuperarPassword";
@@ -24,8 +24,8 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
         <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />

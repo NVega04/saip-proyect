@@ -1,0 +1,68 @@
+.saip-confirm__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1200;
+}
+
+.saip-confirm__box {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+}
+
+.saip-confirm__header {
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.saip-confirm__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #3b1f08;
+}
+
+.saip-confirm__body {
+  padding: 16px 20px;
+}
+
+.saip-confirm__body p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #5c3d1e;
+  line-height: 1.45;
+}
+
+.saip-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px 18px;
+}
+
+.saip-confirm__btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.saip-confirm__btn--cancel {
+  background: #f5f0ea;
+  color: #7d5a3c;
+}
+
+.saip-confirm__btn--danger {
+  background: #a01818;
+  color: white;
+}

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import "./Alerta.css";
+import "./Alert.css";
 
 interface AlertaProps {
   show: boolean;

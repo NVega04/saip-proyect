@@ -5,8 +5,8 @@ import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
-import Detallemodal from "../components/Detallemodal";
-import "./Recetas.css";
+import Detallemodal from "../components/Detailmodal";
+import "./Recipes.css";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const INSUMOS_MOCK = [
