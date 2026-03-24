@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 import "./RecoverPassword.css";
+import { useAlert } from "../context/AlertContext";
 
 export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
@@ -56,12 +57,19 @@ function ForgotForm() {
   const [sent, setSent]           = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
+  const { showAlert } = useAlert();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email) { setError("Ingresa tu correo electrónico."); return; }
+    if (!email) {
+      setError("Ingresa tu correo electrónico.");
+      showAlert("warning", "Ingresa tu correo electrónico.");
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
+      showAlert("success", "Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.");
       const res = await fetch("http://localhost:8000/session/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,7 +78,8 @@ function ForgotForm() {
       if (!res.ok) throw new Error();
       setSent(true);
     } catch {
-      setError("Error de conexión con el servidor.");
+        setError("Error de conexión con el servidor.");
+        showAlert("error", "Error de conexión con el servidor.");
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +146,7 @@ function ForgotForm() {
 // ── Paso 2: Nueva contraseña ───────────────────────────────────────────────
 function ResetForm({ token }: { token: string }) {
   const navigate                              = useNavigate();
+  const { showAlert }                         = useAlert();
   const [newPassword, setNewPassword]         = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNew, setShowNew]                 = useState(false);
@@ -147,16 +157,22 @@ function ResetForm({ token }: { token: string }) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newPassword || !confirmPassword) {
-      setError("Todos los campos son obligatorios."); return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden."); return;
-    }
-    if (newPassword.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres."); return;
-    }
-    setError(null);
+      if (!newPassword || !confirmPassword) {
+        setError("Todos los campos son obligatorios.");
+        showAlert("warning", "Todos los campos son obligatorios.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setError("Las contraseñas no coinciden.");
+        showAlert("warning", "Las contraseñas no coinciden.");
+        return;
+      }
+      if (newPassword.length < 8) {
+        setError("La contraseña debe tener al menos 8 caracteres.");
+        showAlert("warning", "La contraseña debe tener al menos 8 caracteres.");
+        return;
+      }
+        setError(null);
     setIsLoading(true);
     try {
       const res = await fetch("http://localhost:8000/session/reset-password", {
@@ -166,13 +182,17 @@ function ResetForm({ token }: { token: string }) {
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail ?? "El enlace es inválido o ha expirado.");
+        const message = data.detail ?? "El enlace es inválido o ha expirado.";
+        setError(message);
+        showAlert("error", message);
         return;
       }
       setSuccess(true);
+      showAlert("success", "Tu contraseña fue actualizada correctamente.");
       setTimeout(() => navigate("/"), 3000);
     } catch {
-      setError("Error de conexión con el servidor.");
+        setError("Error de conexión con el servidor.");
+        showAlert("error", "Error de conexión con el servidor.");
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,8 @@ import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
+import { useAlert } from "../context/AlertContext";
+import { useConfirm } from "../context/ConfirmContext";
 import { apiFetch } from "../utils/api";
 import "./products.css";
 
@@ -123,6 +125,9 @@ export default function Products(): JSX.Element {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(true);
 
+  const { showAlert } = useAlert();
+  const { showConfirm } = useConfirm();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -191,7 +196,11 @@ export default function Products(): JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      showAlert("warning", "Completa los campos obligatorios.");
+      return;
+    }
 
     try {
       if (editTarget) {
@@ -207,17 +216,21 @@ export default function Products(): JSX.Element {
             is_locked: form.is_locked,
           }),
         });
+
         if (response.status === 403) {
-          alert("El producto esta bloqueado y no puede ser modificado");
+          showAlert("warning", "El producto está bloqueado y no puede ser modificado.");
           return;
         }
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar producto");
+          showAlert("error", err.detail || "Error al actualizar producto");
           return;
         }
+
         const updated: Product = await response.json();
-        setProducts((prev) => prev.map((p) => p.id === editTarget.id ? updated : p));
+        setProducts((prev) => prev.map((p) => (p.id === editTarget.id ? updated : p)));
+        showAlert("success", "Producto actualizado correctamente.");
       } else {
         const response = await apiFetch("/products/", {
           method: "POST",
@@ -231,59 +244,84 @@ export default function Products(): JSX.Element {
             is_locked: form.is_locked,
           }),
         });
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear producto");
+          showAlert("error", err.detail || "Error al crear producto");
           return;
         }
+
         const created: Product = await response.json();
         setProducts((prev) => [...prev, created]);
+        showAlert("success", "Producto creado correctamente.");
       }
+
       handleCerrar();
     } catch {
-      alert("Error de conexion con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
-  const handleEliminar = async (id: number) => {
-    const product = products.find(p => p.id === id);
+  const handleEliminar = (id: number) => {
+    const product = products.find((p) => p.id === id);
+
     if (product?.is_locked) {
-      alert("El producto esta bloqueado y no puede ser eliminado");
+      showAlert("warning", "El producto está bloqueado y no puede ser eliminado.");
       return;
     }
-    if (!confirm("¿Esta seguro de eliminar este producto?")) return;
-    try {
-      const response = await apiFetch(`/products/${id}`, { method: "DELETE" });
-      if (response.status === 403) {
-        alert("El producto esta bloqueado y no puede ser eliminado");
-        return;
-      }
-      if (!response.ok) {
-        const err = await response.json();
-        alert(err.detail || "Error al eliminar producto");
-        return;
-      }
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-    } catch {
-      alert("Error de conexion con el servidor.");
-    }
+
+    showConfirm({
+      title: "Eliminar producto",
+      message: "¿Está seguro que desea eliminar este registro?",
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(`/products/${id}`, { method: "DELETE" });
+
+          if (response.status === 403) {
+            showAlert("warning", "El producto está bloqueado y no puede ser eliminado.");
+            return;
+          }
+
+          if (!response.ok) {
+            const err = await response.json();
+            showAlert("error", err.detail || "Error al eliminar producto");
+            return;
+          }
+
+          setProducts((prev) => prev.filter((p) => p.id !== id));
+          showAlert("success", "Producto eliminado correctamente.");
+        } catch {
+          showAlert("error", "Error de conexión con el servidor.");
+        }
+      },
+    });
   };
 
   const handleToggleLock = async (id: number) => {
     try {
       const response = await apiFetch(`/products/${id}/lock`, { method: "PATCH" });
+
       if (!response.ok) {
         const err = await response.json();
-        alert(err.detail || "Error al cambiar estado de bloqueo");
+        showAlert("error", err.detail || "Error al cambiar estado de bloqueo");
         return;
       }
+
       const updated: Product = await response.json();
-      setProducts((prev) => prev.map((p) => p.id === id ? updated : p));
+      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+
+      showAlert(
+        "success",
+        updated.is_locked
+          ? "Producto bloqueado correctamente."
+          : "Producto desbloqueado correctamente."
+      );
     } catch {
-      alert("Error de conexion con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
-
   return (
     <Layout
       breadcrumbs={[

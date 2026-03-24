@@ -3,6 +3,9 @@ import Layout from "../components/Layout";
 import Table, { ColumnDef } from "../components/Table";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
+import { useAlert } from "../context/AlertContext";
+import { useConfirm } from "../context/ConfirmContext";
+
 
 interface Proveedor {
   id: number;
@@ -35,6 +38,9 @@ const columns: ColumnDef<Proveedor>[] = [
 export default function Proveedores() {
   const [proveedores, setProveedores] = useState<Proveedor[]>(mockProveedores);
 
+  const { showAlert } = useAlert();
+  const { showConfirm } = useConfirm();
+
   return (
     <Layout
       breadcrumbs={[
@@ -50,7 +56,8 @@ export default function Proveedores() {
         sortKey="nombre"
         headerActions={
           <>
-            <Button variant="primary" onClick={() => console.log("crear")}>
+            <Button variant="primary" onClick={() => showAlert("info", "Formulario de creación de proveedores pendiente por implementar.")}
+            > 
               Agregar proveedores
             </Button>
           </>
@@ -58,7 +65,7 @@ export default function Proveedores() {
         renderActions={(row) => (
           <div className="saip-table__actions">
             <button className="saip-table__action-btn" title="Editar"
-              onClick={() => console.log("editar", row.id)}>
+              onClick={() => showAlert("info", `Edición del proveedor ${row.nombre} pendiente por implementar.`)}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.8">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -66,7 +73,18 @@ export default function Proveedores() {
               </svg>
             </button>
             <button className="saip-table__action-btn saip-table__action-btn--danger" title="Eliminar"
-              onClick={() => setProveedores((p) => p.filter((x) => x.id !== row.id))}>
+              onClick={() =>
+                showConfirm({
+                  title: "Eliminar proveedor",
+                  message: "¿Está seguro que desea eliminar este registro?",
+                  confirmText: "Eliminar",
+                  cancelText: "Cancelar",
+                  onConfirm: () => {
+                    setProveedores((p) => p.filter((x) => x.id !== row.id));
+                    showAlert("success", "Proveedor eliminado correctamente.");
+                  },
+                })
+              }>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.8">
                 <polyline points="3 6 5 6 21 6"/>

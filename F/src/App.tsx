@@ -15,6 +15,9 @@ import './variables.css'
 import { AuthProvider } from "./context/AuthContext";
 import RecoverPassword from "./pages/RecoverPassword";
 import Landing from "./pages/Landing";
+import { AlertProvider } from "./context/AlertContext";
+import { ConfirmProvider } from "./context/ConfirmContext";
+
 
 function App() {
   const { pathname } = useLocation();
@@ -25,22 +28,26 @@ function App() {
 
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Landing />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        {/* <Route path="/inventario"  element={<ProtectedRoute module="inventario"> <Inventario />  </ProtectedRoute>} /> */}
-        <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
-        {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
-        <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
-        <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
-        <Route path="/units"       element={<ProtectedRoute module="recetas">    <Units />       </ProtectedRoute>} />
-        <Route path="/products"    element={<ProtectedRoute module="recetas">    <Products />    </ProtectedRoute>} />
-        <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
-        <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
-        <Route path="/perfil" element={<Perfil />} />
-        <Route path="/reset-password" element={<RecoverPassword />} />
-      </Routes>
+      <AlertProvider>
+        <ConfirmProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            {/* <Route path="/inventario"  element={<ProtectedRoute module="inventario"> <Inventario />  </ProtectedRoute>} /> */}
+            <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
+            {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
+            <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
+            <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
+            <Route path="/units"       element={<ProtectedRoute module="recetas">    <Units />       </ProtectedRoute>} />
+            <Route path="/products"    element={<ProtectedRoute module="recetas">    <Products />    </ProtectedRoute>} />
+            <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
+            <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/reset-password" element={<RecoverPassword />} />
+          </Routes>
+        </ConfirmProvider>
+      </AlertProvider>  
     </AuthProvider>
   );
 }

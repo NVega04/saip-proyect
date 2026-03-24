@@ -4,6 +4,8 @@ import Layout from "../components/Layout";
 import Table, { ColumnDef } from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
+import { useAlert } from "../context/AlertContext";
+import { useConfirm } from "../context/ConfirmContext";
 import { apiFetch } from "../utils/api";
 import "./units.css";
 
@@ -47,6 +49,9 @@ export default function Units(): JSX.Element {
   const [form, setForm] = useState<UnitForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(true);
+
+  const { showAlert } = useAlert();
+  const { showConfirm } = useConfirm();
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -106,7 +111,11 @@ export default function Units(): JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      showAlert("warning", "Completa los campos obligatorios.");
+      return;
+    }
 
     try {
       if (editTarget) {
@@ -119,13 +128,16 @@ export default function Units(): JSX.Element {
             quantity: form.quantity,
           }),
         });
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar unidad");
+          showAlert("error", err.detail || "Error al actualizar unidad");
           return;
         }
+
         const updated: Unit = await response.json();
-        setUnits((prev) => prev.map((u) => u.id === editTarget.id ? updated : u));
+        setUnits((prev) => prev.map((u) => (u.id === editTarget.id ? updated : u)));
+        showAlert("success", "Unidad actualizada correctamente.");
       } else {
         const response = await apiFetch("/units/", {
           method: "POST",
@@ -136,35 +148,48 @@ export default function Units(): JSX.Element {
             quantity: form.quantity,
           }),
         });
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear unidad");
+          showAlert("error", err.detail || "Error al crear unidad");
           return;
         }
+
         const created: Unit = await response.json();
         setUnits((prev) => [...prev, created]);
+        showAlert("success", "Unidad creada correctamente.");
       }
+
       handleCerrar();
     } catch {
-      alert("Error de conexion con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
-  const handleEliminar = async (id: number) => {
-    if (!confirm("¿Esta seguro de eliminar esta unidad?")) return;
-    try {
-      const response = await apiFetch(`/units/${id}`, { method: "DELETE" });
-      if (!response.ok) {
-        const err = await response.json();
-        alert(err.detail || "Error al eliminar unidad");
-        return;
-      }
-      setUnits((prev) => prev.filter((u) => u.id !== id));
-    } catch {
-      alert("Error de conexion con el servidor.");
-    }
-  };
+  const handleEliminar = (id: number) => {
+    showConfirm({
+      title: "Eliminar unidad",
+      message: "¿Está seguro que desea eliminar este registro?",
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(`/units/${id}`, { method: "DELETE" });
 
+          if (!response.ok) {
+            const err = await response.json();
+            showAlert("error", err.detail || "Error al eliminar unidad");
+            return;
+          }
+
+          setUnits((prev) => prev.filter((u) => u.id !== id));
+          showAlert("success", "Unidad eliminada correctamente.");
+        } catch {
+          showAlert("error", "Error de conexión con el servidor.");
+        }
+      },
+    });
+  };
   return (
     <Layout
       breadcrumbs={[
