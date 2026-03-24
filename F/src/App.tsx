@@ -23,11 +23,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
-        <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
-        <Route path="/recetas" element={<ProtectedRoute><Recetas /></ProtectedRoute>} />
-        <Route path="/usuarios" element={<ProtectedRoute><User /></ProtectedRoute>} />
-        <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
+        {/* <Route path="/inventario"  element={<ProtectedRoute module="inventario"> <Inventario />  </ProtectedRoute>} /> */}
+        <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
+        {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
+        <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
+        <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
+        <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
+        <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
         <Route path="/perfil" element={<Perfil />} />
       </Routes>
     </AuthProvider>

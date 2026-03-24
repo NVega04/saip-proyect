@@ -1,5 +1,6 @@
 import React, { JSX, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAllowedModules, canAccessModule } from "../utils/permissions";
 
 interface MenuItem {
   id: string;
@@ -81,8 +82,8 @@ const menuItems: MenuItem[] = [
   { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "recetario",        label: "Recetas",            path: "/recetas",    icon: Icon.recipes,    group: "operaciones" },
-  { id: "gestion-usuarios", label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
+  { id: "recetas",          label: "Recetas",            path: "/recetas",    icon: Icon.recipes,    group: "operaciones" },
+  { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
   { id: "contacto",         label: "Contáctanos",        path: "/contacto",   icon: Icon.contact,    group: "soporte" },
@@ -146,13 +147,18 @@ function NavItem({ item, isActive, onClick }: { item: MenuItem; isActive: boolea
   );
 }
 
+// ── Módulos permitidos ─────────────────────────────────────────────────────
 function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemClick: (id: string) => void }) {
+  const allowedModules = getAllowedModules();
+
   return (
     <nav style={{ display: "flex", flexDirection: "column", padding: "0.4rem 0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
       {groupOrder.map((group, gi) => {
-        const items = grouped[group];
-        if (!items) return null;
+        const items = grouped[group].filter((item) =>
+          canAccessModule(item.id, allowedModules)
+        );
+        if (!items.length) return null;
         return (
           <div key={group} style={{ marginBottom: gi < groupOrder.length - 1 ? "0.3rem" : 0 }}>
             <div style={{

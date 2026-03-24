@@ -1,6 +1,26 @@
 import { useState, ChangeEvent } from "react";
 import React from "react";
 import './login.css';
+import { apiFetch } from "../utils/api";
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+interface LoginResponse {
+  session_token: string;
+  expires_at: string;
+  user: UserData;
+}
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  role_id: number;
+  is_admin: boolean;
+  status: string;
+  created_at: string;
+}
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -26,9 +46,22 @@ export default function Login() {
         return;
       }
 
-      const data = await response.json();
+      const data: LoginResponse = await response.json();
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Cargar módulos del rol
+      if (!data.user.is_admin) {
+        const modulesRes = await apiFetch(`/role-modules/${data.user.role_id}`);
+        if (modulesRes.ok) {
+          const roleModules: { module: { name: string } }[] = await modulesRes.json();
+          const moduleNames = roleModules.map((rm) => rm.module.name);
+          localStorage.setItem("modules", JSON.stringify(moduleNames));
+        }
+      } else {
+        localStorage.setItem("modules", JSON.stringify(["all"]));
+      }
+
       window.location.href = "/dashboard";
 
     } catch {
