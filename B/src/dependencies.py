@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from datetime import datetime, timezone
 
 from src.database import get_session
-from src.models.models import SessionApp, User
+from src.models.models import SessionApp, User, RoleModule, Module
 
 def get_current_user(
     session_token: str = Header(..., alias="session_token"),
@@ -31,3 +31,39 @@ def get_current_user(
         )
 
     return user_session.user
+
+def require_module(module_name: str):
+    def checker(
+        current_user: User = Depends(get_current_user),
+        session: Session = Depends(get_session),
+    ) -> User:
+        if current_user.is_admin:
+            return current_user
+
+        access = session.exec(
+            select(RoleModule)
+            .join(Module, RoleModule.module_id == Module.id)
+            .where(
+                RoleModule.role_id == current_user.role_id,
+                Module.name == module_name,
+            )
+        ).first()
+
+        if not access:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"No tienes acceso al módulo '{module_name}'.",
+            )
+        return current_user
+    return checker
+
+
+def require_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Se requieren permisos de administrador.",
+        )
+    return current_user

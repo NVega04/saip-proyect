@@ -2,11 +2,31 @@ import { useState, ChangeEvent } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 import './login.css';
+import { apiFetch } from "../utils/api";
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+interface LoginResponse {
+  session_token: string;
+  expires_at: string;
+  user: UserData;
+}
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  role_id: number;
+  is_admin: boolean;
+  status: string;
+  created_at: string;
+}
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
+  const [remember, setRemember] = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
+  const [email, setEmail] = useState<string>(() => localStorage.getItem("remembered_email")?? "");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -27,9 +47,28 @@ export default function Login() {
         return;
       }
 
-      const data = await response.json();
+      const data: LoginResponse = await response.json();
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (remember) {
+        localStorage.setItem("remembered_email", email);
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+      
+      // Cargar módulos del rol
+      if (!data.user.is_admin) {
+        const modulesRes = await apiFetch(`/role-modules/${data.user.role_id}`);
+        if (modulesRes.ok) {
+          const roleModules: { module: { name: string } }[] = await modulesRes.json();
+          const moduleNames = roleModules.map((rm) => rm.module.name);
+          localStorage.setItem("modules", JSON.stringify(moduleNames));
+        }
+      } else {
+        localStorage.setItem("modules", JSON.stringify(["all"]));
+      }
+
       window.location.href = "/dashboard";
 
     } catch {

@@ -2,9 +2,9 @@ import { useState, useEffect, ChangeEvent } from "react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
-import "./recuperarPassword.css";
+import "./RecoverPassword.css";
 
-export default function RecuperarPassword() {
+export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -264,10 +264,6 @@ function BackLink() {
   return (
     <div className="rp-back-row">
       <Link to="/" className="rp-back-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
-        </svg>
         Volver al inicio de sesión
       </Link>
     </div>

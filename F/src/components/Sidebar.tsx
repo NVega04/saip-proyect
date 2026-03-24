@@ -1,5 +1,6 @@
 import React, { JSX, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAllowedModules, canAccessModule } from "../utils/permissions";
 
 interface MenuItem {
   id: string;
@@ -7,6 +8,7 @@ interface MenuItem {
   icon: JSX.Element;
   path: string;
   group?: string;
+  subitems?: MenuItem[];
 }
 
 interface SidebarProps {
@@ -73,19 +75,35 @@ const Icon = {
       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
     </svg>
   ),
+  units: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 6h18M3 12h18M3 18h18"/>
+    </svg>
+  ),
+  products: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </svg>
+  ),
 };
 
 const menuItems: MenuItem[] = [
-  { id: "dashboard",        label: "Dashboard",           path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
-  { id: "inventario",       label: "Inventario",          path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
-  { id: "proveedores",      label: "Proveedores",         path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
-  { id: "ventas",           label: "Ventas",              path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
-  { id: "produccion",       label: "Producción",          path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "recetario",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "operaciones" },
-  { id: "gestion-usuarios", label: "Gestión de usuarios", path: "/usuarios",   icon: Icon.users,      group: "administracion" },
-  { id: "roles",            label: "Gestión de roles",    path: "/roles",      icon: Icon.roles,      group: "administracion" },
-  { id: "acerca",           label: "Acerca de SAIP",      path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "contacto",         label: "Contáctanos",         path: "/contacto",   icon: Icon.contact,    group: "soporte" },
+  { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
+  { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
+  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
+  { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
+  { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
+  { id: "recetas",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
+    { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
+    { id: "unidades",       label: "Unidades",            path: "/units",      icon: Icon.units,      group: "recetas" },
+    { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
+  ]},
+  { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
+  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
+  { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
+  { id: "contacto",         label: "Contáctanos",        path: "/contacto",   icon: Icon.contact,    group: "soporte" },
 ];
 
 const groupLabels: Record<string, string> = {
@@ -104,29 +122,82 @@ const grouped = menuItems.reduce<Record<string, MenuItem[]>>((acc, item) => {
   return acc;
 }, {});
 
-function NavItem({ item, isActive, onClick }: { item: MenuItem; isActive: boolean; onClick: () => void }) {
+function NavItem({ 
+  item, 
+  isActive, 
+  onClick, 
+  isExpanded,
+  hasSubitems,
+  onToggle,
+  isSubitem = false
+}: { 
+  item: MenuItem; 
+  isActive: boolean; 
+  onClick: () => void;
+  isExpanded?: boolean;
+  hasSubitems?: boolean;
+  onToggle?: () => void;
+  isSubitem?: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
+
+  const handleClick = () => {
+    if (hasSubitems) {
+      onToggle?.();
+    } else {
+      onClick();
+    }
+  };
+
+  const baseStyle: React.CSSProperties = {
+    display: "flex", alignItems: "center", gap: "0.6rem",
+    padding: isSubitem ? "0.4rem 0.75rem 0.4rem 2rem" : "0.5rem 0.75rem",
+    borderRadius: "7px",
+    fontSize: isSubitem ? "0.78rem" : "0.81rem",
+    fontWeight: isActive ? 600 : 400,
+    color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
+    background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
+    boxShadow: "none",
+    cursor: "pointer",
+    fontFamily: "'Outfit', system-ui, sans-serif",
+    transition: "background 0.15s, color 0.15s",
+  };
+
+  if (hasSubitems) {
+    return (
+      <div
+        onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          ...baseStyle,
+          background: hovered ? "var(--bakery-sidebar-hover)" : "transparent",
+        }}
+      >
+        <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
+          {item.icon}
+        </span>
+        <span style={{ flex: 1 }}>{item.label}</span>
+        <span style={{
+          fontSize: "0.6rem",
+          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+          transition: "transform 0.2s ease",
+          opacity: 0.7,
+        }}>
+          ▶
+        </span>
+      </div>
+    );
+  }
 
   return (
     <Link to={item.path} style={{ textDecoration: "none" }} onClick={onClick}>
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        style={{
-          display: "flex", alignItems: "center", gap: "0.6rem",
-          padding: "0.5rem 0.75rem",
-          borderRadius: "7px",
-          fontSize: "0.81rem",
-          fontWeight: isActive ? 600 : 400,
-          color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
-          background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
-          boxShadow: "none",
-          cursor: "pointer",
-          fontFamily: "'Outfit', system-ui, sans-serif",
-          transition: "background 0.15s, color 0.15s",
-        }}
+        style={baseStyle}
       >
-        <span style={{ flexShrink: 0, display: "flex", color: "inherit", transition: "color 0.15s" }}>
+        <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
           {item.icon}
         </span>
         <span style={{ flex: 1 }}>{item.label}</span>
@@ -141,13 +212,32 @@ function NavItem({ item, isActive, onClick }: { item: MenuItem; isActive: boolea
   );
 }
 
+// ── Módulos permitidos ─────────────────────────────────────────────────────
 function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemClick: (id: string) => void }) {
+  const allowedModules = getAllowedModules();
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSubitemClick = (id: string) => {
+    onItemClick(id);
+  };
+
   return (
     <nav style={{ display: "flex", flexDirection: "column", padding: "0.4rem 0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
       {groupOrder.map((group, gi) => {
-        const items = grouped[group];
-        if (!items) return null;
+        const items = grouped[group].filter((item) =>
+          canAccessModule(item.id, allowedModules)
+        );
+        if (!items.length) return null;
         return (
           <div key={group} style={{ marginBottom: gi < groupOrder.length - 1 ? "0.3rem" : 0 }}>
             <div style={{
@@ -161,12 +251,29 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
             </div>
             <div style={{ padding: "0 0.65rem", display: "flex", flexDirection: "column", gap: "2px" }}>
               {items.map((item) => (
-                <NavItem
-                  key={item.id}
-                  item={item}
-                  isActive={activeMenu === item.id}
-                  onClick={() => onItemClick(item.id)}
-                />
+                <div key={item.id}>
+                  <NavItem
+                    item={item}
+                    isActive={activeMenu === item.id}
+                    onClick={() => onItemClick(item.id)}
+                    isExpanded={expandedItems.has(item.id)}
+                    hasSubitems={!!item.subitems?.length}
+                    onToggle={() => toggleExpand(item.id)}
+                  />
+                  {item.subitems && expandedItems.has(item.id) && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      {item.subitems.filter(sub => canAccessModule(sub.id, allowedModules)).map(subitem => (
+                        <NavItem
+                          key={subitem.id}
+                          item={subitem}
+                          isActive={activeMenu === subitem.id}
+                          onClick={() => handleSubitemClick(subitem.id)}
+                          isSubitem
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
