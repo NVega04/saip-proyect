@@ -238,7 +238,13 @@ export default function Roles(): JSX.Element {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Layout>
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Gestión de usuarios" },
+      ]}
+     >
+      
       {loading ? (
         <div className="saip-loading">Cargando roles...</div>
       ) : (
