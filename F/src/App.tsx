@@ -12,6 +12,7 @@ import Perfil from "./pages/Perfil";
 import './variables.css'
 import { AuthProvider } from "./context/AuthContext";
 import RecuperarPassword from "./pages/RecuperarPassword";
+import Landing from "./pages/Landing";
 
 function App() {
   const { pathname } = useLocation();
@@ -23,7 +24,8 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/proveedores" element={<ProtectedRoute><Proveedores /></ProtectedRoute>} />
         <Route path="/produccion" element={<ProtectedRoute><Produccion /></ProtectedRoute>} />
