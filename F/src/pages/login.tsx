@@ -25,8 +25,8 @@ interface UserData {
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
+  const [remember, setRemember] = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
+  const [email, setEmail] = useState<string>(() => localStorage.getItem("remembered_email")?? "");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -51,6 +51,12 @@ export default function Login() {
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
+      if (remember) {
+        localStorage.setItem("remembered_email", email);
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+      
       // Cargar módulos del rol
       if (!data.user.is_admin) {
         const modulesRes = await apiFetch(`/role-modules/${data.user.role_id}`);
