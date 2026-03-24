@@ -7,6 +7,8 @@ import Login from "./pages/login";
 import Proveedores from "./pages/Proveedores";
 import Produccion from "./pages/Produccion";
 import Recetas from "./pages/Recetas";
+import Units from "./pages/Units";
+import Products from "./pages/Products";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Perfil";
 import './variables.css'
@@ -32,6 +34,8 @@ function App() {
         {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
         <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
         <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
+        <Route path="/units"       element={<ProtectedRoute module="recetas">    <Units />       </ProtectedRoute>} />
+        <Route path="/products"    element={<ProtectedRoute module="recetas">    <Products />    </ProtectedRoute>} />
         <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
         <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
         <Route path="/perfil" element={<Perfil />} />
