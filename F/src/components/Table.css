@@ -1,20 +1,18 @@
 .saip-table-section__title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #3b2510;
+  color: var(--bakery-text-primary);
   font-family: 'Roboto', sans-serif;
   margin-bottom: 1.5rem;
 }
 
-/* Card contenedor */
 .saip-table-card {
-  background: #ffffff;
-  border: 1px solid #cfc0b066;
+  background: var(--bakery-card-bg);
+  border: 2px solid var(--bakery-border);
   border-radius: 12px;
   padding: 1.5rem;
 }
 
-/* Toolbar */
 .saip-table-card__toolbar {
   display: flex;
   align-items: center;
@@ -31,27 +29,24 @@
   flex-wrap: wrap;
 }
 
-/* Scroll horizontal en mobile */
 .saip-table-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* scroll suave en iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Tabla */
 .saip-table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Roboto', sans-serif;
 }
 
-/* Encabezados */
 .saip-table__th {
   text-align: left;
   font-size: 0.82rem;
-  font-weight: 600;
-  color: #5c3d1e;
+  font-weight: 700;
+  color: var(--bakery-sidebar-bg);
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid #e8ddd4;
+  border-bottom: 2px solid var(--bakery-border);
   white-space: nowrap;
 }
 
@@ -59,24 +54,22 @@
   text-align: right;
 }
 
-/* Filas */
 .saip-table__row {
   transition: background 0.12s ease;
 }
 
 .saip-table__row:hover {
-  background: #faf7f4;
+  background: #EDE0CC;
 }
 
 .saip-table__row:not(:last-child) td {
-  border-bottom: 1px solid #f0e8e0;
+  border-bottom: 1px solid var(--bakery-border);
 }
 
-/* Celdas */
 .saip-table__td {
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
-  color: #4a3020;
+  color: var(--bakery-text-primary);
   vertical-align: middle;
 }
 
@@ -84,7 +77,6 @@
   text-align: right;
 }
 
-/* Acciones inline en celda */
 .saip-table__actions {
   display: flex;
   align-items: center;
@@ -102,42 +94,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9e7e62;
+  color: var(--bakery-text-secondary);
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 .saip-table__action-btn:hover {
-  background: #f5f0ea;
-  color: #5c3d1e;
+  background: #EDE0CC;
+  color: var(--bakery-sidebar-bg);
 }
 
 .saip-table__action-btn--danger:hover {
-  background: #fdf0ee;
-  color: #b94a3a;
+  background: #F5C8C8;
+  color: #8B1A1A;
 }
 
-/* Badges en celda */
 .saip-table__badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
 
-/* Vacío */
 .saip-table__empty {
   text-align: center;
   padding: 3rem 1rem;
   font-size: 0.85rem;
-  color: #9e7e62;
+  color: var(--bakery-text-muted);
   font-family: 'Roboto', sans-serif;
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   RESPONSIVE
-   ───────────────────────────────────────────────────────────────────────── */
-
-/* ── Tablet (≤ 1024px) ───────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .saip-table__th,
   .saip-table__td {
@@ -146,22 +130,17 @@
   }
 }
 
-/* ── Móvil (≤ 767px) ─────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
-
-  /* Título más pequeño */
   .saip-table-section__title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
   }
 
-  /* Card con menos padding */
   .saip-table-card {
     padding: 1rem;
     border-radius: 8px;
   }
 
-  /* Toolbar: acciones arriba, buscador abajo ocupando todo el ancho */
   .saip-table-card__toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -174,31 +153,26 @@
     justify-content: flex-start;
   }
 
-  /* El SearchBar ocupa todo el ancho en móvil */
   .saip-table-card__toolbar > *:last-child {
     width: 100%;
   }
 
-  /* Celdas más compactas */
   .saip-table__th,
   .saip-table__td {
     padding: 0.55rem 0.65rem;
     font-size: 0.8rem;
   }
 
-  /* Botones de acción ligeramente más grandes para touch */
   .saip-table__action-btn {
     width: 34px;
     height: 34px;
   }
 
-  /* Estado vacío más compacto */
   .saip-table__empty {
     padding: 2rem 1rem;
   }
 }
 
-/* ── Móvil pequeño (≤ 480px) ─────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .saip-table__th,
   .saip-table__td {
@@ -206,7 +180,6 @@
     font-size: 0.78rem;
   }
 
-  /* Hint visual de scroll horizontal */
   .saip-table-wrapper {
     position: relative;
   }

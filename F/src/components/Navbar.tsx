@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { logout } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import PerfilModal from "./PerfilModal";
 
 
 interface NavbarProps {
@@ -11,12 +12,11 @@ interface NavbarProps {
 
 export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [perfilOpen, setPerfilOpen] = useState(false);
   const [isMobile, setIsMobile]   = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const menuRef                   = useRef<HTMLDivElement>(null);
-  const navigate                  = useNavigate();
 
-  // ── Usuario desde contexto global (reemplaza getMe) ──────────────────────
   const { currentUser } = useAuth();
 
   const user = currentUser
@@ -27,7 +27,6 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
       }
     : null;
 
-  // ── Responsive ────────────────────────────────────────────────────────────
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -35,7 +34,6 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // ── Scroll ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll);
@@ -67,19 +65,19 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           position: relative;
           font-family: 'Outfit', system-ui, sans-serif;
           font-size: .82rem; font-weight: 400;
-          color: var(--light, #b07248);
+          color: var(--bakery-text-secondary);
           text-decoration: none; padding-bottom: 2px;
           transition: color .2s;
         }
         .saip-link::after {
           content: ''; position: absolute;
           bottom: -2px; left: 0; width: 0; height: 1.5px;
-          background: var(--medium, #6b3a18);
+          background: var(--bakery-sidebar-bg);
           transition: width .25s ease;
         }
-        .saip-link:hover { color: var(--dark, #3b1f08); }
+        .saip-link:hover { color: var(--bakery-text-primary); }
         .saip-link:hover::after { width: 100%; }
-        .saip-trigger:hover { background: var(--bg, #faf4ec) !important; }
+        .saip-trigger:hover { background: var(--bakery-bg) !important; }
         .saip-dd-item {
           display: flex; align-items: center; gap: 9px;
           width: 100%; padding: 11px 14px;
@@ -87,10 +85,10 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           font-size: .82rem; font-family: 'Outfit', system-ui, sans-serif;
           text-align: left; transition: background .15s, color .15s;
         }
-        .saip-dd-item:hover { background: var(--bg, #faf4ec) !important; color: var(--dark, #3b1f08) !important; }
-        .saip-dd-danger { color: var(--danger, #a01818) !important; }
-        .saip-dd-danger:hover { background: var(--danger-pale, #fce0e0) !important; }
-        .saip-hbg:hover { background: var(--bg, #faf4ec) !important; }
+        .saip-dd-item:hover { background: var(--bakery-bg) !important; color: var(--bakery-text-primary) !important; }
+        .saip-dd-danger { color: var(--bakery-danger) !important; }
+        .saip-dd-danger:hover { background: var(--bakery-danger-bg) !important; }
+        .saip-hbg:hover { background: var(--bakery-bg) !important; }
         @keyframes saip-drop {
           from { opacity: 0; transform: translateY(-6px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -99,10 +97,10 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
 
       <nav style={{
         height: "58px",
-        background: "var(--white, #fff)",
+        background: "var(--bakery-card-bg)",
         borderBottom: scrolled
-          ? "1px solid var(--border-s, rgba(107,58,24,0.30))"
-          : "1px solid var(--border, rgba(107,58,24,0.18))",
+          ? "1px solid var(--bakery-border)"
+          : "1px solid var(--bakery-border)",
         boxShadow: scrolled ? "0 1px 8px rgba(59,31,8,0.09)" : "none",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 1.5rem",
@@ -122,16 +120,16 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                 display: "flex", flexDirection: "column",
                 justifyContent: "center", alignItems: "center", gap: "4.5px",
                 width: "36px", height: "36px",
-                border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+                border: "1px solid var(--bakery-border)",
                 borderRadius: "7px", cursor: "pointer", padding: "6px",
-                background: sidebarOpen ? "var(--bg, #faf4ec)" : "transparent",
+                background: sidebarOpen ? "var(--bakery-bg)" : "transparent",
                 transition: "background 0.2s",
               }}
             >
               {[0, 1, 2].map((i) => (
                 <span key={i} style={{
                   display: "block", width: "15px", height: "1.5px",
-                  background: "var(--medium, #6b3a18)", borderRadius: "2px",
+                  background: "var(--bakery-sidebar-bg)", borderRadius: "2px",
                   transition: "transform 0.25s ease, opacity 0.2s ease",
                   transform: sidebarOpen
                     ? i === 0 ? "rotate(45deg) translate(4px, 4px)"
@@ -146,13 +144,13 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
             <div style={{
               width: "34px", height: "34px",
-              background: "var(--bg, #faf4ec)",
-              border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+              background: "var(--bakery-sidebar-bg)",
+              border: "1px solid var(--bakery-border)",
               borderRadius: "7px",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                stroke="var(--medium, #6b3a18)" strokeWidth="1.7" strokeLinecap="round">
+                stroke="#ffffff" strokeWidth="1.7" strokeLinecap="round">
                 <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
                 <path d="M9 21V12h6v9"/>
               </svg>
@@ -161,7 +159,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               <span style={{
                 fontFamily: "'Outfit', system-ui, sans-serif",
                 fontSize: "1rem", fontWeight: 700,
-                color: "var(--dark, #3b1f08)",
+                color: "var(--bakery-text-primary)",
                 letterSpacing: "0.07em", lineHeight: 1,
               }}>
                 SAIP
@@ -193,7 +191,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
                 <span style={{
                   fontSize: "0.82rem", fontWeight: 600,
-                  color: "var(--dark, #3b1f08)",
+                  color: "var(--bakery-text-primary)",
                   fontFamily: "'Outfit', system-ui, sans-serif", lineHeight: 1,
                 }}>
                   {user?.nombre ?? "· · ·"}
@@ -201,7 +199,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <span style={{
                     fontSize: "0.7rem", fontWeight: 300,
-                    color: "var(--mid, #8c5530)", lineHeight: 1,
+                    color: "var(--bakery-text-secondary)", lineHeight: 1,
                     fontFamily: "'Outfit', system-ui, sans-serif",
                   }}>
                     {user?.rol ?? ""}
@@ -209,9 +207,9 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                   {user && (
                     <span style={{
                       fontSize: "0.59rem", fontWeight: 700, letterSpacing: "0.07em",
-                      color: user.isAdmin ? "#1e4a18" : "var(--mid, #8c5530)",
-                      background: user.isAdmin ? "#b8e0b0" : "var(--bg, #faf4ec)",
-                      border: `1px solid ${user.isAdmin ? "#52a844" : "var(--border-s, rgba(107,58,24,0.30))"}`,
+                      color: user.isAdmin ? "#1e4a18" : "var(--bakery-text-secondary)",
+                      background: user.isAdmin ? "#b8e0b0" : "var(--bakery-bg)",
+                      border: `1px solid ${user.isAdmin ? "#52a844" : "var(--bakery-border)"}`,
                       borderRadius: "99px", padding: "1px 7px",
                       fontFamily: "'Outfit', system-ui, sans-serif",
                     }}>
@@ -224,17 +222,17 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
 
             <div style={{
               width: "34px", height: "34px", borderRadius: "50%",
-              background: "var(--bg, #faf4ec)",
-              border: "1.5px solid var(--border-s, rgba(107,58,24,0.30))",
+              background: "var(--bakery-btn-primary)",
+              border: "1.5px solid var(--bakery-btn-primary-hover)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "0.7rem", fontWeight: 700,
-              color: "var(--dark, #3b1f08)",
+              color: "#ffffff",
               fontFamily: "'Outfit', system-ui, sans-serif",
               flexShrink: 0, userSelect: "none",
             }}>
               {initials || (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="var(--medium, #6b3a18)" strokeWidth="1.8">
+                  stroke="#ffffff" strokeWidth="1.8">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
@@ -242,7 +240,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
             </div>
 
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="var(--pale, #c99870)" strokeWidth="2.2"
+              stroke="var(--bakery-text-muted)" strokeWidth="2.2"
               style={{ transition: "transform 0.2s", transform: menuOpen ? "rotate(180deg)" : "none", flexShrink: 0 }}>
               <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -251,8 +249,8 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           {menuOpen && (
             <div style={{
               position: "absolute", right: 0, top: "calc(100% + 8px)",
-              background: "var(--white, #fff)",
-              border: "1px solid var(--border-s, rgba(107,58,24,0.30))",
+              background: "var(--bakery-card-bg)",
+              border: "1px solid var(--bakery-border)",
               borderRadius: "11px",
               boxShadow: "0 4px 20px rgba(59,31,8,0.12)",
               minWidth: "190px", zIndex: 300, overflow: "hidden",
@@ -263,18 +261,18 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                   <div style={{ padding: "12px 14px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
                     <span style={{
                       fontSize: "0.83rem", fontWeight: 600,
-                      color: "var(--dark, #3b1f08)",
+                      color: "var(--bakery-text-primary)",
                       fontFamily: "'Outfit', system-ui, sans-serif",
                     }}>
                       {user.nombre}
                     </span>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                      <span style={{ fontSize: "0.7rem", color: "var(--mid, #8c5530)" }}>{user.rol}</span>
+                      <span style={{ fontSize: "0.7rem", color: "var(--bakery-text-secondary)" }}>{user.rol}</span>
                       <span style={{
                         fontSize: "0.59rem", fontWeight: 700, letterSpacing: "0.07em",
-                        color: user.isAdmin ? "#1e4a18" : "var(--mid, #8c5530)",
-                        background: user.isAdmin ? "#b8e0b0" : "var(--bg, #faf4ec)",
-                        border: `1px solid ${user.isAdmin ? "#52a844" : "var(--border-s, rgba(107,58,24,0.30))"}`,
+                        color: user.isAdmin ? "var(--bakery-success)" : "var(--bakery-text-secondary)",
+                        background: user.isAdmin ? "var(--bakery-success-bg)" : "var(--bakery-bg)",
+                        border: `1px solid ${user.isAdmin ? "var(--bakery-success)" : "var(--bakery-border)"}`,
                         borderRadius: "99px", padding: "1px 7px",
                         fontFamily: "'Outfit', system-ui, sans-serif",
                       }}>
@@ -282,24 +280,24 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                       </span>
                     </div>
                   </div>
-                  <div style={{ height: "1px", background: "var(--bg, #faf4ec)", margin: "0 12px" }} />
+                  <div style={{ height: "1px", background: "var(--bakery-bg)", margin: "0 12px" }} />
                 </>
               )}
 
               <button
                 className="saip-dd-item"
-                style={{ color: "var(--dark, #3b1f08)" }}
-                onClick={() => { navigate("/perfil"); setMenuOpen(false); }}
+                style={{ color: "var(--bakery-text-primary)" }}
+                onClick={() => { setPerfilOpen(true); setMenuOpen(false); }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="var(--mid, #8c5530)" strokeWidth="1.8" strokeLinecap="round">
+                  stroke="var(--bakery-text-secondary)" strokeWidth="1.8" strokeLinecap="round">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
                 Ver perfil
               </button>
 
-              <div style={{ height: "1px", background: "var(--bg, #faf4ec)", margin: "0 12px" }} />
+              <div style={{ height: "1px", background: "var(--bakery-bg)", margin: "0 12px" }} />
 
               <button className="saip-dd-item saip-dd-danger" onClick={handleLogout}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -314,6 +312,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           )}
         </div>
       </nav>
+      {perfilOpen && <PerfilModal isOpen={perfilOpen} onClose={() => setPerfilOpen(false)} />}
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, ChangeEvent } from "react";
 import React from "react";
+import { Link } from "react-router-dom";
 import './login.css';
 
 export default function Login() {
@@ -108,7 +109,7 @@ export default function Login() {
                     />
                     Recordar contraseña
                   </label>
-                  <a href="#" className="forgot-link">¿Olvidó su contraseña?</a>
+                  <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
                 </div>
 
                 <button type="submit" className="btn-submit" disabled={isLoading}>

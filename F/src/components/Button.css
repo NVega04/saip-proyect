@@ -23,41 +23,41 @@
 
 /* Variantes */
 .saip-btn--primary {
-  background: #5c3d1e;
-  color: #ffffff;
-  border: 1px solid #5c3d1e;
+  background: var(--bakery-btn-primary);
+  color: var(--bakery-btn-text);
+  border: 1px solid var(--bakery-btn-primary);
 }
 .saip-btn--primary:hover:not(:disabled) {
-  background: #7d5a3c;
-  border-color: #7d5a3c;
+  background: var(--bakery-btn-primary-hover);
+  border-color: var(--bakery-btn-primary-hover);
 }
 
 .saip-btn--secondary {
-  background: #ffffff;
-  color: #7d5a3c;
-  border: 1px solid #cfc0b0;
+  background: var(--bakery-card-bg);
+  color: var(--bakery-text-secondary);
+  border: 1px solid var(--bakery-border);
 }
 .saip-btn--secondary:hover:not(:disabled) {
-  background: #f5f0ea;
+  background: var(--bakery-bg);
 }
 
 .saip-btn--danger {
-  background: #ffffff;
-  color: #b94a3a;
-  border: 1px solid #e5b4ae;
+  background: var(--bakery-card-bg);
+  color: var(--bakery-danger);
+  border: 1px solid var(--bakery-danger-bg);
 }
 .saip-btn--danger:hover:not(:disabled) {
-  background: #fdf0ee;
-  border-color: #c9685a;
+  background: var(--bakery-danger-bg);
+  border-color: var(--bakery-danger);
 }
 
 .saip-btn--ghost {
   background: transparent;
-  color: #9e7e62;
+  color: var(--bakery-text-muted);
   border: none;
 }
 .saip-btn--ghost:hover:not(:disabled) {
-  color: #5c3d1e;
+  color: var(--bakery-sidebar-bg);
 }
 
 .saip-btn__icon {
