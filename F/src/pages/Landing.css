@@ -10,18 +10,20 @@
 
 .landing {
   font-family: 'Roboto', sans-serif;
-  background: var(--bg);
+  background: radial-gradient(circle at 10% 20%, #f3eae2 0%, transparent 40%),
+              radial-gradient(circle at 90% 0%, #e8ddd4 0%, transparent 35%),
+              var(--bg);
   color: var(--dark);
   min-height: 100vh;
 }
-
 /* ── NAVBAR ── */
 .landing-nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--white);
-  border-bottom: 1px solid #cfc0b055;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.7);
+  border-bottom: 1px solid #cfc0b033;
   padding: 0 3rem;
   height: 60px;
   display: flex;
@@ -99,16 +101,23 @@
 }
 
 .landing-hero__title {
-  font-size: 2.6rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -1px;
   color: var(--dark);
   margin-bottom: 1.25rem;
   font-family: 'Poppins', 'Roboto', sans-serif;
 }
 
 .landing-hero__title--accent {
-  color: var(--medium);
+  background: linear-gradient(90deg, var(--medium), var(--dark));
+  
+  -webkit-background-clip: text; 
+  background-clip: text;        
+  
+  -webkit-text-fill-color: transparent; 
+  color: transparent; 
 }
 
 .landing-hero__desc {
@@ -168,7 +177,8 @@
 .landing-hero__svg {
   width: 100%;
   max-width: 340px;
-  filter: drop-shadow(0 16px 40px rgba(92, 61, 30, 0.12));
+  filter: drop-shadow(0 25px 60px rgba(92, 61, 30, 0.2));
+  transform: scale(1.05);
 }
 
 .landing-hero__card-row {
@@ -253,16 +263,18 @@
 }
 
 .landing-feature-card {
-  background: var(--bg);
+  background: var(--white);
   border: 1px solid #ede4d8;
-  border-radius: 14px;
-  padding: 1.5rem;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  border-radius: 16px;
+  padding: 1.6rem;
+  transition: all 0.25s ease;
+  animation: fadeUp 0.7s ease;
 }
 
 .landing-feature-card:hover {
-  box-shadow: 0 8px 24px #cfc0b044;
-  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  transform: translateY(-6px);
+  border-color: #e0d5cc;
 }
 
 .landing-feature-card__icon {
@@ -295,6 +307,8 @@
   padding: 5rem 2rem;
   max-width: 1100px;
   margin: 0 auto;
+  background: linear-gradient(180deg, #faf7f3, #f3ebe4);
+  border-radius: 20px;
 }
 
 .landing-about__inner {
@@ -302,6 +316,7 @@
   grid-template-columns: 1.5fr 1fr;
   gap: 4rem;
   align-items: start;
+  animation: fadeUp 0.7s ease;
 }
 
 .landing-about__p {
@@ -325,6 +340,7 @@
   border: 1px solid #e0cfbe;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
+  transition: all 0.2s ease;
 }
 
 /* ── CTA ── */
