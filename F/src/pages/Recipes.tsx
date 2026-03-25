@@ -324,7 +324,9 @@ export default function Recetas(): JSX.Element {
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Gestión de recetas" },
+        { label: "Panadería"},
+        { label: "Recetas" },
+
       ]}
     >
       <Table

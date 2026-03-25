@@ -194,7 +194,7 @@ export default function Units(): JSX.Element {
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Recetas" },
+        { label: "Panadería" },
         { label: "Unidades" },
       ]}
     >

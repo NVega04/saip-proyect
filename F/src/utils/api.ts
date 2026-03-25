@@ -25,7 +25,7 @@ export async function logout(): Promise<void> {
     await apiFetch("/session/logout", { method: "POST" });
   } finally {
     localStorage.clear();
-    window.location.href = "/";
+    window.location.href = "/login";
   }
 }
 

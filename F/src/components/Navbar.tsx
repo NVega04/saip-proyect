@@ -18,7 +18,6 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
   const menuRef                   = useRef<HTMLDivElement>(null);
 
   const { currentUser } = useAuth();
-
   const user = currentUser
     ? {
         nombre:  `${currentUser.first_name} ${currentUser.last_name}`,

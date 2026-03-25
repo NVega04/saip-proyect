@@ -4,15 +4,21 @@ import { getMe, UserProfile } from "../utils/api";
 interface AuthContextType {
   currentUser: UserProfile | null;
   loading: boolean;
+  setCurrentUser: (user: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
+  setCurrentUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  // Lee el usuario del localStorage inmediatamente para mostrarlo sin esperar el fetch
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,13 +27,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
+    // Fetch en segundo plano para obtener datos frescos del backend
     getMe()
-      .then(setCurrentUser)
+      .then((me) => {
+        if (me) {
+          setCurrentUser(me);
+          localStorage.setItem("user", JSON.stringify(me));
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading }}>
+    <AuthContext.Provider value={{ currentUser, loading, setCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -36,4 +48,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-
