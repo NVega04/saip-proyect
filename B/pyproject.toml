@@ -8,11 +8,11 @@ dependencies = [
     "alembic>=1.18.4",
     "cryptography>=46.0.5",
     "fastapi[standard]>=0.129.0",
-    "passlib[bcrypt]>=1.7.4",
     "pymysql>=1.1.2",
     "sqlalchemy>=2.0.46",
     "sqlmodel>=0.0.37",
     "uvicorn>=0.41.0",
     "bcrypt>=4.0.0",
     "slowapi>=0.1.9",
+    "python-dotenv>=1.0.0",
 ]
