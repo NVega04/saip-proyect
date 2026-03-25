@@ -8,6 +8,8 @@ import Badge from "../components/Badge";
 import { apiFetch } from "../utils/api";
 import "./user.css";
 import { useAuth } from "../context/AuthContext";
+import { useAlert } from "../context/AlertContext";
+import { useConfirm } from "../context/ConfirmContext";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -97,9 +99,9 @@ export default function User(): JSX.Element {
   const [form, setForm]             = useState<UserForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
   const [loading, setLoading]       = useState(true);
-
-
   const { currentUser } = useAuth();
+  const { showAlert } = useAlert();
+  const { showConfirm } = useConfirm();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
 
   // ── Cargar usuarios ────────────────────────────────────────────────────────
@@ -194,20 +196,23 @@ export default function User(): JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      showAlert("warning", "Completa los campos obligatorios.");
+      return;
+    }
 
     try {
       if (editTarget) {
-        // ── Edición ──
         const body: Record<string, unknown> = {
           first_name: form.first_name,
-          last_name:  form.last_name,
-          email:      form.email,
-          phone:      form.phone || null,
+          last_name: form.last_name,
+          email: form.email,
+          phone: form.phone || null,
         };
 
         if (isCurrentUserAdmin) {
-          body.role_id  = Number(form.role_id);
+          body.role_id = Number(form.role_id);
           body.is_admin = form.is_admin;
         }
 
@@ -215,11 +220,13 @@ export default function User(): JSX.Element {
           method: "PUT",
           body: JSON.stringify(body),
         });
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar usuario");
+          showAlert("error", err.detail || "Error al actualizar usuario");
           return;
         }
+
         const updated: User = await response.json();
 
         const updatedWithRole: User = {
@@ -227,48 +234,66 @@ export default function User(): JSX.Element {
           role: roles.find((r) => r.id === updated.role_id) ?? editTarget.role,
         };
 
-        setUsers((prev) => prev.map((u) => u.id === editTarget.id ? updatedWithRole : u));
-        
+        setUsers((prev) =>
+          prev.map((u) => (u.id === editTarget.id ? updatedWithRole : u))
+        );
+
+        showAlert("success", "Usuario actualizado correctamente.");
       } else {
         const response = await apiFetch("/users/", {
           method: "POST",
           body: JSON.stringify({
             first_name: form.first_name,
-            last_name:  form.last_name,
-            email:      form.email,
-            phone:      form.phone || null,
-            role_id:    Number(form.role_id),
-            is_admin:   form.is_admin,
+            last_name: form.last_name,
+            email: form.email,
+            phone: form.phone || null,
+            role_id: Number(form.role_id),
+            is_admin: form.is_admin,
           }),
         });
+
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear usuario");
+          showAlert("error", err.detail || "Error al crear usuario");
           return;
         }
+
         const created: User = await response.json();
         setUsers((prev) => [...prev, created]);
+
+        showAlert("success", "Usuario creado correctamente.");
       }
+
       handleCerrar();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
-  };
+};
 
-  const handleEliminar = async (id: number) => {
-    try {
-      const response = await apiFetch(`/users/${id}`, { method: "DELETE" });
-      if (!response.ok) {
-        const err = await response.json();
-        alert(err.detail || "Error al eliminar usuario");
-        return;
-      }
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-    } catch {
-      alert("Error de conexión con el servidor.");
-    }
-  };
+  const handleEliminar = (id: number) => {
+    showConfirm({
+      title: "Eliminar usuario",
+      message: "¿Está seguro que desea eliminar este registro?",
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(`/users/${id}`, { method: "DELETE" });
 
+          if (!response.ok) {
+            const err = await response.json();
+            showAlert("error", err.detail || "Error al eliminar usuario");
+            return;
+          }
+
+          setUsers((prev) => prev.filter((u) => u.id !== id));
+          showAlert("success", "Usuario eliminado correctamente.");
+        } catch {
+          showAlert("error", "Error de conexión con el servidor.");
+        }
+      },
+    });
+  };
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (

@@ -6,7 +6,10 @@ import Modal from "../components/Modal";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
 import Detallemodal from "../components/Detailmodal";
+import { useAlert } from "../context/AlertContext";
+import { useConfirm } from "../context/ConfirmContext";
 import "./Recipes.css";
+
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const INSUMOS_MOCK = [
@@ -155,6 +158,9 @@ export default function Recetas(): JSX.Element {
   const [form, setForm]             = useState<RecetaForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
 
+  const { showAlert } = useAlert();
+  const { showConfirm } = useConfirm();
+
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleCrear = () => {
     setEditTarget(null);
@@ -256,7 +262,11 @@ export default function Recetas(): JSX.Element {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      showAlert("warning", "Completa los campos obligatorios.");
+      return;
+    }
 
     if (editTarget) {
       setRecetas((prev) =>
@@ -264,35 +274,49 @@ export default function Recetas(): JSX.Element {
           r.id === editTarget.id
             ? {
                 ...editTarget,
-                nombre:       form.nombre,
-                descripcion:  form.descripcion || null,
-                estado:       form.estado,
+                nombre: form.nombre,
+                descripcion: form.descripcion || null,
+                estado: form.estado,
                 ingredientes: buildIngredientes(),
               }
             : r
         )
       );
+
+      showAlert("success", "Receta actualizada correctamente.");
     } else {
       const newId =
         recetas.length > 0 ? Math.max(...recetas.map((r) => r.id)) + 1 : 1;
+
       setRecetas((prev) => [
         ...prev,
         {
-          id:           newId,
-          nombre:       form.nombre,
-          descripcion:  form.descripcion || null,
-          estado:       form.estado,
+          id: newId,
+          nombre: form.nombre,
+          descripcion: form.descripcion || null,
+          estado: form.estado,
           ingredientes: buildIngredientes(),
-          created_at:   new Date().toISOString().split("T")[0],
+          created_at: new Date().toISOString().split("T")[0],
         },
       ]);
+
+      showAlert("success", "Receta creada correctamente.");
     }
+
     handleCerrar();
   };
 
   const handleEliminar = (id: number) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar esta receta?")) return;
-    setRecetas((prev) => prev.filter((r) => r.id !== id));
+    showConfirm({
+      title: "Eliminar receta",
+      message: "¿Está seguro que desea eliminar este registro?",
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      onConfirm: () => {
+        setRecetas((prev) => prev.filter((r) => r.id !== id));
+        showAlert("success", "Receta eliminada correctamente.");
+      },
+    });
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
