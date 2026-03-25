@@ -7,6 +7,7 @@ from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, Us
 from src.security import hash_password, generate_temp_password
 from datetime import datetime, timezone
 from src.dependencies import get_current_user
+from src.email import send_welcome_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
@@ -32,11 +33,16 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
 
     temp_password = generate_temp_password()
     hashed = hash_password(temp_password)
-
+    #log de respaldo-------------------------------
     logger.warning(
         f"[SAIP] Password temporal generada para '{user_data.email}': {temp_password}"
     )
-
+    #-----Envio real de contraseña temporal al correo--------
+    try:
+        send_welcome_email(user_data.email, user_data.first_name, temp_password)
+    except Exception as e:
+        print(f"[EMAIL ERROR] No se pudo enviar bienvenida a {user_data.email}: {e}")
+        
     new_user = User(
         first_name=user_data.first_name,
         last_name=user_data.last_name,
