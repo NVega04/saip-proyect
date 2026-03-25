@@ -368,3 +368,12 @@
   .pm-btn-save,
   .pm-pw-btn { width: 100%; justify-content: center; }
 }
+/* -- estilo cerrar sesion en todos los dispositivos-- */
+.pm-pw-btn--danger {
+  color:  #88582f;
+}
+
+.pm-pw-btn--danger:hover {
+  background: #fdf0ef;
+  border-color: #f5c6c2;
+}

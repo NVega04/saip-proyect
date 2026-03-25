@@ -99,6 +99,26 @@ def logout(db: Session = Depends(get_session), current_user: User = Depends(get_
 
     return{"message": "Sesión cerrada correctamante"}
 
+@router.post("/logout-all", status_code=status.HTTP_200_OK, summary="Cerrar sesión en todos los dispositivos")
+def logout_all(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    active_sessions = db.exec(
+        select(SessionApp).where(
+            SessionApp.user_id == current_user.id,
+            SessionApp.is_active == True,
+        )
+    ).all()
+
+    for s in active_sessions:
+        s.is_active = False
+        db.add(s)
+
+    db.commit()
+
+    return {"message": "Sesión cerrada en todos los dispositivos."}
+
 PASSWORD_RESET_EXPIRE_MINUTES = 30
 
 

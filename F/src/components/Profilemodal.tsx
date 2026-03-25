@@ -41,7 +41,22 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
   const [saving, setSaving]         = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [toast, setToast]           = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
 
+  const handleLogoutAll = async () => {
+    setLoggingOutAll(true);
+    try {
+      const res = await apiFetch("/session/logout-all", { method: "POST" });
+      if (!res.ok) throw new Error();
+      localStorage.removeItem("session_token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    } catch {
+      setToast({ msg: "Error al cerrar sesiones", type: "error" });
+    } finally {
+      setLoggingOutAll(false);
+    }
+  };
   // Carga usuario al abrir
   useEffect(() => {
     if (!isOpen) return;
@@ -223,6 +238,14 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
                   <path d="M7 11V7a5 5 0 0110 0v4"/>
                 </svg>
                 Cambiar contraseña
+              </button>
+              <button className="pm-pw-btn pm-pw-btn--danger" onClick={handleLogoutAll} disabled={loggingOutAll}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                {loggingOutAll ? "Cerrando..." : "Cerrar sesión en todos los dispositivos"}
               </button>
 
               {editing && (

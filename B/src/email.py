@@ -32,3 +32,29 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
     server.login(MAIL_USERNAME, MAIL_PASSWORD)
     server.sendmail(MAIL_FROM, to_email, msg.as_string())
     server.quit()
+
+def send_welcome_email(to_email: str, first_name: str, temp_password: str) -> None:
+    subject = "Bienvenido a SAIP - Tu cuenta ha sido creada"
+
+    html_body = f"""
+    <p>Hola <strong>{first_name}</strong>,</p>
+    <p>Tu cuenta en SAIP ha sido creada. Usa las siguientes credenciales para iniciar sesión:</p>
+    <p><strong>Correo:</strong> {to_email}</p>
+    <p><strong>Contraseña temporal:</strong> <code>{temp_password}</code></p>
+    <p style="color:#c0392b;">Por seguridad, cambia tu contraseña después de iniciar sesión por primera vez.</p>
+    <p>Ingresa en: <a href="http://localhost:5173/login">SAIP</a></p>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = MAIL_FROM
+    msg["To"]      = to_email
+    msg.attach(MIMEText(html_body, "html"))
+
+    server = smtplib.SMTP(MAIL_HOST, MAIL_PORT)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(MAIL_USERNAME, MAIL_PASSWORD)
+    server.sendmail(MAIL_FROM, to_email, msg.as_string())
+    server.quit()
