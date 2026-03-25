@@ -326,7 +326,7 @@ export default function Products(): JSX.Element {
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Recetas" },
+        { label: "Panadería" },
         { label: "Productos" },
       ]}
     >

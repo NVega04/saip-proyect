@@ -2,7 +2,8 @@ import { useState, ChangeEvent } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 import './login.css';
-import { apiFetch } from "../utils/api";
+import { apiFetch, getMe } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface LoginResponse {
@@ -24,16 +25,17 @@ interface UserData {
 }
 
 export default function Login() {
+  const { setCurrentUser } = useAuth(); // ← para setear el usuario al contexto al instante
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [remember, setRemember] = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
-  const [email, setEmail] = useState<string>(() => localStorage.getItem("remembered_email")?? "");
-  const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [remember, setRemember]         = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
+  const [email, setEmail]               = useState<string>(() => localStorage.getItem("remembered_email") ?? "");
+  const [password, setPassword]         = useState<string>("");
+  const [isLoading, setIsLoading]       = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const response = await fetch("http://localhost:8000/session/login", {
         method: "POST",
@@ -48,6 +50,8 @@ export default function Login() {
       }
 
       const data: LoginResponse = await response.json();
+
+      // Guarda el token y el usuario en localStorage
       localStorage.setItem("session_token", data.session_token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -56,7 +60,7 @@ export default function Login() {
       } else {
         localStorage.removeItem("remembered_email");
       }
-      
+
       // Cargar módulos del rol
       if (!data.user.is_admin) {
         const modulesRes = await apiFetch(`/role-modules/${data.user.role_id}`);
@@ -69,8 +73,12 @@ export default function Login() {
         localStorage.setItem("modules", JSON.stringify(["all"]));
       }
 
-      window.location.href = "/dashboard";
+      // Obtiene el perfil completo (con role.name) y lo setea en el contexto
+      // para que el Navbar lo muestre inmediatamente sin esperar un nuevo fetch
+      const me = await getMe();
+      if (me) setCurrentUser(me);
 
+      window.location.href = "/dashboard";
     } catch {
       alert("Error de conexión con el servidor.");
     } finally {
@@ -83,15 +91,12 @@ export default function Login() {
       <div className="login-body">
         <div className="card-outer">
           <div className="card-inner">
-
             {/* ── Panel izquierdo ── */}
             <div className="panel-image" />
-
             {/* ── Panel derecho ── */}
             <div className="panel-form">
               <h1 className="form-title">Iniciar sesión</h1>
               <p className="form-desc">Ingrese sus credenciales para acceder a su cuenta.</p>
-
               <form onSubmit={handleSubmit}>
                 <div className="field-group">
                   <label className="field-label" htmlFor="email">Usuario</label>
@@ -138,7 +143,6 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
-
                 <div className="options-row">
                   <label className="checkbox-label">
                     <input
@@ -150,7 +154,6 @@ export default function Login() {
                   </label>
                   <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
                 </div>
-
                 <button type="submit" className="btn-submit" disabled={isLoading}>
                   {isLoading && <span className="btn-spinner" />}
                   {isLoading ? "Verificando..." : "Iniciar sesión"}
@@ -160,7 +163,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-
       {/* ── Footer ── */}
       <footer className="login-footer">
         <div className="footer-links">
