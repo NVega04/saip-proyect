@@ -17,6 +17,7 @@ import RecoverPassword from "./pages/RecoverPassword";
 import Landing from "./pages/Landing";
 import { AlertProvider } from "./context/AlertContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
+import Reports from "./pages/Reports";
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
             <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/reset-password" element={<RecoverPassword />} />
+            <Route path="/reportes" element={<ProtectedRoute><Reports /></ProtectedRoute>}/>
           </Routes>
         </ConfirmProvider>
       </AlertProvider>  

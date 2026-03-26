@@ -1,7 +1,10 @@
 import bcrypt
 import secrets
 import string
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+BOGOTA_TZ = ZoneInfo("America/Bogota")
 
 #Definición de duración de la sessión del usuario en horas
 SESSION_DURATION_HOURS = 8
@@ -27,4 +30,4 @@ def create_session_token() -> str:
     return str(uuid.uuid4())
 
 def get_session_expiry() -> datetime:
-    return datetime.now(timezone.utc) + timedelta(hours=SESSION_DURATION_HOURS)
+    return datetime.now(BOGOTA_TZ) + timedelta(hours=SESSION_DURATION_HOURS)
