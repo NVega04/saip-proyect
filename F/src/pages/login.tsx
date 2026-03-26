@@ -6,6 +6,7 @@ import { apiFetch, getMe } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { useEffect} from "react";
 import Modal from "../components/Modal";
+import Alerta from "../components/Alert";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface LoginResponse {
@@ -36,6 +37,9 @@ export default function Login() {
   const [isLoading, setIsLoading]       = useState<boolean>(false);
   const termsAcceptedRef = useRef<boolean>(false);
   const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertType, setAlertType] = useState<"success" | "error" | "warning" | "info">("error");
   const images = [
   "/Images/Pan 1.jpg",
   "/Images/Pan 2.jpg",
@@ -71,14 +75,18 @@ useEffect(() => {
           setIsLoading(false);
           return;
         }
-        alert(error.detail || "Acceso denegado.");
+        setAlertType("error");
+        setAlertMessage(error.detail || "Acceso denegado.");
+        setShowAlert(true);
         setIsLoading(false);
         return;
       }
 
       if (!response.ok) {
         const error = await response.json();
-        alert(error.detail || "Credenciales inválidas.");
+        setAlertType("error");
+        setAlertMessage(error.detail || "Credenciales inválidas.");
+        setShowAlert(true);
         setIsLoading(false);
         return;
       }
@@ -114,7 +122,9 @@ useEffect(() => {
 
       window.location.href = "/dashboard";
     } catch {
-      alert("Error de conexión con el servidor.");
+      setAlertType("error");
+      setAlertMessage("Error de conexión con el servidor.");
+      setShowAlert(true);
     } finally {
       setIsLoading(false);
     }
@@ -317,6 +327,13 @@ useEffect(() => {
           </div>
         </div>
       </Modal>
+
+      <Alerta
+        show={showAlert}
+        type={alertType}
+        message={alertMessage}
+        onClose={() => setShowAlert(false)}
+      />
     </div>
   );
 }
