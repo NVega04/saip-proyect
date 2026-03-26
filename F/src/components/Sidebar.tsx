@@ -104,7 +104,7 @@ const menuItems: MenuItem[] = [
   { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "recetas",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
+  { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
     { id: "unidades",       label: "Unidades",            path: "/units",      icon: Icon.units,      group: "recetas" },
     { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
     { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
