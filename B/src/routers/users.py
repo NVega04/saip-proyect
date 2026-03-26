@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlmodel import Session, select
 import logging
 from src.database import get_session
 from src.models.models import User, Role, UserStatus, SessionApp
 from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, UserUpdateResponse, UserUpdate
-from src.security import hash_password, generate_temp_password
+from src.security import hash_password, generate_temp_password, verify_password
 from datetime import datetime, timezone
 from src.dependencies import get_current_user
 from src.email import send_welcome_email
@@ -65,6 +65,60 @@ def get_me(
 ):
     
     return current_user
+
+@router.delete("/me", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar cuenta propia con confirmación de contraseña")
+def delete_own_account(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+    x_confirm_password: str = Header(..., alias="X-Confirm-Password"),
+):
+    # Verificar que el usuario no sea administrador
+    if current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Los administradores no pueden eliminar su propia cuenta.",
+        )
+
+    # Verificar que el usuario esté activo
+    if current_user.status == UserStatus.INACTIVE:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="La cuenta ya fue eliminada.",
+        )
+
+    # Validar la contraseña de confirmación
+    if not verify_password(x_confirm_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Contraseña incorrecta. No se puede eliminar la cuenta.",
+        )
+
+    now = datetime.now(timezone.utc)
+    current_user.deleted_at = now
+    current_user.deleted_by = current_user.id
+    current_user.status = UserStatus.INACTIVE
+
+    # Invalidar todas las sesiones activas
+    active_sessions = session.exec(
+        select(SessionApp).where(
+            SessionApp.user_id == current_user.id,
+            SessionApp.is_active == True,
+        )
+    ).all()
+    for s in active_sessions:
+        s.is_active = False
+        session.add(s)
+
+    session.add(current_user)
+    session.commit()
+
+    return DeleteResponseUser(
+        message=f"Cuenta '{current_user.email}' eliminada correctamente.",
+        deleted_at=now,
+        deleted_by=current_user.id,
+    )
+
+
 @router.delete("/{user_id}", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar usuario (soft delete)")
 def delete_user(
     user_id: int,
