@@ -130,7 +130,7 @@ useEffect(() => {
               <p className="form-desc">Ingrese sus credenciales para acceder a su cuenta.</p>
               <form onSubmit={handleSubmit}>
                 <div className="field-group">
-                  <label className="field-label" htmlFor="email">Usuario</label>
+                  <label className="field-label" htmlFor="email">Correo</label>
                   <input
                     id="email"
                     type="text"
@@ -181,7 +181,7 @@ useEffect(() => {
                       checked={remember}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setRemember(e.target.checked)}
                     />
-                    Recordar contraseña
+                    Recordar correo
                   </label>
                   <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
                 </div>
