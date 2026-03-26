@@ -21,31 +21,123 @@ El sistema se enfoca en optimizar procesos transversales de una pequeña panader
 - Producción y registro de materias primas utilizadas
 - Administración básica (reportes simples, finanzas elementales)
 
-**No incluye** (en esta fase): nómina avanzada, contabilidad fiscal completa, e-commerce, integración con POS físicos, ni funcionalidades complejas de logística externa.
+
 
 El proyecto se desarrollará de forma iterativa, comenzando con los módulos prioritarios identificados en el levantamiento inicial.
 
+## Stack Tecnológico
+
+| Capa | Tecnología |
+|------|------------|
+| **Frontend** | React 19 + TypeScript + Vite + pnpm |
+| **Backend** | Python 3.14 + FastAPI + SQLModel |
+| **Base de datos** | MySQL 8.0 (Docker) |
+
+---
+
+## Proceso de Instalación
+
+### Requisitos previos
+
+- [Docker](https://www.docker.com/get-started/) y Docker Compose
+- [Node.js](https://nodejs.org/) (v18+)
+- [pnpm](https://pnpm.io/installation) (`npm install -g pnpm`)
+- [Python](https://www.python.org/) 3.14
+- [uv](https://github.com/astral-sh/uv) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+
+### Pasos
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone <url-del-repositorio>
+   cd saip-proyect
+   ```
+
+2. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env
+   # Editar .env con las credenciales necesarias
+   ```
+
+3. **Instalar dependencias del frontend**
+   ```bash
+   cd F
+   pnpm install
+   ```
+
+4. **Instalar dependencias del backend**
+   ```bash
+   cd ../B
+   uv sync
+   ```
+
+5. **Iniciar la base de datos**
+   ```bash
+   docker-compose up db -d
+   ```
+
+---
+
+## Ejecución del Proyecto
+
+### Modo desarrollo local
+
+```bash
+# Terminal 1: Base de datos
+docker-compose up db -d
+
+# Terminal 2: Backend (puerto 8000)
+cd B
+uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Terminal 3: Frontend (puerto 5173)
+cd F
+pnpm dev
+```
+
+### Modo Docker completo
+
+```bash
+docker-compose up --build
+```
+
+| Servicio | URL |
+|----------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:8000 |
+
+---
+
 ## Estructura del Proyecto
 
-El repositorio está organizado de la siguiente manera:
+```
+saip-proyect/
+├── F/                          # Frontend (React + TypeScript + Vite)
+│   ├── src/
+│   │   ├── components/         # Componentes reutilizables
+│   │   ├── pages/              # Páginas de la aplicación
+│   │   ├── context/            # Contextos (AuthContext.tsx)
+│   │   ├── utils/              # Utilidades (api.ts)
+│   │   ├── App.tsx             # App principal con routing
+│   │   └── main.tsx            # Punto de entrada
+│   ├── eslint.config.js        # ESLint 9 flat config
+│   └── vite.config.js
+├── B/                          # Backend (Python + FastAPI)
+│   ├── src/
+│   │   ├── main.py             # Punto de entrada FastAPI
+│   │   ├── database.py         # Conexión a DB
+│   │   ├── security.py         # Utilidades de auth
+│   │   ├── models/             # Modelos SQLModel
+│   │   ├── routers/             # Rutas de API
+│   │   └── schemas/            # Schemas Pydantic
+│   └── pyproject.toml
+├── docker-compose.yml          # Orquestación Docker
+├── saip.sql                     # Schema de la base de datos
+├── .env                         # Variables de entorno (no committed)
+└── _docs/                       # Documentación de requerimientos
+```
 
-``
-saip-project/
-├── _docs/                  # Documentación general del proyecto
-│   ├── RFs/                # Requerimientos funcionales (cada RF en su archivo .md)
-│   │   ├── README.md       # Este archivo (índice de RFs)
-│   │   ├── RF001_registro_de_usuario.md
-│   │   ├── RF002_inicio_de_sesion.md
-│   │   └── ... (RF-003 a RF-005 y siguientes)
-│   └── [otros documentos: glosario, diagramas, etc.]
-├── backend/                # Código del backend (API, lógica de negocio)
-├── frontend/               # Interfaz web (si aplica)
-├── database/               # Scripts SQL, modelos o migraciones
-├── tests/                  # Pruebas unitarias e integrales
-├── docs/                   # Documentos adicionales (diagramas, mockups, flujogramas)
-├── README.md               # Este archivo (introducción general al proyecto)
-└── [archivos de configuración: .gitignore, docker-compose, etc.]
-``
+---
 
 ## Fases del Proyecto (Resumen)
 
@@ -71,14 +163,6 @@ saip-project/
    - Puesta en producción  
    - Capacitación a usuarios  
    - Monitoreo inicial y ajustes
-
-## Tecnologías (en definición)
-
-- Backend: Python + FastAPI (o framework similar)
-- Frontend: HTML/CSS/JS o framework web ligero
-- Base de datos: PostgreSQL o MySQL 
-- Seguridad: Por validar
-- Despliegue: servidor local o cloud básico (según necesidades)
 
 ¡Bienvenidos al proyecto SAIP!  
 Este sistema busca transformar la gestión diaria de La Parmesana en algo más eficiente y sostenible, y servir como base para otras panaderías similares.
