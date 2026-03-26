@@ -108,7 +108,11 @@ export default function Login() {
         <div className="card-outer">
           <div className="card-inner">
             {/* ── Panel izquierdo ── */}
-            <div className="panel-image" />
+            <img
+              src="/Images/view.jpg"
+              alt="Panadería SAIP"
+              className="panel-image"
+            />
             {/* ── Panel derecho ── */}
             <div className="panel-form">
               <h1 className="form-title">Iniciar sesión</h1>
@@ -166,7 +170,7 @@ export default function Login() {
                       checked={remember}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setRemember(e.target.checked)}
                     />
-                    Recordar contraseña
+                    Recordar correo
                   </label>
                   <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
                 </div>
@@ -182,8 +186,8 @@ export default function Login() {
       {/* ── Footer ── */}
       <footer className="login-footer">
         <div className="footer-links">
-          <a href="#" className="footer-link">Contacto</a>
-          <a href="#" className="footer-link">SAIP</a>
+          <a href="/" className="footer-link">Volver a landing page</a>
+          <a href="/" className="footer-link">SAIP</a>
         </div>
         <div className="footer-social">
           <div className="footer-icon">

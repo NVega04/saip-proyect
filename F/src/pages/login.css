@@ -48,55 +48,13 @@ body {
   background: var(--white);
 }
 
-/* ── Panel Izquierdo (Branding) ── */
+/* ── Panel Izquierdo (Imagen) ── */
 .panel-image {
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  position: relative;
-}
-
-.panel-image::before {
-  content: "";
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  background: var(--pale);
-  filter: blur(80px);
-  border-radius: 50%;
-  top: -20px;
-  left: -20px;
-  opacity: 0.5;
-}
-
-.bakery-content {
-  text-align: center;
-  z-index: 1;
-}
-
-.bakery-content svg {
-  width: 120px;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-}
-
-.brand-name {
-  font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--dark);
-  letter-spacing: 4px;
-  margin-bottom: 0.5rem;
-}
-
-.brand-tagline {
-  font-size: 0.85rem;
-  color: var(--mid);
-  line-height: 1.6;
-  max-width: 240px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  min-height: 400px;
 }
 
 /* ── Panel Derecho (Formulario) ── */
