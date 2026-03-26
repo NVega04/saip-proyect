@@ -445,3 +445,62 @@ body {
     font-size: 0.95rem;
   }
 }
+
+/* ── Modal de Términos ── */
+.terms-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.terms-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--mid);
+  scrollbar-width: thin;
+  scrollbar-color: var(--pale) transparent;
+}
+
+.terms-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terms-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb {
+  background: var(--pale);
+  border-radius: 3px;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--light);
+}
+
+.terms-scroll h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 1rem 0 0.5rem;
+}
+
+.terms-scroll h3:first-child {
+  margin-top: 0;
+}
+
+.terms-scroll p {
+  margin: 0 0 0.75rem;
+}
+
+.terms-actions {
+  border-top: 1px solid var(--bakery-border);
+  padding-top: 1.25rem;
+}
+
+.terms-actions .btn-submit {
+  margin-top: 0;
+}
