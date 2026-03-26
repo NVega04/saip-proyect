@@ -11,6 +11,7 @@ from src.routers import units
 from src.routers import products
 from src.routers import reports
 from src.routers import supply_categories
+from src.routers import supplies
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -41,3 +42,4 @@ app.include_router(units.router)
 app.include_router(products.router)
 app.include_router(reports.router)
 app.include_router(supply_categories.router)
+app.include_router(supplies.router)

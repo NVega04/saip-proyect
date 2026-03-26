@@ -170,8 +170,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
         {/* ── Centro ── */}
         {!isMobile && (
           <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-            <a href="/acerca" className="saip-link">Acerca de nosotros</a>
-            <a href="/contacto" className="saip-link">Contacto</a>
+            <a href="/acerca" className="saip-link">Acerca de SAIP</a>
           </div>
         )}
 
