@@ -35,7 +35,8 @@ class User(SQLModel, table=True):
     role: "Role" = Relationship(
         back_populates="users", sa_relationship_kwargs={"foreign_keys": "User.role_id"}
     )
-
+    accepted_terms: bool = Field(default=False)
+    accepted_terms_at: Optional[datetime] = Field(default=None)
     # Relación: Permite relacionar las sessiones del usurio
     sessions: List["SessionApp"] = Relationship(back_populates="user")
 
