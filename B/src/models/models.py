@@ -256,7 +256,7 @@ class Supply(SQLModel, table=True):
     token: str = Field(
         default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
     )
-    name: str = Field(max_length=150)
+    name: str = Field(max_length=150, unique=True)
     description: Optional[str] = Field(default=None, max_length=500)
 
     category_id: int = Field(foreign_key="supply_categories.id")
