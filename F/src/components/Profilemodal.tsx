@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { apiFetch, getMe, UserProfile } from "../utils/api";
 import "./Profilemodal.css";
+import DeleteAccountModal from "./DeleteAccountModal";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 interface FormState {
@@ -42,6 +43,7 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
   const [showPwModal, setShowPwModal] = useState(false);
   const [toast, setToast]           = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [loggingOutAll, setLoggingOutAll] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleLogoutAll = async () => {
     setLoggingOutAll(true);
@@ -248,6 +250,21 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
                 {loggingOutAll ? "Cerrando..." : "Cerrar sesión en todos los dispositivos"}
               </button>
 
+                {user && !user.is_admin && (
+                <button
+                  className="pm-pw-btn pm-pw-btn--delete"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  </svg>
+                  Eliminar mi cuenta
+                </button>
+                )}
+
               {editing && (
                 <div className="pm-actions">
                   <button className="pm-btn-cancel" onClick={handleCancel} disabled={saving}>
@@ -275,6 +292,12 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
           setToast({ msg: "Contraseña actualizada correctamente", type: "success" });
         }}
       />
+      
+      <DeleteAccountModal
+       isOpen={showDeleteModal}
+       onClose={() => setShowDeleteModal(false)}
+      />
+
     </>
   );
 }

@@ -377,3 +377,14 @@
   background: #fdf0ef;
   border-color: #f5c6c2;
 }
+
+/* Botón eliminar cuenta */
+.pm-pw-btn--delete {
+  color: #c0392b;
+  border-color: #f5c6c2;
+}
+
+.pm-pw-btn--delete:hover {
+  background: #fdf0ef;
+  border-color: #e07060;
+}
