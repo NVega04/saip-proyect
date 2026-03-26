@@ -12,6 +12,8 @@ import Products from "./pages/Products";
 import SupplyCategories from "./pages/SupplyCategories";
 import Supplies from "./pages/Supplies";
 import AcercaDe from "./pages/AcercaDe";
+import Ventas from "./pages/Sales";
+import Inventory from "./pages/inventory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Perfil from "./pages/Profile";
 import './variables.css'
@@ -38,9 +40,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Landing />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            {/* <Route path="/inventario"  element={<ProtectedRoute module="inventario"> <Inventario />  </ProtectedRoute>} /> */}
+            <Route path="/inventario" element={<ProtectedRoute module="inventario"><Inventory /></ProtectedRoute>} />
             <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
-            {/* <Route path="/ventas"      element={<ProtectedRoute module="ventas">     <Ventas />      </ProtectedRoute>} /> */}
+            <Route path="/ventas" element={<ProtectedRoute module="ventas"><Ventas /></ProtectedRoute>} />
             <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
             <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
             <Route path="/units"       element={<ProtectedRoute module="recetas">    <Units />       </ProtectedRoute>} />
