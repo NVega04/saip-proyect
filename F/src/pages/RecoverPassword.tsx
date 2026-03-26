@@ -283,7 +283,7 @@ function ResetForm({ token }: { token: string }) {
 function BackLink() {
   return (
     <div className="rp-back-row">
-      <Link to="/" className="rp-back-link">
+      <Link to="/login" className="rp-back-link">
         Volver al inicio de sesión
       </Link>
     </div>
