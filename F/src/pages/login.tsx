@@ -223,8 +223,6 @@ useEffect(() => {
       {/* ── Footer ── */}
       <footer className="login-footer">
         <div className="footer-links">
-          <a href="#" className="footer-link">Contacto</a>
-          <a href="#" className="footer-link">SAIP</a>
           <Link to="/" className="footer-link">Conócenos</Link>
         </div>
         <div className="footer-social">
