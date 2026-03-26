@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlmodel import Session, select
 from src.database import get_session
 from src.models.models import User, SessionApp, PasswordReset
-from src.schemas.schemas import LoginRequest, LoginResponse, ForgotPasswordRequest, ResetPasswordRequest
+from src.schemas.schemas import (
+    LoginRequest,
+    LoginResponse,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+)
 from src.security import verify_password, get_session_expiry, hash_password
 from src.dependencies import get_current_user
 from slowapi import Limiter
@@ -21,13 +26,19 @@ router = APIRouter(prefix="/session", tags=["Session"])
 
 limiter = Limiter(key_func=get_remote_address)
 
-@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK, summary="Iniciar sesión")
+
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Iniciar sesión",
+)
 @limiter.limit("5/minute")  # ← máximo 5 intentos por minuto por IP
-def login(request: Request, credentials: LoginRequest, db: Session = Depends(get_session)):
+def login(
+    request: Request, credentials: LoginRequest, db: Session = Depends(get_session)
+):
     # 1. Buscar usuario por email
-    user = db.exec(
-        select(User).where(User.email == credentials.email)
-    ).first()
+    user = db.exec(select(User).where(User.email == credentials.email)).first()
 
     if not user:
         raise HTTPException(
@@ -49,7 +60,18 @@ def login(request: Request, credentials: LoginRequest, db: Session = Depends(get
             detail="Credenciales inválidas.",
         )
 
-    # 4. Invalidar sesiones anteriores activas
+    # 4. Verificar aceptación de términos
+    if not user.accepted_terms:
+        if not credentials.accepted_terms:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Debe aceptar los términos y condiciones para continuar.",
+            )
+        user.accepted_terms = True
+        user.accepted_terms_at = datetime.now(BOGOTA_TZ)
+        db.add(user)
+
+    # 5. Invalidar sesiones anteriores activas
     old_sessions = db.exec(
         select(SessionApp).where(
             SessionApp.user_id == user.id,
@@ -60,7 +82,7 @@ def login(request: Request, credentials: LoginRequest, db: Session = Depends(get
         s.is_active = False
         db.add(s)
 
-    # 5. Crear nueva sesión
+    # 6. Crear nueva sesión
     new_session = SessionApp(
         token=str(uuid.uuid4()),
         user_id=user.id,
@@ -76,12 +98,17 @@ def login(request: Request, credentials: LoginRequest, db: Session = Depends(get
         session_token=new_session.token,
         expires_at=new_session.expires_at,
         user=user,
+        terms_required=False,
     )
 
-@router.post("/logout",status_code=status.HTTP_200_OK, summary="Cerrar sesión")
-def logout(db: Session = Depends(get_session), current_user: User = Depends(get_current_user), session_token: str = Header(..., alias="session_token"),
+
+@router.post("/logout", status_code=status.HTTP_200_OK, summary="Cerrar sesión")
+def logout(
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+    session_token: str = Header(..., alias="session_token"),
 ):
-    #Buscar la sesión activa
+    # Buscar la sesión activa
     user_session = db.exec(
         select(SessionApp).where(
             SessionApp.token == session_token,
@@ -91,18 +118,22 @@ def logout(db: Session = Depends(get_session), current_user: User = Depends(get_
 
     if not user_session:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Sesión no encontrada"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Sesión no encontrada"
         )
-    
+
     # Invalidar la sesión
     user_session.is_active = False
     db.add(user_session)
     db.commit()
 
-    return{"message": "Sesión cerrada correctamante"}
+    return {"message": "Sesión cerrada correctamante"}
 
-@router.post("/logout-all", status_code=status.HTTP_200_OK, summary="Cerrar sesión en todos los dispositivos")
+
+@router.post(
+    "/logout-all",
+    status_code=status.HTTP_200_OK,
+    summary="Cerrar sesión en todos los dispositivos",
+)
 def logout_all(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
@@ -121,6 +152,7 @@ def logout_all(
     db.commit()
 
     return {"message": "Sesión cerrada en todos los dispositivos."}
+
 
 PASSWORD_RESET_EXPIRE_MINUTES = 30
 
@@ -157,12 +189,13 @@ def forgot_password(
     reset_entry = PasswordReset(
         user_id=user.id,
         token=raw_token,
-        expires_at=datetime.now(BOGOTA_TZ) + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
+        expires_at=datetime.now(BOGOTA_TZ)
+        + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
     )
     db.add(reset_entry)
     db.commit()
 
-    reset_link = f"{os.getenv('FRONTEND_URL')}/reset-password?token={raw_token}"  
+    reset_link = f"{os.getenv('FRONTEND_URL')}/reset-password?token={raw_token}"
     try:
         send_reset_email(user.email, reset_link)
     except Exception as e:
