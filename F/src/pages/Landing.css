@@ -370,7 +370,7 @@
 }
 
 .landing-about__pills {
-  display: flex;
+  display:flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   padding-top: 1rem;
@@ -384,6 +384,62 @@
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
   transition: all 0.2s ease;
+}
+
+.landing-about__pill--github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #5c3d1e;
+  border: 1px solid #e8ddd4;
+  background: #f0e8df;
+  transition: all 0.25s ease;
+}
+
+.landing-about__pill--github:hover {
+  background: #5c3d1e;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.landing-about__timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline-title {
+  margin-bottom: 16px;
+  color: #5c3d1e;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding-left: 20px;
+  border-left: 2px solid #e8ddd4;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -7px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: #5c3d1e;
+  border-radius: 50%;
+}
+
+.timeline-item strong {
+  font-size: 14px;
+  color: #5c3d1e;
+}
+
+.timeline-item p {
+  font-size: 13px;
+  color: #8c6f5a;
+  margin: 4px 0 0;
 }
 
 /* ── CTA ── */
@@ -432,6 +488,20 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.landing-footer__github {
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  color: #7d5a3c;
+  font-size: 20px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.landing-footer__github:hover {
+  color: #5c3d1e;
+  transform: scale(1.15);
 }
 
 .landing-footer__links a,
