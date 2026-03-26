@@ -48,55 +48,13 @@ body {
   background: var(--white);
 }
 
-/* ── Panel Izquierdo (Branding) ── */
+/* ── Panel Izquierdo (Imagen) ── */
 .panel-image {
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  position: relative;
-}
-
-.panel-image::before {
-  content: "";
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  background: var(--pale);
-  filter: blur(80px);
-  border-radius: 50%;
-  top: -20px;
-  left: -20px;
-  opacity: 0.5;
-}
-
-.bakery-content {
-  text-align: center;
-  z-index: 1;
-}
-
-.bakery-content svg {
-  width: 120px;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-}
-
-.brand-name {
-  font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: var(--dark);
-  letter-spacing: 4px;
-  margin-bottom: 0.5rem;
-}
-
-.brand-tagline {
-  font-size: 0.85rem;
-  color: var(--mid);
-  line-height: 1.6;
-  max-width: 240px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  min-height: 400px;
 }
 
 /* ── Panel Derecho (Formulario) ── */
@@ -383,4 +341,63 @@ body {
     padding: 0.9rem;
     font-size: 0.95rem;
   }
+}
+
+/* ── Modal de Términos ── */
+.terms-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.terms-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--mid);
+  scrollbar-width: thin;
+  scrollbar-color: var(--pale) transparent;
+}
+
+.terms-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terms-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb {
+  background: var(--pale);
+  border-radius: 3px;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--light);
+}
+
+.terms-scroll h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 1rem 0 0.5rem;
+}
+
+.terms-scroll h3:first-child {
+  margin-top: 0;
+}
+
+.terms-scroll p {
+  margin: 0 0 0.75rem;
+}
+
+.terms-actions {
+  border-top: 1px solid var(--bakery-border);
+  padding-top: 1.25rem;
+}
+
+.terms-actions .btn-submit {
+  margin-top: 0;
 }

@@ -18,7 +18,7 @@ export default function RecoverPassword() {
       <div className="login-body">
         <div className="card-outer">
           <div className="card-inner">
-            <div className="panel-image" />
+            <img src="/Images/view.jpg" alt="Panadería SAIP" className="panel-image" />
             <div className="panel-form">
               {token ? <ResetForm token={token} /> : <ForgotForm />}
             </div>

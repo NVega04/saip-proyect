@@ -33,6 +33,8 @@ class UserResponse(BaseModel):
     is_admin: bool
     status: UserStatus
     created_at: datetime
+    accepted_terms: bool
+    accepted_terms_at: Optional[datetime]
 
     class Config:
         from_attributes = True
@@ -111,12 +113,14 @@ class RolePublic(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    accepted_terms: bool = False
 
 
 class LoginResponse(BaseModel):
     session_token: str
     expires_at: datetime
     user: UserResponse
+    terms_required: bool = False
 
 
 class ForgotPasswordRequest(BaseModel):

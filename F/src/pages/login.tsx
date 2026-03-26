@@ -1,9 +1,10 @@
-import { useState, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 import './login.css';
 import { apiFetch, getMe } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import Modal from "../components/Modal";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface LoginResponse {
@@ -25,13 +26,15 @@ interface UserData {
 }
 
 export default function Login() {
-  const { setCurrentUser } = useAuth(); // ← para setear el usuario al contexto al instante
+  const { setCurrentUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [remember, setRemember]         = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
   const [email, setEmail]               = useState<string>(() => localStorage.getItem("remembered_email") ?? "");
   const [password, setPassword]         = useState<string>("");
   const [isLoading, setIsLoading]       = useState<boolean>(false);
+  const termsAcceptedRef = useRef<boolean>(false);
+  const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -40,12 +43,25 @@ export default function Login() {
       const response = await fetch("http://localhost:8000/session/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, accepted_terms: termsAcceptedRef.current }),
       });
+
+      if (response.status === 403) {
+        const error = await response.json();
+        if (error.detail?.includes("términos")) {
+          setShowTermsModal(true);
+          setIsLoading(false);
+          return;
+        }
+        alert(error.detail || "Acceso denegado.");
+        setIsLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         const error = await response.json();
         alert(error.detail || "Credenciales inválidas.");
+        setIsLoading(false);
         return;
       }
 
@@ -92,12 +108,16 @@ export default function Login() {
         <div className="card-outer">
           <div className="card-inner">
             {/* ── Panel izquierdo ── */}
-            <div className="panel-image" />
+            <img
+              src="/Images/view.jpg"
+              alt="Panadería SAIP"
+              className="panel-image"
+            />
             {/* ── Panel derecho ── */}
             <div className="panel-form">
               <h1 className="form-title">Iniciar sesión</h1>
               <p className="form-desc">Ingrese sus credenciales para acceder a su cuenta.</p>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="login-form">
                 <div className="field-group">
                   <label className="field-label" htmlFor="email">Usuario</label>
                   <input
@@ -150,7 +170,7 @@ export default function Login() {
                       checked={remember}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setRemember(e.target.checked)}
                     />
-                    Recordar contraseña
+                    Recordar correo
                   </label>
                   <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
                 </div>
@@ -166,8 +186,8 @@ export default function Login() {
       {/* ── Footer ── */}
       <footer className="login-footer">
         <div className="footer-links">
-          <a href="#" className="footer-link">Contacto</a>
-          <a href="#" className="footer-link">SAIP</a>
+          <a href="/" className="footer-link">Volver a landing page</a>
+          <a href="/" className="footer-link">SAIP</a>
         </div>
         <div className="footer-social">
           <div className="footer-icon">
@@ -184,6 +204,91 @@ export default function Login() {
           </div>
         </div>
       </footer>
+
+      {/* ── Modal Términos y Condiciones ── */}
+      <Modal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Términos y Condiciones"
+        width="560px"
+      >
+        <div className="terms-content">
+          <div className="terms-scroll">
+            <h3>1. Aceptación de los términos</h3>
+            <p>
+              Al acceder y utilizar SAIP (Sistema Administrativo Integral de Productos), 
+              usted acepta estar sujeto a estos términos y condiciones. Si no está de 
+              acuerdo con alguno de estos términos, por favor no utilice el sistema.
+            </p>
+
+            <h3>2. Descripción del servicio</h3>
+            <p>
+              SAIP es una plataforma de gestión administrativa diseñada para el control 
+              de inventario y productos de panadería. El sistema permite administrar 
+              usuarios, productos, unidades de medida y demás elementos relacionados 
+              con la operación del negocio.
+            </p>
+
+            <h3>3. Cuenta de usuario</h3>
+            <p>
+              Para acceder al sistema, cada usuario recibirá credenciales de acceso 
+              personalizadas (correo electrónico y contraseña). El usuario es responsable 
+              de mantener la confidencialidad de sus credenciales y de todas las 
+              actividades que ocurran bajo su cuenta.
+            </p>
+
+            <h3>4. Uso adecuado</h3>
+            <p>
+              El usuario se compromete a utilizar el sistema únicamente para fines 
+              legítimos y de acuerdo con las políticas internas de la organización. 
+              Queda prohibido utilizar el sistema para actividades ilegales o no 
+              autorizadas.
+            </p>
+
+            <h3>5. Protección de datos</h3>
+            <p>
+              Sus datos personales serán tratados de acuerdo con las políticas de 
+              privacidad de la organización. Nos comprometemos a proteger su 
+              información y utilizarla únicamente para los fines contemplados 
+              en este servicio.
+            </p>
+
+            <h3>6. Modificaciones del servicio</h3>
+            <p>
+              SAIP se reserva el derecho de modificar o discontinuar el servicio 
+              en cualquier momento, con o sin previo aviso. No nos haremos 
+              responsables por la pérdida de datos derivada de estas modificaciones.
+            </p>
+
+            <h3>7. Limitación de responsabilidad</h3>
+            <p>
+              El sistema se proporciona "tal cual". No garantizamos que el servicio 
+              sea ininterrumpido, seguro o libre de errores. El usuario utiliza el 
+              sistema bajo su propia responsabilidad.
+            </p>
+
+            <h3>8. Ley aplicable</h3>
+            <p>
+              Estos términos se rigen por las leyes vigentes. Cualquier disputa 
+              derivada del uso del sistema será resuelta de acuerdo con los 
+              procedimientos legales aplicables.
+            </p>
+          </div>
+          <div className="terms-actions">
+            <button
+              type="button"
+              className="btn-submit"
+              onClick={() => {
+                termsAcceptedRef.current = true;
+                setShowTermsModal(false);
+                document.querySelector<HTMLFormElement>(".login-form")?.requestSubmit();
+              }}
+            >
+              Aceptar y continuar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
