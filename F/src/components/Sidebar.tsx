@@ -105,15 +105,15 @@ const menuItems: MenuItem[] = [
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
   { id: "recetas",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
-    { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
     { id: "unidades",       label: "Unidades",            path: "/units",      icon: Icon.units,      group: "recetas" },
+    { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
+    { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
     { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
     { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
   ]},
   { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "contacto",         label: "Contáctanos",        path: "/contacto",   icon: Icon.contact,    group: "soporte" },
   { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
 ];
 
@@ -121,7 +121,7 @@ const groupLabels: Record<string, string> = {
   principal:      "Principal",
   operaciones:    "Operaciones",
   administracion: "Administración",
-  soporte:        "Soporte",
+  soporte:        "Información",
 };
 
 const groupOrder = ["principal", "operaciones", "administracion", "soporte"];
