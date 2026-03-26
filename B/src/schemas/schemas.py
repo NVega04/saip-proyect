@@ -276,7 +276,6 @@ class SupplyCategoryCreate(BaseModel):
 class SupplyCategoryUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    status: Optional[str] = None
 
 
 class SupplyCategoryResponse(BaseModel):
