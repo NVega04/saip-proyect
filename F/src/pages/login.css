@@ -15,14 +15,15 @@ body {
 }
 
 .login-root {
-  min-height: 100vh;
+  min-height:auto;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   background: radial-gradient(circle at top right, var(--pale) 0%, var(--bg) 60%);
 }
 
 .login-body {
-  flex: 1;
+  flex: unset;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,32 +36,131 @@ body {
   max-width: 900px;
   background: var(--white);
   border-radius: 24px;
-  padding: 12px;
+  padding: 16px;
   box-shadow: 0 20px 40px rgba(92, 61, 30, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0,0,0,0.08);
+
 }
 
 .card-inner {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
+  grid-template-columns: 1fr 1fr;
   border-radius: 16px;
   overflow: hidden;
   background: var(--white);
+  position: relative;
 }
 
-/* ── Panel Izquierdo (Imagen) ── */
+/* ── Panel Izquierdo (Branding) ── */
 .panel-image {
+  background: var(--mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  margin: 16px;
+  overflow: hidden;
+  padding: 12px;
+  height: 500px;
+  border-radius: 16px 16px 16px 16px;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.panel-image::before {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: var(--pale);
+  filter: blur(80px);
+  border-radius: 50%;
+  top: -20px;
+  left: -20px;
+  opacity: 0.5;
+}
+
+.carousel-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  min-height: 400px;
+  animation: fadeIn 0.6s ease;
+  border-radius: 12px 12px 12px 12px;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.carousel-logo-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  z-index: 2;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px); 
+
+  padding: 20px;
+  border-radius: 18px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-logo-card img {
+  width: 150px;
+  height: auto;
+}
+
+/* animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bakery-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.bakery-content svg {
+  width: 120px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+}
+
+.brand-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--dark);
+  letter-spacing: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.brand-tagline {
+  font-size: 0.85rem;
+  color: var(--mid);
+  line-height: 1.6;
+  max-width: 240px;
 }
 
 /* ── Panel Derecho (Formulario) ── */
 .panel-form {
   padding: 3.5rem 3rem;
   background: var(--white);
+  flex: 1;
 }
 
 .form-title {
@@ -212,13 +312,14 @@ body {
 
 /* ── Footer ── */
 .login-footer {
-  padding: 1.5rem 4rem;
+  padding: 1rem 2rem;
   background: transparent;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
+  margin-top: 10px;
 }
 
 .footer-links { display: flex; align-items: center; }
@@ -285,11 +386,13 @@ body {
     min-height: 100vh;
   }
 
-  .card-inner {
-    grid-template-columns: 1fr;
-    border-radius: 0;
-    min-height: 100vh;
-  }
+.card-inner {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 500%;
+  grid-template-columns: 1fr 1fr;
+}
 
   /* Panel de imagen oculto en móvil */
   .panel-image {
@@ -341,63 +444,4 @@ body {
     padding: 0.9rem;
     font-size: 0.95rem;
   }
-}
-
-/* ── Modal de Términos ── */
-.terms-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.terms-scroll {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: var(--mid);
-  scrollbar-width: thin;
-  scrollbar-color: var(--pale) transparent;
-}
-
-.terms-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.terms-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.terms-scroll::-webkit-scrollbar-thumb {
-  background: var(--pale);
-  border-radius: 3px;
-}
-
-.terms-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--light);
-}
-
-.terms-scroll h3 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--dark);
-  margin: 1rem 0 0.5rem;
-}
-
-.terms-scroll h3:first-child {
-  margin-top: 0;
-}
-
-.terms-scroll p {
-  margin: 0 0 0.75rem;
-}
-
-.terms-actions {
-  border-top: 1px solid var(--bakery-border);
-  padding-top: 1.25rem;
-}
-
-.terms-actions .btn-submit {
-  margin-top: 0;
 }

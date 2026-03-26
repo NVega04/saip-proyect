@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./Landing.css";
 import { useEffect } from "react";
+import { FaGithub } from "react-icons/fa";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -174,22 +175,90 @@ export default function Landing() {
               ¿por qué tantos negocios locales siguen gestionando sus productos en cuadernos
               o en hojas de cálculo desconectadas?
             </p>
+
             <p className="landing-about__p">
-              Lo que empezó como una tarea académica se convirtió en una herramienta real.
-              Diseñamos SAIP pensando en el panadero que abre a las 4am, en el administrador
-              que necesita saber qué hay en bodega sin revisar físicamente, y en el cajero
-              que registra ventas sin complicaciones.
+              A medida que avanzábamos, entendimos que el problema no era solo la falta de herramientas,
+              sino la falta de soluciones diseñadas realmente para el día a día de un negocio. Por eso,
+              decidimos construir SAIP con un enfoque práctico, pensando en la operación real.
             </p>
+
             <p className="landing-about__p">
-              Hoy SAIP es un sistema integral que centraliza inventario, ventas, recetas
-              y gestión de usuarios — construido con tecnología moderna y con el propósito
-              de que cualquier negocio, grande o pequeño, pueda tener el control que merece.
+              El sistema fue desarrollado utilizando <strong>Python y FastAPI</strong> para el backend,
+              permitiendo una arquitectura robusta, escalable y segura. Implementamos autenticación,
+              manejo de sesiones, control de usuarios y una estructura modular orientada a servicios.
+            </p>
+
+            <p className="landing-about__p">
+              En el frontend utilizamos <strong>React con TypeScript</strong>, construyendo una interfaz
+              moderna, intuitiva y dinámica. Diseñamos componentes reutilizables, navegación fluida
+              y una experiencia centrada en la usabilidad para facilitar la gestión diaria.
+            </p>
+
+            <p className="landing-about__p">
+              Durante el desarrollo integramos funcionalidades clave como control de inventario,
+              registro de ventas, gestión de roles y manejo de proveedores, conectando todo mediante
+              APIs eficientes y bien estructuradas.
+            </p>
+
+            <p className="landing-about__p">
+              Hoy SAIP no es solo un proyecto académico, sino una solución real en evolución,
+              construida con tecnologías modernas y con la visión de escalar hacia un sistema
+              completo para la administración de negocios.
             </p>
           </div>
           <div className="landing-about__pills">
-            {["Proyecto académico", "Código abierto", "Hecho con 🤎", "React + FastAPI", "Para negocios"].map((p) => (
+            {["Proyecto académico", "Código abierto", "Hecho con 🤎", "React + Typescript", "Python + FastAPI", "Dockerfile", "Para negocios"].map((p) => (
               <span key={p} className="landing-about__pill">{p}</span>
             ))}
+            {/* 🔥 GITHUB */}
+            <a
+              href="https://github.com/NVega04/saip-proyect.git"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-about__pill landing-about__pill--github"
+            >
+              <FaGithub />
+              GitHub
+            </a>
+            <div className="landing-about__timeline">
+              <h3 className="timeline-title">Evolución del proyecto</h3>
+
+              <div className="timeline-item">
+                <div className="timeline-dot" />
+                <div>
+                  <strong>Inicio académico</strong>
+                  <p>Idea inicial planteada en el entorno formativo con enfoque en problemas reales.</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot" />
+                <div>
+                  <strong>Diseño del sistema</strong>
+                  <p>Definición de arquitectura, modelos de datos y flujo de usuarios.</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot" />
+                <div>
+                  <strong>Backend</strong>
+                  <p>Desarrollo con Python y FastAPI, implementación de autenticación, sesiones y API REST.</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot" />
+                <div>
+                  <strong>Frontend</strong>
+                  <p>Construcción con React y TypeScript, enfoque en UX y componentes reutilizables.</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot" />
+                <div>
+                  <strong>Versión actual</strong>
+                  <p>Sistema funcional con módulos de gestión de usuarios, gestión de roles, recetas, inventario, etc</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -214,6 +283,14 @@ export default function Landing() {
           <a href="#about">Acerca de</a>
           <span className="landing-footer__sep">·</span>
           <span onClick={() => navigate("/login")}>Iniciar sesión</span>
+          <a
+            href="https://github.com/NVega04/saip-proyect.git"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-footer__github"
+          >
+            <FaGithub />
+          </a>
         </div>
       </footer>
 
