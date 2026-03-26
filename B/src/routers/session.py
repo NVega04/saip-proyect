@@ -9,10 +9,13 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 import uuid
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import secrets
 from src.email import send_reset_email
 from src.schemas.schemas import ChangePasswordRequest
+from zoneinfo import ZoneInfo
+
+BOGOTA_TZ = ZoneInfo("America/Bogota")
 
 router = APIRouter(prefix="/session", tags=["Session"])
 
@@ -154,7 +157,7 @@ def forgot_password(
     reset_entry = PasswordReset(
         user_id=user.id,
         token=raw_token,
-        expires_at=datetime.now(timezone.utc) + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
+        expires_at=datetime.now(BOGOTA_TZ) + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
     )
     db.add(reset_entry)
     db.commit()
@@ -193,7 +196,7 @@ def reset_password(
             detail="El token ya fue utilizado.",
         )
 
-    if datetime.now(timezone.utc) > reset_entry.expires_at.replace(tzinfo=timezone.utc):
+    if datetime.now(BOGOTA_TZ) > reset_entry.expires_at.replace(tzinfo=BOGOTA_TZ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El token ha expirado.",
@@ -202,7 +205,7 @@ def reset_password(
     # Actualizar contraseña
     user = reset_entry.user
     user.password_hash = hash_password(body.new_password)
-    user.updated_at = datetime.now(timezone.utc)
+    user.updated_at = datetime.now(BOGOTA_TZ)
     db.add(user)
 
     # Marcar token como usado
@@ -242,7 +245,7 @@ def change_password(
         )
 
     current_user.password_hash = hash_password(body.new_password)
-    current_user.updated_at = datetime.now(timezone.utc)
+    current_user.updated_at = datetime.now(BOGOTA_TZ)
     db.add(current_user)
     db.commit()
 

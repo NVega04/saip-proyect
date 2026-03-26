@@ -1,9 +1,12 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Integer, ForeignKey
 from enum import Enum
 import uuid
+from zoneinfo import ZoneInfo
+
+BOGOTA_TZ = ZoneInfo("America/Bogota")
 
 
 class UserStatus(str, Enum):
@@ -24,7 +27,7 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, index=True, max_length=150)
     phone: Optional[str] = Field(default=None, max_length=20)
     password_hash: str = Field(max_length=255)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     status: UserStatus = Field(default=UserStatus.ACTIVE)
     is_admin: bool = Field(default=False)
 
@@ -60,7 +63,7 @@ class Role(SQLModel, table=True):
     )
     name: str = Field(max_length=100)
     description: str = Field(max_length=500)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
 
     # -- Auditoria de actualización-------------------
     updated_at: Optional[datetime] = Field(default=None)
@@ -104,7 +107,7 @@ class SessionApp(SQLModel, table=True):
         default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
     )
     user_id: int = Field(foreign_key="users.id")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     expires_at: datetime
     is_active: bool = Field(default=True)
     user: "User" = Relationship(back_populates="sessions")
@@ -117,7 +120,7 @@ class PasswordReset(SQLModel, table=True):
     token: str = Field(unique=True, index=True, max_length=255)
     user_id: int = Field(foreign_key="users.id")
     expires_at: datetime
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     used: bool = Field(default=False)
 
     user: "User" = Relationship()
@@ -161,7 +164,7 @@ class Unit(SQLModel, table=True):
     description: Optional[str] = Field(default=None, max_length=255)
     quantity: float = Field(default=0)
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     created_by: Optional[int] = Field(default=None, foreign_key="users.id")
     updated_at: Optional[datetime] = Field(default=None)
     updated_by: Optional[int] = Field(default=None, foreign_key="users.id")
@@ -192,7 +195,7 @@ class Product(SQLModel, table=True):
     is_locked: bool = Field(default=False)
     status: str = Field(default="active")
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     created_by: Optional[int] = Field(default=None, foreign_key="users.id")
     updated_at: Optional[datetime] = Field(default=None)
     updated_by: Optional[int] = Field(default=None, foreign_key="users.id")
