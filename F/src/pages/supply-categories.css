@@ -1,0 +1,121 @@
+.scf {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scss__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scf__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scf__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dark, #3b1f08);
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.scf__required {
+  color: #c0392b;
+  margin-left: 2px;
+}
+
+.scf__input,
+.scf__textarea,
+.scf__select {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-s, rgba(107, 58, 24, 0.30));
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-family: 'Outfit', system-ui, sans-serif;
+  color: var(--dark, #3b1f08);
+  background: var(--white, #fff);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.scf__input:focus,
+.scf__textarea:focus,
+.scf__select:focus {
+  border-color: var(--medium, #6b3a18);
+  box-shadow: 0 0 0 3px rgba(107, 58, 24, 0.12);
+}
+
+.scf__input--error {
+  border-color: #c0392b;
+}
+
+.scf__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+}
+
+.scf__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.scf__error {
+  font-size: 0.75rem;
+  color: #c0392b;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.scf__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, rgba(107, 58, 24, 0.18));
+}
+
+.sc-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Outfit', system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.sc-badge--active {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+}
+
+.sc-badge--inactive {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.sc-supplies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sc-supply-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background-color: rgba(107, 58, 24, 0.08);
+  color: var(--dark, #3b1f08);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.sc-supplies-empty {
+  color: rgba(107, 58, 24, 0.5);
+  font-size: 0.8rem;
+  font-style: italic;
+  font-family: 'Outfit', system-ui, sans-serif;
+}

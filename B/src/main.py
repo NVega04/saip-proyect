@@ -9,7 +9,8 @@ from slowapi.errors import RateLimitExceeded
 from src.routers import role_modules
 from src.routers import units
 from src.routers import products
-from src.routers.reports import router as reports_router
+from src.routers import reports
+from src.routers import supply_categories
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -38,4 +39,5 @@ app.include_router(session.router)
 app.include_router(role_modules.router)
 app.include_router(units.router)
 app.include_router(products.router)
-app.include_router(reports_router)
+app.include_router(reports.router)
+app.include_router(supply_categories.router)

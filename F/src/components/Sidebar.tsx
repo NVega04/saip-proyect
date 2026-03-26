@@ -105,9 +105,10 @@ const menuItems: MenuItem[] = [
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
   { id: "recetas",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
-    { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
+    { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
     { id: "unidades",       label: "Unidades",            path: "/units",      icon: Icon.units,      group: "recetas" },
     { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
+    { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
   ]},
   { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },

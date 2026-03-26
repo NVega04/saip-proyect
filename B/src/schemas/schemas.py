@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional
+from typing import Optional, List
 from src.models.models import UserStatus, RoleStatus, ProductStatus
 from datetime import datetime
 
@@ -255,3 +255,48 @@ class ProductResponse(BaseModel):
         if isinstance(v, str):
             return ProductStatus(v.lower())
         return v
+
+
+## Esquemas relacionados a SupplyCategory
+class SupplyBasic(BaseModel):
+    id: int
+    token: str
+    name: str
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
+class SupplyCategoryCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class SupplyCategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
+class SupplyCategoryResponse(BaseModel):
+    id: int
+    token: str
+    name: str
+    description: Optional[str]
+    status: str
+    created_at: datetime
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
+    supplies: List[SupplyBasic]
+
+    class Config:
+        from_attributes = True
+
+
+class DeleteResponseSupplyCategory(BaseModel):
+    message: str
+    deleted_at: datetime
+    deleted_by: int
