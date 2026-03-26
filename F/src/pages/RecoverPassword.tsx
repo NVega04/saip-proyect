@@ -7,6 +7,23 @@ import { useAlert } from "../context/AlertContext";
 
 export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
+  const images = [
+  "/Images/Pan 1.jpg",
+  "/Images/Pan 2.jpg",
+  "/Images/Pan 3.jpg",
+  "/Images/Pan 4.jpg",
+  "/Images/Pan 5.jpeg",
+];
+
+const [currentIndex, setCurrentIndex] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -18,7 +35,19 @@ export default function RecoverPassword() {
       <div className="login-body">
         <div className="card-outer">
           <div className="card-inner">
-            <img src="/Images/view.jpg" alt="Panadería SAIP" className="panel-image" />
+            <div className="panel-image">
+              <img
+                key={currentIndex}
+                src={images[currentIndex]}
+                className="carousel-image"
+              />
+
+              <div className="carousel-overlay" />
+
+              <div className="carousel-logo-card">
+                <img src="/Images/Logo-saip.png" alt="SAIP" />
+              </div>
+            </div>
             <div className="panel-form">
               {token ? <ResetForm token={token} /> : <ForgotForm />}
             </div>
@@ -30,6 +59,7 @@ export default function RecoverPassword() {
         <div className="footer-links">
           <a href="#" className="footer-link">Contacto</a>
           <a href="#" className="footer-link">SAIP</a>
+          <Link to="/" className="footer-link">Conócenos</Link>
         </div>
         <div className="footer-social">
           <div className="footer-icon">
@@ -283,7 +313,7 @@ function ResetForm({ token }: { token: string }) {
 function BackLink() {
   return (
     <div className="rp-back-row">
-      <Link to="/" className="rp-back-link">
+      <Link to="/login" className="rp-back-link">
         Volver al inicio de sesión
       </Link>
     </div>
