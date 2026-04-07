@@ -96,23 +96,31 @@ const Icon = {
     <polyline points="10 9 9 9 8 9"/>
   </svg>
   ),
+  providers:(
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+       <rect x="1" y="3" width="15" height="13" rx="1" />
+       <path d="M16 8h4l3 5v4h-7V8z" />
+       <circle cx="5.5" cy="18.5" r="2.5" />
+       <circle cx="18.5" cy="18.5" r="2.5" />
+    </svg>
+  ),
 };
 
 const menuItems: MenuItem[] = [
   { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
   { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
-  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.suppliers,  group: "operaciones" },
+  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.providers,  group: "operaciones" },
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
   { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
-    { id: "unidades",       label: "Unidades",            path: "/units",      icon: Icon.units,      group: "recetas" },
+    { id: "unidades",       label: "Unidades de medida",            path: "/units",      icon: Icon.units,      group: "recetas" },
     { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
     { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
     { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
     { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
   ]},
   { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
-  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
+  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.users,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
   { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
 ];
