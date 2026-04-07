@@ -2,19 +2,19 @@ import { JSX } from "react";
 import Layout from "../components/Layout";
 import "./Inventory.css";
 
-export default function Produccion(): JSX.Element {
+export default function Inventario(): JSX.Element {
   return (
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Producción" },
+        { label: "Inventario" },
       ]}
     >
       <div className="construccion">
         <div className="construccion__icon">
           <svg
-            width="48"
-            height="48"
+            width="64"
+            height="64"
             viewBox="0 0 24 24"
             fill="none"
             stroke="#7d5a3c"
@@ -22,14 +22,9 @@ export default function Produccion(): JSX.Element {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20" />
-            <line x1="2" y1="20" x2="22" y2="20" />
-            <line x1="14" y1="20" x2="14" y2="10" />
-            <line x1="14" y1="10" x2="22" y2="10" />
-            <line x1="22" y1="10" x2="22" y2="20" />
-            <rect x="17" y="4" width="3" height="6" rx="0" />
-            <circle cx="18.5" cy="2.5" r="0.7" />
-            <circle cx="20" cy="1.5" r="0.5" />
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
           </svg>
         </div>
         <h1 className="construccion__title">Módulo en construcción</h1>

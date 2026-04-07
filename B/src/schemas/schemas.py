@@ -4,8 +4,31 @@ from src.models.models import UserStatus, RoleStatus, ProductStatus
 from datetime import datetime
 
 
+class UppercaseMixin:
+    EXCLUDE_FIELDS = {
+        "email",
+        "description",
+        "password",
+        "token",
+        "new_password",
+        "current_password",
+        "notas",
+        "observaciones",
+        "notas",
+    }
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def uppercase_strings(cls, v, info):
+        if info.field_name in cls.EXCLUDE_FIELDS:
+            return v
+        if isinstance(v, str) and v.strip():
+            return v.upper().strip()
+        return v
+
+
 ## Esquemas relacionados a Usuarios.
-class UserCreate(BaseModel):
+class UserCreate(UppercaseMixin, BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
@@ -46,7 +69,7 @@ class DeleteResponseUser(BaseModel):
     deleted_by: int
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(UppercaseMixin, BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -74,7 +97,7 @@ class UserUpdateResponse(BaseModel):
 
 
 ## Esquemas relacionados a Roles.
-class RoleCreate(BaseModel):
+class RoleCreate(UppercaseMixin, BaseModel):
     name: str
     description: str
 
@@ -90,7 +113,7 @@ class RoleResponse(BaseModel):
 
 
 ## Esquemas relacionados a sesiones en el sistema.
-class RoleUpdate(BaseModel):
+class RoleUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
@@ -165,14 +188,14 @@ class ChangePasswordRequest(BaseModel):
 
 
 ## Esquemas relacionados a Units (Unidades de medida)
-class UnitCreate(BaseModel):
+class UnitCreate(UppercaseMixin, BaseModel):
     name: str
     abbreviation: str
     description: Optional[str] = None
     quantity: float
 
 
-class UnitUpdate(BaseModel):
+class UnitUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     abbreviation: Optional[str] = None
     description: Optional[str] = None
@@ -207,7 +230,7 @@ class UnitBasic(BaseModel):
         from_attributes = True
 
 
-class ProductCreate(BaseModel):
+class ProductCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
     unit_id: int
@@ -217,7 +240,7 @@ class ProductCreate(BaseModel):
     is_locked: bool = False
 
 
-class ProductUpdate(BaseModel):
+class ProductUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     unit_id: Optional[int] = None
@@ -268,12 +291,12 @@ class SupplyBasic(BaseModel):
         from_attributes = True
 
 
-class SupplyCategoryCreate(BaseModel):
+class SupplyCategoryCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
 
 
-class SupplyCategoryUpdate(BaseModel):
+class SupplyCategoryUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
@@ -297,6 +320,72 @@ class SupplyCategoryResponse(BaseModel):
 
 
 class DeleteResponseSupplyCategory(BaseModel):
+    message: str
+    deleted_at: datetime
+    deleted_by: int
+
+
+## Esquemas relacionados a Supply (Insumos)
+class SupplyCategoryBasic(BaseModel):
+    id: int
+    token: str
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class SupplyCreate(UppercaseMixin, BaseModel):
+    name: str
+    description: Optional[str] = None
+    category_id: int
+    unit_id: int
+    available_quantity: float = 0
+    min_stock: float = 0
+    max_stock: float = 0
+    supplier_id: Optional[int] = None
+    expiration_date: Optional[datetime] = None
+
+
+class SupplyUpdate(UppercaseMixin, BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category_id: Optional[int] = None
+    unit_id: Optional[int] = None
+    available_quantity: Optional[float] = None
+    min_stock: Optional[float] = None
+    max_stock: Optional[float] = None
+    supplier_id: Optional[int] = None
+    expiration_date: Optional[datetime] = None
+
+
+class SupplyResponse(BaseModel):
+    id: int
+    token: str
+    name: str
+    description: Optional[str]
+    category_id: int
+    category: SupplyCategoryBasic
+    unit_id: int
+    unit: UnitBasic
+    available_quantity: float
+    min_stock: float
+    max_stock: float
+    supplier_id: Optional[int]
+    expiration_date: Optional[datetime]
+    status: str
+    created_at: datetime
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
+
+    class Config:
+        from_attributes = True
+
+
+class DeleteResponseSupply(BaseModel):
     message: str
     deleted_at: datetime
     deleted_by: int

@@ -2,12 +2,12 @@ import { JSX } from "react";
 import Layout from "../components/Layout";
 import "./Inventory.css";
 
-export default function Produccion(): JSX.Element {
+export default function Proveedores(): JSX.Element {
   return (
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Producción" },
+        { label: "Proveedores" },
       ]}
     >
       <div className="construccion">
@@ -22,14 +22,10 @@ export default function Produccion(): JSX.Element {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20" />
-            <line x1="2" y1="20" x2="22" y2="20" />
-            <line x1="14" y1="20" x2="14" y2="10" />
-            <line x1="14" y1="10" x2="22" y2="10" />
-            <line x1="22" y1="10" x2="22" y2="20" />
-            <rect x="17" y="4" width="3" height="6" rx="0" />
-            <circle cx="18.5" cy="2.5" r="0.7" />
-            <circle cx="20" cy="1.5" r="0.5" />
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 3v5h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
           </svg>
         </div>
         <h1 className="construccion__title">Módulo en construcción</h1>

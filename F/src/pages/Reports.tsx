@@ -34,6 +34,28 @@ const entities: ReportEntity[] = [
       </svg>
     ),
   },
+    {
+    id: "units",
+    label: "Unidades",
+    desc: "Listado de unidades de medida configuradas en el sistema.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+    ),
+  },
+  {
+    id: "supplies",
+    label: "Insumos",
+    desc: "Listado de insumos con stock y categorizacion.",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M3 6h18M3 12h18M3 18h18"/>
+      </svg>
+    ),
+  },
 ];
 
 export default function Reportes() {

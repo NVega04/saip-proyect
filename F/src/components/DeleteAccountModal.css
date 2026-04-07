@@ -1,0 +1,239 @@
+/* Contenedor principal del modal */
+.da-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0 0.25rem;
+  text-align: center;
+}
+
+/* Ícono de advertencia */
+.da-warning-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff7e8;
+  border: 2px solid #efd28f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b37400;
+  flex-shrink: 0;
+}
+
+/* Ícono de candado */
+.da-lock-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fdecea;
+  border: 2px solid #f5c6cb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0392b;
+  flex-shrink: 0;
+}
+
+/* Título del modal */
+.da-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #3b2510;
+  font-family: "Roboto", sans-serif;
+  line-height: 1.4;
+}
+
+/* Descripción */
+.da-description {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #7d5a3c;
+  line-height: 1.5;
+}
+
+/* Lista de consecuencias */
+.da-consequences {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  background: #fff7f7;
+  border: 1px solid #f5e0de;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.da-consequences li {
+  font-size: 0.82rem;
+  color: #7a3b30;
+  padding: 4px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Bullet personalizado para cada item */
+.da-consequences li::before {
+  content: "•";
+  color: #e07060;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Campo de contraseña */
+.da-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.da-label {
+  font-size: 0.72rem;
+  color: #9e7e62;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.da-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.da-input {
+  width: 100%;
+  padding: 0.65rem 2.6rem 0.65rem 0.9rem;
+  border: 1.5px solid #f5f0ea;
+  background: #f5f0ea;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #3b2510;
+  font-family: "Roboto", sans-serif;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.da-input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #c0392b;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.12);
+}
+
+.da-input::placeholder {
+  color: #9e7e62;
+  opacity: 0.6;
+}
+
+/* Botón ojo para mostrar/ocultar contraseña */
+.da-eye-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #b8a08a;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.da-eye-btn:hover {
+  color: #7d5a3c;
+}
+
+/* Contenedor de botones de acción */
+.da-actions {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* Botón cancelar / atrás */
+.da-btn-cancel {
+  padding: 0.6rem 1.1rem;
+  background: #ffffff;
+  border: 1.5px solid #cfc0b0;
+  border-radius: 9px;
+  font-size: 0.83rem;
+  color: #7d5a3c;
+  cursor: pointer;
+  font-family: "Roboto", sans-serif;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.da-btn-cancel:hover:not(:disabled) {
+  border-color: #b8a08a;
+  background: #f5f0ea;
+}
+
+/* Botón de acción destructiva */
+.da-btn-danger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0.6rem 1.1rem;
+  background: #c0392b;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.83rem;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: "Roboto", sans-serif;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
+}
+
+.da-btn-danger:hover:not(:disabled) {
+  background: #a93226;
+  transform: translateY(-1px);
+}
+
+.da-btn-danger:disabled,
+.da-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner de carga */
+.da-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: da-spin 0.7s linear infinite;
+}
+
+@keyframes da-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .da-actions {
+    flex-direction: column;
+  }
+
+  .da-btn-cancel,
+  .da-btn-danger {
+    width: 100%;
+    justify-content: center;
+  }
+}
