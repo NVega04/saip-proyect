@@ -107,11 +107,9 @@ export default function Table<T extends { id: string | number }>({
 
       {/* Card */}
       <div className="saip-table-card">
+
         {/* Toolbar */}
         <div className="saip-table-card__toolbar">
-          <div className="saip-table-card__toolbar-left">
-            {headerActions}
-          </div>
           {searchable && (
             <SearchBar
               value={search}
@@ -126,6 +124,9 @@ export default function Table<T extends { id: string | number }>({
               }}
             />
           )}
+          <div className="saip-table-card__toolbar-left">
+            {headerActions}
+          </div>
         </div>
 
         {/* Tabla */}
