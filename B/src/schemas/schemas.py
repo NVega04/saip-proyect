@@ -4,8 +4,31 @@ from src.models.models import UserStatus, RoleStatus, ProductStatus
 from datetime import datetime
 
 
+class UppercaseMixin:
+    EXCLUDE_FIELDS = {
+        "email",
+        "description",
+        "password",
+        "token",
+        "new_password",
+        "current_password",
+        "notas",
+        "observaciones",
+        "notas",
+    }
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def uppercase_strings(cls, v, info):
+        if info.field_name in cls.EXCLUDE_FIELDS:
+            return v
+        if isinstance(v, str) and v.strip():
+            return v.upper().strip()
+        return v
+
+
 ## Esquemas relacionados a Usuarios.
-class UserCreate(BaseModel):
+class UserCreate(UppercaseMixin, BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
@@ -46,7 +69,7 @@ class DeleteResponseUser(BaseModel):
     deleted_by: int
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(UppercaseMixin, BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -74,7 +97,7 @@ class UserUpdateResponse(BaseModel):
 
 
 ## Esquemas relacionados a Roles.
-class RoleCreate(BaseModel):
+class RoleCreate(UppercaseMixin, BaseModel):
     name: str
     description: str
 
@@ -90,7 +113,7 @@ class RoleResponse(BaseModel):
 
 
 ## Esquemas relacionados a sesiones en el sistema.
-class RoleUpdate(BaseModel):
+class RoleUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
@@ -165,14 +188,14 @@ class ChangePasswordRequest(BaseModel):
 
 
 ## Esquemas relacionados a Units (Unidades de medida)
-class UnitCreate(BaseModel):
+class UnitCreate(UppercaseMixin, BaseModel):
     name: str
     abbreviation: str
     description: Optional[str] = None
     quantity: float
 
 
-class UnitUpdate(BaseModel):
+class UnitUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     abbreviation: Optional[str] = None
     description: Optional[str] = None
@@ -207,7 +230,7 @@ class UnitBasic(BaseModel):
         from_attributes = True
 
 
-class ProductCreate(BaseModel):
+class ProductCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
     unit_id: int
@@ -217,7 +240,7 @@ class ProductCreate(BaseModel):
     is_locked: bool = False
 
 
-class ProductUpdate(BaseModel):
+class ProductUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     unit_id: Optional[int] = None
@@ -268,12 +291,12 @@ class SupplyBasic(BaseModel):
         from_attributes = True
 
 
-class SupplyCategoryCreate(BaseModel):
+class SupplyCategoryCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
 
 
-class SupplyCategoryUpdate(BaseModel):
+class SupplyCategoryUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
@@ -312,7 +335,7 @@ class SupplyCategoryBasic(BaseModel):
         from_attributes = True
 
 
-class SupplyCreate(BaseModel):
+class SupplyCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
     category_id: int
@@ -324,7 +347,7 @@ class SupplyCreate(BaseModel):
     expiration_date: Optional[datetime] = None
 
 
-class SupplyUpdate(BaseModel):
+class SupplyUpdate(UppercaseMixin, BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     category_id: Optional[int] = None
