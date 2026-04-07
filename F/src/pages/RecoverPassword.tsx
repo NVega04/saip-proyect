@@ -189,7 +189,7 @@ function ResetForm({ token }: { token: string }) {
       }
       setSuccess(true);
       showAlert("success", "Tu contraseña fue actualizada correctamente.");
-      setTimeout(() => navigate("/"), 3000);
+      setTimeout(() => navigate("/login"), 3000);
     } catch {
         setError("Error de conexión con el servidor.");
         showAlert("error", "Error de conexión con el servidor.");
@@ -212,7 +212,7 @@ function ResetForm({ token }: { token: string }) {
         Tu contraseña fue cambiada correctamente. Serás redirigido al
         inicio de sesión en unos segundos.
       </p>
-      <Link to="/" className="btn-submit" style={{ textDecoration: "none", marginTop: "0.5rem" }}>
+      <Link to="/login" className="btn-submit" style={{ textDecoration: "none", marginTop: "0.5rem" }}>
         Ir al inicio de sesión
       </Link>
     </>
