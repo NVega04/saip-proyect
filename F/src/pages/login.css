@@ -15,9 +15,10 @@ body {
 }
 
 .login-root {
-  min-height:80vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   background: radial-gradient(circle at top right, var(--pale) 0%, var(--bg) 60%);
 }
 
@@ -382,14 +383,14 @@ body {
     padding: 0;
     box-shadow: none;
     border: none;
-    min-height: auto;
+    min-height: 100vh;
   }
 
 .card-inner {
-  display: block;
+  display: flex;
   flex-direction: row;
   width: 100%;
-  height: auto;
+  min-height: 100vh;
   grid-template-columns: 1fr 1fr;
 }
 
@@ -403,6 +404,8 @@ body {
     padding: 3rem 1.5rem 2rem;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
   }
 
   .form-title {
