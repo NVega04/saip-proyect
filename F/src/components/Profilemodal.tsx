@@ -3,6 +3,7 @@ import Modal from "./Modal";
 import { apiFetch, getMe, UserProfile } from "../utils/api";
 import "./Profilemodal.css";
 import DeleteAccountModal from "./DeleteAccountModal";
+import { useAlert } from "../context/AlertContext";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 interface FormState {
@@ -41,7 +42,7 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
-  const [toast, setToast]           = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const { showAlert } = useAlert();
   const [loggingOutAll, setLoggingOutAll] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -54,7 +55,7 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
       localStorage.removeItem("user");
       window.location.href = "/login";
     } catch {
-      setToast({ msg: "Error al cerrar sesiones", type: "error" });
+      showAlert("error", "Error al cerrar sesiones");
     } finally {
       setLoggingOutAll(false);
     }
@@ -77,18 +78,9 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
     });
   }, [isOpen]);
 
-  // Auto-ocultar toast
-  useEffect(() => {
-    if (toast) {
-      const t = setTimeout(() => setToast(null), 3500);
-      return () => clearTimeout(t);
-    }
-  }, [toast]);
-
   // Reset al cerrar
   const handleClose = () => {
     setEditing(false);
-    setToast(null);
     onClose();
   };
 
@@ -113,9 +105,9 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
       const updated = await res.json();
       setUser((prev) => prev ? { ...prev, ...updated } : prev);
       setEditing(false);
-      setToast({ msg: "Perfil actualizado con éxito", type: "success" });
+      showAlert("success", "Perfil actualizado con éxito");
     } catch {
-      setToast({ msg: "Error al actualizar el perfil", type: "error" });
+      showAlert("error", "Error al actualizar el perfil");
     } finally {
       setSaving(false);
     }
@@ -130,14 +122,6 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
   return (
     <>
       <Modal isOpen={isOpen} onClose={handleClose} title="Mi perfil" width="600px">
-
-        {/* Toast */}
-        {toast && (
-          <div className={`pm-toast pm-toast--${toast.type}`}>
-            <span>{toast.type === "success" ? "✓" : "✕"}</span>
-            {toast.msg}
-          </div>
-        )}
 
         {/* Header con avatar */}
         {loading ? (
@@ -289,7 +273,7 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
         onClose={() => setShowPwModal(false)}
         onSuccess={() => {
           setShowPwModal(false);
-          setToast({ msg: "Contraseña actualizada correctamente", type: "success" });
+          showAlert("success", "Contraseña actualizada correctamente");
         }}
       />
       
