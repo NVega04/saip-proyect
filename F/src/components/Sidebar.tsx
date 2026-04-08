@@ -411,18 +411,26 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
 
   return (
     <aside style={{
-      width: "220px",
-      minHeight: "calc(100vh - 58px)",
-      background: "var(--bakery-sidebar-bg)",
-      borderRight: "1px solid rgba(255,255,255,0.08)",
-      display: "flex", flexDirection: "column",
-      position: "sticky", top: "58px",
-      height: "calc(100vh - 58px)",
-      fontFamily: "'Outfit', system-ui, sans-serif",
-      overflowY: "auto",
-    }}>
+        width: isOpen ? "220px" : "0px",
+        minHeight: "calc(100vh - 58px)",
+        background: "var(--bakery-sidebar-bg)",
+        borderRight: isOpen ? "1px solid rgba(255,255,255,0.08)" : "none",
+        display: "flex",
+        flexDirection: "column",
+        position: "sticky",
+        top: "58px",
+        height: "calc(100vh - 58px)",
+        fontFamily: "'Outfit', system-ui, sans-serif",
+        overflowY: "auto",
+        overflowX: "hidden",
+        transition: "width 0.25s ease",
+      }}>
+        {isOpen && (
+      <>
       <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} />
       <div style={versionTag}>SAIP v1.0</div>
+      </>
+     )}
     </aside>
   );
 }

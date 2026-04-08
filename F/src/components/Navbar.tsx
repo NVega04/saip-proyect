@@ -110,7 +110,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
 
         {/* ── Izquierda ── */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-          {isMobile && (
+          {onToggleSidebar && (
             <button
               className="saip-hbg"
               onClick={onToggleSidebar}

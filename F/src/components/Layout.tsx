@@ -19,6 +19,8 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
+  const [sidebarHover, setSidebarHover] = useState(false);
+  const isSidebarVisible = sidebarOpen || sidebarHover;
 
   return (
     <div style={styles.root}>
@@ -27,10 +29,24 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
         sidebarOpen={sidebarOpen}
       />
       <div style={styles.body}>
+        {!sidebarOpen && (
+          <div
+            onMouseEnter={() => setSidebarHover(true)}
+            onMouseLeave={() => setSidebarHover(false)}
+            style={{
+              position: "fixed",
+              top: "58px",
+              left: 0,
+              width: "10px",
+              height: "100vh",
+              zIndex: 120,
+            }}
+          />
+        )}
         <Sidebar
           activeMenu={activeMenu}
           onMenuChange={() => {}}
-          isOpen={sidebarOpen}
+          isOpen={isSidebarVisible}
           onClose={() => setSidebarOpen(false)}
         />
         <main style={styles.content}>
@@ -59,5 +75,20 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "2rem 2.5rem",
     overflowY: "auto",
     minWidth: 0,
+  },
+    floatingButton: {
+    position: "fixed",
+    top: "70px", // ajusta según tu navbar
+    left: "12px",
+    zIndex: 300,
+    width: "40px",
+    height: "40px",
+    borderRadius: "8px",
+    border: "none",
+    background: "var(--bakery-sidebar-bg)",
+    color: "#fff",
+    fontSize: "18px",
+    cursor: "pointer",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
   },
 };
