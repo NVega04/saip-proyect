@@ -38,13 +38,21 @@ const Icon = {
     </svg>
   ),
   sales: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23" />
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   ),
   production: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 20h20"/><path d="M5 20V10l4-6 4 6 4-4 4 4v10"/><rect x="9" y="14" width="6" height="6"/>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20" />
+        <line x1="2" y1="20" x2="22" y2="20" />
+        <line x1="14" y1="20" x2="14" y2="10" />
+        <line x1="14" y1="10" x2="22" y2="10" />
+        <line x1="22" y1="10" x2="22" y2="20" />
+        <rect x="17" y="4" width="3" height="6" rx="0" />
+        <circle cx="18.5" cy="2.5" r="0.7" />
+        <circle cx="20" cy="1.5" r="0.5" />
     </svg>
   ),
   recipes: (
@@ -60,8 +68,8 @@ const Icon = {
     </svg>
   ),
   roles: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3">
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
     </svg>
   ),
   about: (
@@ -88,13 +96,12 @@ const Icon = {
     </svg>
   ),
   reports: (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
-    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10 9 9 9 8 9"/>
-  </svg>
+   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
   ),
   providers:(
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
@@ -104,15 +111,23 @@ const Icon = {
        <circle cx="18.5" cy="18.5" r="2.5" />
     </svg>
   ),
+  bakery:(
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 14c0-4 4-7 8-7s8 3 8 7v3a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-3z"/>
+      <path d="M8 14c.5-1 1.5-2 4-2s3.5 1 4 2"/>
+      <line x1="9" y1="10" x2="9" y2="12"/>
+      <line x1="12" y1="9" x2="12" y2="11"/>
+      <line x1="15" y1="10" x2="15" y2="12"/>
+    </svg>
+  ),
 };
-
 const menuItems: MenuItem[] = [
   { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
   { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
   { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.providers,  group: "operaciones" },
   { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
   { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
+  { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.bakery,    group: "operaciones", subitems: [
     { id: "unidades",       label: "Unidades de medida",            path: "/units",      icon: Icon.units,      group: "recetas" },
     { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
     { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
@@ -120,9 +135,9 @@ const menuItems: MenuItem[] = [
     { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
   ]},
   { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
-  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.users,      group: "administracion" },
+  { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.roles,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
+  { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.reports,      group: "administracion" },
 ];
 
 const groupLabels: Record<string, string> = {
