@@ -354,7 +354,7 @@ export default function Recetas(): JSX.Element {
                     </svg>
                   }
                 >
-                {reportLoading ? "Generando..." : "Exportar Excel"}
+                {reportLoading ? "Generando..." : "Exportar excel"}
             </Button>
             </>
         }

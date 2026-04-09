@@ -226,7 +226,7 @@ export default function Units(): JSX.Element {
                     </svg>
                   }
                 >
-                {reportLoading ? "Generando..." : "Exportar Excel"}
+                {reportLoading ? "Generando..." : "Exportar excel"}
             </Button>
             </>
           }

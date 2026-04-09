@@ -321,7 +321,7 @@ export default function Supplies(): JSX.Element {
                     </svg>
                   }
                 >
-                {reportLoading ? "Generando..." : "Exportar Excel"}
+                {reportLoading ? "Generando..." : "Exportar excel"}
             </Button>
             </>
           }

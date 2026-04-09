@@ -358,7 +358,7 @@ export default function Products(): JSX.Element {
                     </svg>
                   }
                 >
-                {reportLoading ? "Generando..." : "Exportar Excel"}
+                {reportLoading ? "Generando..." : "Exportar excel"}
             </Button>
             </>
           }
