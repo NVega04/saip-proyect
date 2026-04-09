@@ -1,6 +1,7 @@
 import React, { JSX, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllowedModules, canAccessModule } from "../utils/permissions";
+import Tooltip from "./Tooltip";
 
 interface MenuItem {
   id: string;
@@ -16,6 +17,7 @@ interface SidebarProps {
   onMenuChange: (id: string) => void;
   isOpen?: boolean;
   onClose?: () => void;
+  collapsed?: boolean;
 }
 
 const Icon = {
@@ -163,7 +165,8 @@ function NavItem({
   isExpanded,
   hasSubitems,
   onToggle,
-  isSubitem = false
+  isSubitem = false,
+  collapsed
 }: { 
   item: MenuItem; 
   isActive: boolean; 
@@ -172,6 +175,7 @@ function NavItem({
   hasSubitems?: boolean;
   onToggle?: () => void;
   isSubitem?: boolean;
+  collapsed?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -184,8 +188,8 @@ function NavItem({
   };
 
   const baseStyle: React.CSSProperties = {
-    display: "flex", alignItems: "center", gap: "0.6rem",
-    padding: isSubitem ? "0.4rem 0.75rem 0.4rem 2rem" : "0.5rem 0.75rem",
+    display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "flex-start", gap: collapsed ? "0" : "0.6rem",
+    padding: collapsed ? "0.6rem 0": isSubitem ? "0.4rem 0.75rem 0.4rem 2rem": "0.5rem 0.75rem",
     borderRadius: "7px",
     fontSize: isSubitem ? "0.78rem" : "0.81rem",
     fontWeight: isActive ? 600 : 400,
@@ -199,55 +203,63 @@ function NavItem({
 
   if (hasSubitems) {
     return (
-      <div
-        onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          ...baseStyle,
-          background: hovered ? "var(--bakery-sidebar-hover)" : "transparent",
-        }}
-      >
-        <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
-          {item.icon}
-        </span>
-        <span style={{ flex: 1 }}>{item.label}</span>
-        <span style={{
-          fontSize: "0.6rem",
-          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
-          transition: "transform 0.2s ease",
-          opacity: 0.7,
-        }}>
-          ▶
-        </span>
-      </div>
+        <div
+          onClick={handleClick}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            ...baseStyle,
+            background: hovered ? "var(--bakery-sidebar-hover)" : "transparent",
+          }}
+        >
+          <Tooltip text={collapsed ? item.label : ""}>
+            <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
+              {item.icon}
+            </span>
+          </Tooltip>
+          {!collapsed && (
+            <span style={{ flex: 1 }}>{item.label}</span>)}
+          {!collapsed && (
+            <span style={{
+              fontSize: "0.6rem",
+              transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+              opacity: 0.7,
+            }}>
+              ▶
+            </span>
+            )}
+        </div>
     );
   }
 
   return (
     <Link to={item.path} style={{ textDecoration: "none" }} onClick={onClick}>
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={baseStyle}
-      >
-        <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
-          {item.icon}
-        </span>
-        <span style={{ flex: 1 }}>{item.label}</span>
-        {isActive && (
-          <span style={{
-            width: "5px", height: "5px", borderRadius: "50%",
-            background: "rgba(255,255,255,0.8)", flexShrink: 0,
-          }} />
-        )}
-      </div>
+        <div
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={baseStyle}
+        >
+          <Tooltip text={collapsed ? item.label : ""}>
+            <span style={{ flexShrink: 0, display: "flex", color: "inherit" }}>
+              {item.icon}
+            </span>
+          </Tooltip>
+          {!collapsed && (
+            <span style={{ flex: 1 }}>{item.label}</span>)}
+          {isActive && (
+            <span style={{
+              width: "5px", height: "5px", borderRadius: "50%",
+              background: "rgba(255,255,255,0.8)", flexShrink: 0,
+            }} />
+          )}
+        </div>
     </Link>
   );
 }
 
 // ── Módulos permitidos ─────────────────────────────────────────────────────
-function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemClick: (id: string) => void }) {
+function NavContent({ activeMenu, onItemClick, collapsed }: { activeMenu: string; onItemClick: (id: string) => void; collapsed? : boolean; }) {
   const allowedModules = getAllowedModules();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -281,7 +293,7 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
               padding: "0.75rem 0.9rem 0.28rem",
               fontFamily: "'Outfit', system-ui, sans-serif",
             }}>
-              {groupLabels[group]}
+              {!collapsed && groupLabels[group]}
             </div>
             <div style={{ padding: "0 0.65rem", display: "flex", flexDirection: "column", gap: "2px" }}>
               {items.map((item) => (
@@ -293,6 +305,7 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
                     isExpanded={expandedItems.has(item.id)}
                     hasSubitems={!!item.subitems?.length}
                     onToggle={() => toggleExpand(item.id)}
+                    collapsed={collapsed}
                   />
                   {item.subitems && expandedItems.has(item.id) && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -303,6 +316,7 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
                           isActive={activeMenu === subitem.id}
                           onClick={() => handleSubitemClick(subitem.id)}
                           isSubitem
+                          collapsed={collapsed}
                         />
                       ))}
                     </div>
@@ -373,7 +387,7 @@ const versionTag: React.CSSProperties = {
   letterSpacing: "0.04em",
 };
 
-export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClose }: SidebarProps): JSX.Element {
+export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClose, collapsed }: SidebarProps): JSX.Element {
   const [isMobile, setIsMobile] = React.useState(false);
 
   useEffect(() => {
@@ -417,7 +431,7 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
           fontFamily: "'Outfit', system-ui, sans-serif",
         }}>
           <SidebarLogo withClose onClose={onClose} />
-          <NavContent activeMenu={activeMenu} onItemClick={handleItemClick} />
+          <NavContent activeMenu={activeMenu} onItemClick={handleItemClick}  collapsed={false}/>
           <div style={versionTag}>SAIP v1.0 · Sistema Artesanal Integral</div>
         </aside>
       </>
@@ -426,7 +440,8 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
 
   return (
     <aside style={{
-      width: "220px",
+      width: collapsed ? "72px" : "220px",
+      transition: "width 0.3s ease",
       minHeight: "calc(100vh - 58px)",
       background: "var(--bakery-sidebar-bg)",
       borderRight: "1px solid rgba(255,255,255,0.08)",
@@ -436,7 +451,7 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
       fontFamily: "'Outfit', system-ui, sans-serif",
       overflowY: "auto",
     }}>
-      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} />
+      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} collapsed={collapsed} />
       <div style={versionTag}>SAIP v1.0</div>
     </aside>
   );

@@ -8,9 +8,10 @@ import PerfilModal from "./Profilemodal";
 interface NavbarProps {
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
+export default function Navbar({ onToggleSidebar, sidebarOpen, onToggleCollapse }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
   const [isMobile, setIsMobile]   = useState(false);
@@ -139,7 +140,25 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               ))}
             </button>
           )}
-
+          {!isMobile && (
+            <button
+              onClick={onToggleCollapse}
+              style={{
+                width: "36px",
+                height: "36px",
+                border: "1px solid var(--bakery-border)",
+                borderRadius: "7px",
+                background: "transparent",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              ☰
+            </button>
+          )}
+          
           <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
             <div style={{
               width: "34px", height: "34px",

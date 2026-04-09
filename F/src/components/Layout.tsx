@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import Breadcrumb from "./Breadcrumb";
+import { useEffect } from "react";
 
 interface BreadcrumbItem {
   label: string;
@@ -17,14 +18,19 @@ interface LayoutProps {
 
 export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {const saved = localStorage.getItem("sidebar-collapsed"); return saved === "true";});
   const location = useLocation();
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
+  useEffect(() => {
+   localStorage.setItem("sidebar-collapsed", String(collapsed));
+  }, [collapsed]);
   return (
     <div style={styles.root}>
       <Navbar
         onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         sidebarOpen={sidebarOpen}
+        onToggleCollapse={() => setCollapsed(prev => !prev)}
       />
       <div style={styles.body}>
         <Sidebar
@@ -32,6 +38,7 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
           onMenuChange={() => {}}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          collapsed={collapsed}
         />
         <main style={styles.content}>
           {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
