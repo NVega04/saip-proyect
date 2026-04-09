@@ -10,6 +10,7 @@ import "./user.css";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 import { useConfirm } from "../context/ConfirmContext";
+import { useReportDownload } from "../hooks/useReportDownload.ts";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -103,6 +104,7 @@ export default function User(): JSX.Element {
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
+  const { download: downloadReport, loading: reportLoading } = useReportDownload("users");
 
   // ── Cargar usuarios ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -313,11 +315,27 @@ export default function User(): JSX.Element {
           data={users}
           searchPlaceholder="Buscar usuario"
           headerActions={
-            isCurrentUserAdmin ? (
-              <Button variant="primary" onClick={handleCrear}>
-                Crear usuario
+             <>
+              {isCurrentUserAdmin && (
+                <Button variant="primary" onClick={handleCrear}>
+                  Crear usuario
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                onClick={downloadReport}
+                disabled={reportLoading}
+                icon={
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                }
+              >
+                {reportLoading ? "Generando..." : "Exportar Excel"}
               </Button>
-            ) : undefined
+            </>
           }
           renderActions={(row) => (
             <div className="saip-table__actions">

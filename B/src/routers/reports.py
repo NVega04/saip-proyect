@@ -9,55 +9,54 @@ from openpyxl.utils import get_column_letter
 
 from src.database import get_session
 from src.dependencies import get_current_user
-from src.models.models import User, Role, Unit, Supply
+from src.models.models import (
+    User, Role, SessionApp, Product, Supply,
+    SupplyCategory, Unit, Recipe, ProductionOrder,
+)
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
 # ── Paleta SAIP ────────────────────────────────────────────────────────────
 COLOR_HEADER_BG = "5C3D1E"
 COLOR_HEADER_FG = "FFFFFF"
-COLOR_ROW_ALT = "F5F0EA"
+COLOR_ROW_ALT   = "F5F0EA"
 COLOR_ROW_WHITE = "FFFFFF"
-COLOR_BORDER = "CFC0B0"
+COLOR_BORDER    = "CFC0B0"
 
 ENTITY_MAP = {
-    "users": "Usuarios",
-    "roles": "Roles",
-    "sessions": "Sesiones",
-    "units": "Unidades",
-    "supplies": "Insumos",
+    "users":             "Usuarios",
+    "roles":             "Roles",
+    "sessions":          "Sesiones",
+    "products":          "Productos",
+    "supplies":          "Insumos",
+    "supply-categories": "Categorías de Insumos",
+    "units":             "Unidades",
+    "recipes":           "Recetas",
+    "production":        "Órdenes de Producción",
 }
-
 
 # ── Helpers de estilo ──────────────────────────────────────────────────────
 def _header_font():
     return Font(name="Arial", bold=True, color=COLOR_HEADER_FG, size=10)
 
-
 def _cell_font():
     return Font(name="Arial", size=9)
-
 
 def _header_fill():
     return PatternFill("solid", fgColor=COLOR_HEADER_BG)
 
-
 def _alt_fill():
     return PatternFill("solid", fgColor=COLOR_ROW_ALT)
 
-
 def _white_fill():
     return PatternFill("solid", fgColor=COLOR_ROW_WHITE)
-
 
 def _border():
     side = Side(style="thin", color=COLOR_BORDER)
     return Border(left=side, right=side, top=side, bottom=side)
 
-
 def _center():
     return Alignment(horizontal="center", vertical="center")
-
 
 def _left():
     return Alignment(horizontal="left", vertical="center", wrap_text=True)
@@ -67,9 +66,9 @@ def _apply_header_row(ws, headers: list[str]):
     ws.row_dimensions[1].height = 22
     for col_idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col_idx, value=header)
-        cell.font = _header_font()
-        cell.fill = _header_fill()
-        cell.border = _border()
+        cell.font      = _header_font()
+        cell.fill      = _header_fill()
+        cell.border    = _border()
         cell.alignment = _center()
 
 
@@ -78,9 +77,9 @@ def _apply_data_row(ws, row_idx: int, values: list):
     ws.row_dimensions[row_idx].height = 18
     for col_idx, value in enumerate(values, start=1):
         cell = ws.cell(row=row_idx, column=col_idx, value=value)
-        cell.font = _cell_font()
-        cell.fill = fill
-        cell.border = _border()
+        cell.font      = _cell_font()
+        cell.fill      = fill
+        cell.border    = _border()
         cell.alignment = _left()
 
 
@@ -99,8 +98,8 @@ def _add_title_row(ws, title: str, col_count: int):
     ws.insert_rows(1)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=col_count)
     cell = ws.cell(row=1, column=1, value=title)
-    cell.font = Font(name="Arial", bold=True, size=12, color=COLOR_HEADER_FG)
-    cell.fill = _header_fill()
+    cell.font      = Font(name="Arial", bold=True, size=12, color=COLOR_HEADER_FG)
+    cell.fill      = _header_fill()
     cell.alignment = _center()
     ws.row_dimensions[1].height = 28
 
@@ -119,131 +118,156 @@ def _fmt_bool(value: bool) -> str:
 
 # ── Builders por entidad ───────────────────────────────────────────────────
 def _build_users(ws, db: Session):
-    headers = [
-        "ID",
-        "Nombre",
-        "Apellido",
-        "Correo",
-        "Teléfono",
-        "Rol",
-        "Admin",
-        "Estado",
-        "Creado en",
-    ]
+    headers = ["ID", "Nombre", "Apellido", "Correo", "Teléfono", "Rol",
+               "Admin", "Estado", "Creado en"]
     _apply_header_row(ws, headers)
-
     users = db.exec(select(User).where(User.deleted_at == None)).all()
     for i, u in enumerate(users, start=2):
         role_name = u.role.name if u.role else "—"
-        _apply_data_row(
-            ws,
-            i,
-            [
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.email,
-                u.phone or "—",
-                role_name,
-                _fmt_bool(u.is_admin),
-                u.status.value,
-                _fmt_dt(u.created_at),
-            ],
-        )
+        _apply_data_row(ws, i, [
+            u.id, u.first_name, u.last_name, u.email,
+            u.phone or "—", role_name,
+            _fmt_bool(u.is_admin), u.status.value,
+            _fmt_dt(u.created_at),
+        ])
     return headers
 
 
 def _build_roles(ws, db: Session):
     headers = ["ID", "Nombre", "Descripción", "Estado", "Creado en"]
     _apply_header_row(ws, headers)
-
     roles = db.exec(select(Role).where(Role.deleted_at == None)).all()
     for i, r in enumerate(roles, start=2):
-        _apply_data_row(
-            ws,
-            i,
-            [
-                r.id,
-                r.name,
-                r.description,
-                r.status.value,
-                _fmt_dt(r.created_at),
-            ],
-        )
+        _apply_data_row(ws, i, [
+            r.id, r.name, r.description,
+            r.status.value, _fmt_dt(r.created_at),
+        ])
     return headers
 
 
-def _build_units(ws, db: Session):
-    headers = [
-        "ID",
-        "Nombre",
-        "Abreviatura",
-        "Descripcion",
-        "Cantidad base",
-        "Creado en",
-    ]
+def _build_sessions(ws, db: Session):
+    headers = ["ID", "Usuario", "Correo", "Activa", "Creada en", "Expira en"]
     _apply_header_row(ws, headers)
+    sessions = db.exec(select(SessionApp)).all()
+    for i, s in enumerate(sessions, start=2):
+        user_name  = f"{s.user.first_name} {s.user.last_name}" if s.user else "—"
+        user_email = s.user.email if s.user else "—"
+        _apply_data_row(ws, i, [
+            s.id, user_name, user_email,
+            _fmt_bool(s.is_active),
+            _fmt_dt(s.created_at), _fmt_dt(s.expires_at),
+        ])
+    return headers
 
-    units = db.exec(select(Unit).where(Unit.deleted_at == None)).all()
-    for i, u in enumerate(units, start=2):
-        _apply_data_row(
-            ws,
-            i,
-            [
-                u.id,
-                u.name,
-                u.abbreviation,
-                u.description or "—",
-                u.quantity,
-                _fmt_dt(u.created_at),
-            ],
-        )
+
+def _build_products(ws, db: Session):
+    headers = ["ID", "Nombre", "Descripción", "Unidad", "Stock disponible",
+               "Stock mínimo", "Stock máximo", "Bloqueado", "Estado", "Creado en"]
+    _apply_header_row(ws, headers)
+    products = db.exec(select(Product).where(Product.deleted_at == None)).all()
+    for i, p in enumerate(products, start=2):
+        unit_name = p.unit.name if p.unit else "—"
+        _apply_data_row(ws, i, [
+            p.id, p.name, p.description or "—",
+            unit_name, p.available_quantity,
+            p.min_stock, p.max_stock,
+            _fmt_bool(p.is_locked), p.status,
+            _fmt_dt(p.created_at),
+        ])
     return headers
 
 
 def _build_supplies(ws, db: Session):
-    headers = [
-        "ID",
-        "Nombre",
-        "Descripcion",
-        "Categoria",
-        "Unidad",
-        "Stock disp.",
-        "Stock min",
-        "Stock max",
-        "Vencimiento",
-        "Estado",
-        "Creado en",
-    ]
+    headers = ["ID", "Nombre", "Descripción", "Categoría", "Unidad",
+               "Stock disponible", "Stock mínimo", "Stock máximo",
+               "Fecha vencimiento", "Estado", "Creado en"]
     _apply_header_row(ws, headers)
-
     supplies = db.exec(select(Supply).where(Supply.deleted_at == None)).all()
     for i, s in enumerate(supplies, start=2):
-        _apply_data_row(
-            ws,
-            i,
-            [
-                s.id,
-                s.name,
-                s.description or "—",
-                s.category.name if s.category else "—",
-                f"{s.unit.name} ({s.unit.abbreviation})" if s.unit else "—",
-                s.available_quantity,
-                s.min_stock,
-                s.max_stock,
-                _fmt_dt(s.expiration_date),
-                s.status,
-                _fmt_dt(s.created_at),
-            ],
-        )
+        cat_name  = s.category.name if s.category else "—"
+        unit_name = s.unit.name if s.unit else "—"
+        _apply_data_row(ws, i, [
+            s.id, s.name, s.description or "—",
+            cat_name, unit_name,
+            s.available_quantity, s.min_stock, s.max_stock,
+            _fmt_dt(s.expiration_date), s.status,
+            _fmt_dt(s.created_at),
+        ])
+    return headers
+
+
+def _build_supply_categories(ws, db: Session):
+    headers = ["ID", "Nombre", "Descripción", "Estado", "Creado en"]
+    _apply_header_row(ws, headers)
+    categories = db.exec(select(SupplyCategory)).all()
+    for i, c in enumerate(categories, start=2):
+        _apply_data_row(ws, i, [
+            c.id, c.name, c.description or "—",
+            c.status, _fmt_dt(c.created_at),
+        ])
+    return headers
+
+
+def _build_units(ws, db: Session):
+    headers = ["ID", "Nombre", "Abreviatura", "Descripción", "Cantidad", "Creado en"]
+    _apply_header_row(ws, headers)
+    units = db.exec(select(Unit).where(Unit.deleted_at == None)).all()
+    for i, u in enumerate(units, start=2):
+        _apply_data_row(ws, i, [
+            u.id, u.name, u.abbreviation,
+            u.description or "—", u.quantity,
+            _fmt_dt(u.created_at),
+        ])
+    return headers
+
+
+def _build_recipes(ws, db: Session):
+    headers = ["ID", "Nombre", "Descripción", "Producto", "Rendimiento",
+               "Unidad rendimiento", "Estado", "Creado en"]
+    _apply_header_row(ws, headers)
+    recipes = db.exec(select(Recipe).where(Recipe.deleted_at == None)).all()
+    for i, r in enumerate(recipes, start=2):
+        product_name = r.product.name if r.product else "—"
+        yield_unit   = r.yield_unit.name if r.yield_unit else "—"
+        _apply_data_row(ws, i, [
+            r.id, r.name, r.description or "—",
+            product_name, r.yield_quantity,
+            yield_unit, r.status.value,
+            _fmt_dt(r.created_at),
+        ])
+    return headers
+
+
+def _build_production(ws, db: Session):
+    headers = ["ID", "Receta", "Multiplicador", "Rendimiento total",
+               "Estado", "Programado para", "Completado en",
+               "Notas", "Creado en"]
+    _apply_header_row(ws, headers)
+    orders = db.exec(
+        select(ProductionOrder).where(ProductionOrder.deleted_at == None)
+    ).all()
+    for i, o in enumerate(orders, start=2):
+        recipe_name = o.recipe.name if o.recipe else "—"
+        _apply_data_row(ws, i, [
+            o.id, recipe_name,
+            o.quantity_multiplier, o.total_yield,
+            o.status.value,
+            _fmt_dt(o.scheduled_at), _fmt_dt(o.completed_at),
+            o.notes or "—", _fmt_dt(o.created_at),
+        ])
     return headers
 
 
 BUILDERS = {
-    "users": _build_users,
-    "roles": _build_roles,
-    "units": _build_units,
-    "supplies": _build_supplies,
+    "users":             _build_users,
+    "roles":             _build_roles,
+    "sessions":          _build_sessions,
+    "products":          _build_products,
+    "supplies":          _build_supplies,
+    "supply-categories": _build_supply_categories,
+    "units":             _build_units,
+    "recipes":           _build_recipes,
+    "production":        _build_production,
 }
 
 
@@ -274,7 +298,8 @@ def generate_report(
     col_count = len(headers)
     _add_title_row(
         ws,
-        f"Reporte de {ENTITY_MAP.get(entity, entity)} — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC",
+        f"Reporte de {ENTITY_MAP.get(entity, entity)} — "
+        f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC",
         col_count,
     )
     _auto_width(ws, headers)
@@ -283,9 +308,7 @@ def generate_report(
     wb.save(stream)
     stream.seek(0)
 
-    filename = (
-        f"reporte_{entity}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.xlsx"
-    )
+    filename = f"reporte_{entity}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.xlsx"
 
     return StreamingResponse(
         stream,

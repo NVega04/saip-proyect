@@ -8,6 +8,7 @@ import Badge from "../components/Badge";
 import { apiFetch } from "../utils/api";
 import "../pages/roles.css";
 import { useAuth } from "../context/AuthContext";
+import { useReportDownload } from "../hooks/useReportDownload.ts";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -68,9 +69,10 @@ export default function Roles(): JSX.Element {
   const [form, setForm]             = useState<RoleForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
   const [loading, setLoading]       = useState(true);
-
+  
   const { currentUser } = useAuth();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
+  const { download: downloadReport, loading: reportLoading } = useReportDownload("roles"); 
 
   // ── Cargar roles ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -255,9 +257,25 @@ export default function Roles(): JSX.Element {
           searchPlaceholder="Buscar rol"
           sortKey="name"
           headerActions={
+            <>
             <Button variant="primary" onClick={handleCrear}>
               Crear rol
             </Button>
+             <Button
+                variant="secondary"
+                onClick={downloadReport}
+                disabled={reportLoading}
+                icon={
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  }
+                >
+                {reportLoading ? "Generando..." : "Exportar Excel"}
+              </Button>
+            </>
           }
           renderActions={(row) => (
             <div className="saip-table__actions">
