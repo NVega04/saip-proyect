@@ -29,7 +29,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "session_token", "X-Confirm-Password"],
+    allow_headers=["Content-Type", "session-token", "X-Confirm-Password"],
 )
 
 app.state.limiter = limiter
