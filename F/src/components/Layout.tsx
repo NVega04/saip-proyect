@@ -78,7 +78,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
     floatingButton: {
     position: "fixed",
-    top: "70px", // ajusta según tu navbar
+    top: "70px",
     left: "12px",
     zIndex: 300,
     width: "40px",
