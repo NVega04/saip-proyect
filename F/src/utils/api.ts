@@ -7,7 +7,7 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "session_token": token ?? "",
+      "session-token": token ?? "",
       ...options?.headers,
     },
   });

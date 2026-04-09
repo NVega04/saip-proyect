@@ -8,7 +8,7 @@ import Badge from "../components/Badge";
 import { apiFetch } from "../utils/api";
 import "../pages/roles.css";
 import { useAuth } from "../context/AuthContext";
-import { useReportDownload } from "../hooks/useReportDownload.ts";
+import { useReportDownload } from "../hooks/useReportDownload";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
