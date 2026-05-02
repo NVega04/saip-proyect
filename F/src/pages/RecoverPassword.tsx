@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 import "./RecoverPassword.css";
 import { useAlert } from "../context/AlertContext";
+import PasswordStrengthBar from "../components/PasswordStrengthBar";
+import { getPasswordStrength } from "../utils/passwordStrength";
 
 export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
@@ -155,6 +157,10 @@ function ResetForm({ token }: { token: string }) {
   const [success, setSuccess]                 = useState(false);
   const [error, setError]                     = useState<string | null>(null);
 
+  const blockClipboard = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+  };
+  const isStrong = getPasswordStrength(newPassword).level === "fuerte";
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
       if (!newPassword || !confirmPassword) {
@@ -244,11 +250,15 @@ function ResetForm({ token }: { token: string }) {
               value={newPassword}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
               autoComplete="new-password"
+              onCopy={blockClipboard}
+              onPaste={blockClipboard}
+              onCut={blockClipboard}
             />
             <button type="button" className="toggle-pw" onClick={() => setShowNew(!showNew)}>
               <EyeIcon visible={showNew} />
             </button>
           </div>
+          <PasswordStrengthBar password={newPassword} />
         </div>
 
         <div className="field-group">
@@ -262,6 +272,9 @@ function ResetForm({ token }: { token: string }) {
               value={confirmPassword}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
+              onCopy={blockClipboard}
+              onPaste={blockClipboard}
+              onCut={blockClipboard}
             />
             <button type="button" className="toggle-pw" onClick={() => setShowConfirm(!showConfirm)}>
               <EyeIcon visible={showConfirm} />
@@ -269,7 +282,7 @@ function ResetForm({ token }: { token: string }) {
           </div>
         </div>
 
-        <button type="submit" className="btn-submit" disabled={isLoading}>
+        <button type="submit" className="btn-submit" disabled={isLoading || !isStrong}>
           {isLoading && <span className="btn-spinner" />}
           {isLoading ? "Actualizando..." : "Actualizar contraseña"}
         </button>
