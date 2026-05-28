@@ -15,6 +15,7 @@ class UppercaseMixin:
         "notas",
         "observaciones",
         "notas",
+        "status",
     }
 
     @field_validator("*", mode="before")
@@ -76,6 +77,7 @@ class UserUpdate(UppercaseMixin, BaseModel):
     phone: Optional[str] = None
     role_id: Optional[int] = None
     is_admin: Optional[bool] = None
+    status: Optional[UserStatus] = None 
 
 
 class UserUpdateResponse(BaseModel):

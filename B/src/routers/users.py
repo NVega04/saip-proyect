@@ -7,7 +7,7 @@ from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, Us
 from src.security import hash_password, generate_temp_password, verify_password
 from datetime import datetime, timezone
 from src.dependencies import get_current_user
-from src.email import send_welcome_email
+from src.email import send_welcome_email, send_deactivation_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
@@ -212,6 +212,8 @@ def update_user(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"El rol con id '{user_data.role_id}' no existe.",
             )
+    # Detectar si se está desactivando la cuenta
+    was_active = user.status == UserStatus.ACTIVE
 
     update_data = user_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -223,6 +225,12 @@ def update_user(
     session.add(user)
     session.commit()
     session.refresh(user)
+    # Notificar si la cuenta acaba de ser desactivada
+    if was_active and user.status == UserStatus.INACTIVE:
+        try:
+            send_deactivation_email(user.email, user.first_name)
+        except Exception as e:
+            logger.warning(f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}")
 
     return user
 
