@@ -58,3 +58,27 @@ def send_welcome_email(to_email: str, first_name: str, temp_password: str) -> No
     server.login(MAIL_USERNAME, MAIL_PASSWORD)
     server.sendmail(MAIL_FROM, to_email, msg.as_string())
     server.quit()
+
+def send_deactivation_email(to_email: str, first_name: str) -> None:
+    subject = "Tu cuenta en SAIP ha sido desactivada"
+
+    html_body = f"""
+    <p>Hola <strong>{first_name}</strong>,</p>
+    <p>Te informamos que tu cuenta en <strong>SAIP</strong> ha sido <strong>desactivada</strong>.</p>
+    <p>Si crees que esto es un error o necesitas más información, comunícate con el administrador del sistema.</p>
+    <p>— Equipo SAIP</p>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = MAIL_FROM
+    msg["To"]      = to_email
+    msg.attach(MIMEText(html_body, "html"))
+
+    server = smtplib.SMTP(MAIL_HOST, MAIL_PORT)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(MAIL_USERNAME, MAIL_PASSWORD)
+    server.sendmail(MAIL_FROM, to_email, msg.as_string())
+    server.quit()
