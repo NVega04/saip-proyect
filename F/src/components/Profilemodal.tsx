@@ -3,6 +3,8 @@ import Modal from "./Modal";
 import { apiFetch, getMe, UserProfile } from "../utils/api";
 import "./Profilemodal.css";
 import DeleteAccountModal from "./DeleteAccountModal";
+import PasswordStrengthBar from "./PasswordStrengthBar";
+import { getPasswordStrength } from "../utils/passwordStrength";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 interface FormState {
@@ -319,6 +321,11 @@ function ChangePasswordModal({
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
+  const blockClipboard = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  e.preventDefault();
+};
+  const isStrong = getPasswordStrength(form.new_password).level === "fuerte";
+
   // Reset al cerrar
   useEffect(() => {
     if (!isOpen) {
@@ -388,6 +395,11 @@ function ChangePasswordModal({
                 value={form[name]}
                 onChange={handleChange}
                 placeholder="••••••••"
+                {...(name !== "current_password" && {
+                  onCopy:  blockClipboard,
+                  onPaste: blockClipboard,
+                  onCut:   blockClipboard,
+                })}
               />
               <button
                 type="button"
@@ -408,6 +420,9 @@ function ChangePasswordModal({
                 )}
               </button>
             </div>
+            {name === "new_password" && (
+              <PasswordStrengthBar password={form.new_password} />
+            )}
           </div>
         ))}
 
@@ -415,7 +430,7 @@ function ChangePasswordModal({
           <button className="pm-btn-cancel" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button className="pm-btn-save" onClick={handleSubmit} disabled={saving}>
+          <button className="pm-btn-save" onClick={handleSubmit} disabled={saving  || !isStrong}>
             {saving ? <><span className="pm-spinner" /> Guardando...</> : "Actualizar contraseña"}
           </button>
         </div>
