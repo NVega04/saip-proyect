@@ -37,12 +37,7 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
     logger.warning(
         f"[SAIP] Password temporal generada para '{user_data.email}': {temp_password}"
     )
-    #-----Envio real de contraseña temporal al correo--------
-    try:
-        send_welcome_email(user_data.email, user_data.first_name, temp_password)
-    except Exception as e:
-        print(f"[EMAIL ERROR] No se pudo enviar bienvenida a {user_data.email}: {e}")
-        
+   
     new_user = User(
         first_name=user_data.first_name,
         last_name=user_data.last_name,
@@ -56,6 +51,11 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
+
+    try:
+        send_welcome_email(new_user.email, new_user.first_name, temp_password)
+    except Exception as e:
+        logger.warning(f"[EMAIL ERROR] No se pudo enviar bienvenida a {new_user.email}: {e}")
 
     return new_user
 
@@ -167,6 +167,11 @@ def delete_user(
 
     session.add(user)
     session.commit()
+
+    try:
+        send_deactivation_email(user.email, user.first_name)
+    except Exception as e:
+        logger.warning(f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}")
 
     return DeleteResponseUser(
         message=f"Usuario '{user.email}' eliminado correctamente.",
