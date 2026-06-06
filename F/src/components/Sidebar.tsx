@@ -108,21 +108,21 @@ const Icon = {
 
 const menuItems: MenuItem[] = [
   { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
-  { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
-  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.providers,  group: "operaciones" },
-  { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
-  { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
+  { id: "inventary",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
+  { id: "providers",      label: "Proveedores",        path: "/proveedores",icon: Icon.providers,  group: "operaciones" },
+  { id: "sales",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
+  { id: "production",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
   { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
-    { id: "unidades",       label: "Unidades de medida",            path: "/units",      icon: Icon.units,      group: "recetas" },
-    { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
-    { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
-    { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
-    { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
+    { id: "units",       label: "Unidades de medida",            path: "/units",      icon: Icon.units,      group: "recetas" },
+    { id: "supply-categories", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
+    { id: "supplies",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
+    { id: "products",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
+    { id: "recipes",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
   ]},
-  { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
+  { id: "users",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.users,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
+  { id: "reports",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
 ];
 
 const groupLabels: Record<string, string> = {
@@ -253,9 +253,12 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
     <nav style={{ display: "flex", flexDirection: "column", padding: "0.4rem 0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
       {groupOrder.map((group, gi) => {
-        const items = grouped[group].filter((item) =>
-          canAccessModule(item.id, allowedModules)
-        );
+      const items = grouped[group].filter((item) => {
+        if (item.subitems?.length) {
+          return item.subitems.some(sub => canAccessModule(sub.id, allowedModules));
+        }
+        return canAccessModule(item.id, allowedModules);
+      });
         if (!items.length) return null;
         return (
           <div key={group} style={{ marginBottom: gi < groupOrder.length - 1 ? "0.3rem" : 0 }}>

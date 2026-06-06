@@ -40,16 +40,16 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Landing />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/inventario" element={<ProtectedRoute module="inventario"><Inventory /></ProtectedRoute>} />
-            <Route path="/proveedores" element={<ProtectedRoute module="proveedores"><Proveedores /> </ProtectedRoute>} />
-            <Route path="/ventas" element={<ProtectedRoute module="ventas"><Ventas /></ProtectedRoute>} />
-            <Route path="/produccion"  element={<ProtectedRoute module="produccion"> <Produccion />  </ProtectedRoute>} />
-            <Route path="/recetas"     element={<ProtectedRoute module="recetas">    <Recetas />     </ProtectedRoute>} />
-            <Route path="/units"       element={<ProtectedRoute module="recetas">    <Units />       </ProtectedRoute>} />
-            <Route path="/products"    element={<ProtectedRoute module="recetas">    <Products />    </ProtectedRoute>} />
-            <Route path="/supply-categories" element={<ProtectedRoute module="recetas"><SupplyCategories /></ProtectedRoute>} />
-            <Route path="/supplies" element={<ProtectedRoute module="recetas"><Supplies /></ProtectedRoute>} />
-            <Route path="/usuarios"    element={<ProtectedRoute module="usuarios">   <User />        </ProtectedRoute>} />
+            <Route path="/inventario" element={<ProtectedRoute module="inventory"><Inventory /></ProtectedRoute>} />
+            <Route path="/proveedores" element={<ProtectedRoute module="providers"><Proveedores /> </ProtectedRoute>} />
+            <Route path="/ventas" element={<ProtectedRoute module="sales"><Ventas /></ProtectedRoute>} />
+            <Route path="/produccion"  element={<ProtectedRoute module="production"> <Produccion />  </ProtectedRoute>} />
+            <Route path="/recetas"     element={<ProtectedRoute module="recipes">    <Recetas />     </ProtectedRoute>} />
+            <Route path="/units"       element={<ProtectedRoute module="supplies">   <Units />       </ProtectedRoute>} />
+            <Route path="/products"    element={<ProtectedRoute module="supplies">   <Products />    </ProtectedRoute>} />
+            <Route path="/supply-categories" element={<ProtectedRoute module="supplies"><SupplyCategories /></ProtectedRoute>} />
+            <Route path="/supplies"    element={<ProtectedRoute module="supplies">   <Supplies />    </ProtectedRoute>} />
+            <Route path="/usuarios"    element={<ProtectedRoute module="users">      <User />        </ProtectedRoute>} />
             <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/reset-password" element={<RecoverPassword />} />

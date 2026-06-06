@@ -39,10 +39,13 @@ def get_role_modules(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"El rol con id '{role_id}' no existe.",
         )
-
     role_modules = session.exec(
         select(RoleModule).where(RoleModule.role_id == role_id)
     ).all()
+
+    # Cargar la relación module explícitamente
+    for rm in role_modules:
+        _ = rm.module
 
     return role_modules
 
