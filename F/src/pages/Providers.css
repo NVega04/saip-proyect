@@ -1,0 +1,250 @@
+.crf {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.crf__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.crf__label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+}
+
+.crf__required {
+  color: #c9685a;
+  margin-left: 2px;
+}
+
+.crf__input,
+.crf__textarea {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.85rem;
+  color: #3b2510;
+  background: #ffffff;
+  border: 1px solid #cfc0b0;
+  border-radius: 7px;
+  padding: 0.55rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.crf__input::placeholder,
+.crf__textarea::placeholder {
+  color: #9e7e62;
+  opacity: 0.6;
+}
+
+.crf__input:focus,
+.crf__textarea:focus {
+  border-color: #9e7e62;
+  box-shadow: 0 0 0 2px rgba(184, 160, 138, 0.2);
+}
+
+.crf__input--error {
+  border-color: #c9685a !important;
+}
+
+.crf__error {
+  font-size: 0.74rem;
+  color: #b94a3a;
+  font-family: 'Roboto', sans-serif;
+}
+
+.crf__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0e8e0;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 480px) {
+  .crf__actions {
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+  }
+
+  .crf__actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Panel de detalle del proveedor ────────────────────────────────────────── */
+
+.prd {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Info básica (NIT, email, estado) */
+.prd__info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  padding: 0.85rem 1rem;
+  background: #faf6f2;
+  border: 1px solid #ede4da;
+  border-radius: 8px;
+}
+
+.prd__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.prd__info-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #9e7e62;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: 'Roboto', sans-serif;
+}
+
+.prd__info-value {
+  font-size: 0.85rem;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* ─── Cabecera de la sección contactos ──────────────────────────────────────── */
+
+.prd__contacts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prd__contacts-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.prd__contacts-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8ddd4;
+  color: #6b4226;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 0.05rem 0.55rem;
+  min-width: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+}
+
+.prd__add-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6b4226;
+  background: transparent;
+  border: 1px solid #cfc0b0;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+.prd__add-contact-btn:hover {
+  background: #f5ede5;
+  border-color: #b8a08a;
+}
+
+/* ─── Lista de contactos ────────────────────────────────────────────────────── */
+
+.prd__contacts-empty {
+  font-size: 0.82rem;
+  color: #9e7e62;
+  font-family: 'Roboto', sans-serif;
+  padding: 0.75rem 0;
+}
+
+.prd__contacts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.prd__contact-card {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ede4da;
+  border-radius: 8px;
+  background: #ffffff;
+  transition: border-color 0.15s ease;
+}
+
+.prd__contact-card:hover {
+  border-color: #cfc0b0;
+}
+
+.prd__contact-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.prd__contact-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #3b2510;
+  font-family: 'Roboto', sans-serif;
+}
+
+.prd__contact-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.prd__contact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.prd__contact-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: #7a5c42;
+  font-family: 'Roboto', sans-serif;
+}
+
+.prd__contact-meta-item svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.prd__contact-notes {
+  font-size: 0.76rem;
+  color: #9e7e62;
+  font-family: 'Roboto', sans-serif;
+  font-style: italic;
+  width: 100%;
+  margin-top: 0.15rem;
+}
