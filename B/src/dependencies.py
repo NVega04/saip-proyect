@@ -4,15 +4,23 @@ from datetime import datetime, timezone
 
 from src.database import get_session
 from src.models.models import SessionApp, User, RoleModule, Module
+from src.security import decode_jwt
 
 def get_current_user(
     session_token: str = Header(..., alias="session-token"),
     session: Session = Depends(get_session),
 ) -> User:
 
-# Buscar la sesión por token
+    payload = decode_jwt(session_token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+    internal_token = payload["session_token"]
+
     user_session = session.exec(
-        select(SessionApp).where(SessionApp.token == session_token)  # ← buscar por token en lugar de PK
+        select(SessionApp).where(SessionApp.token == internal_token)
     ).first()
     if user_session is None:
         raise HTTPException(
