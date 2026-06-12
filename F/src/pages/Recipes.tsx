@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
 import React from "react";
 import Layout from "../components/Layout";
 import Table, { ColumnDef } from "../components/Table";
@@ -8,162 +8,162 @@ import Badge from "../components/Badge";
 import Detallemodal from "../components/Detailmodal";
 import { useAlert } from "../context/AlertContext";
 import { useConfirm } from "../context/ConfirmContext";
+import { apiFetch } from "../utils/api";
 import "./Recipes.css";
 import { useReportDownload } from "../hooks/useReportDownload.ts";
 
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const INSUMOS_MOCK = [
-  { id: 1,  nombre: "Harina de trigo",  unidad: "kg" },
-  { id: 2,  nombre: "Azúcar",           unidad: "kg" },
-  { id: 3,  nombre: "Huevos",           unidad: "unidad" },
-  { id: 4,  nombre: "Mantequilla",      unidad: "kg" },
-  { id: 5,  nombre: "Leche",            unidad: "L" },
-  { id: 6,  nombre: "Levadura",         unidad: "g" },
-  { id: 7,  nombre: "Sal",              unidad: "g" },
-  { id: 8,  nombre: "Cacao en polvo",   unidad: "g" },
-  { id: 9,  nombre: "Vainilla",         unidad: "ml" },
-  { id: 10, nombre: "Polvo de hornear", unidad: "g" },
-];
-
-// ─── Interfaces ───────────────────────────────────────────────────────────────
-interface Ingrediente {
-  insumo_id: number;
-  nombre: string;
-  cantidad: number;
-  unidad: string;
+interface UnitBasic {
+  id: number;
+  name: string;
+  abbreviation: string;
 }
 
-interface Receta {
+interface SupplyBasic {
   id: number;
-  nombre: string;
-  descripcion?: string | null;
-  ingredientes: Ingrediente[];
-  estado: "activa" | "inactiva";
+  token: string;
+  name: string;
+  status: string;
+}
+
+interface RecipeIngredient {
+  id: number;
+  token: string;
+  supply_id: number;
+  supply: SupplyBasic;
+  quantity: number;
+  unit_id: number;
+  unit: UnitBasic;
+  notes: string | null;
+}
+
+interface Recipe {
+  id: number;
+  token: string;
+  name: string;
+  description: string | null;
+  product_id: number | null;
+  yield_quantity: number;
+  yield_unit_id: number;
+  yield_unit: UnitBasic;
+  status: "active" | "inactive";
+  ingredients: RecipeIngredient[];
   created_at: string;
 }
 
-interface Insumo {
+interface Supply {
   id: number;
-  nombre: string;
-  unidad: string;
+  token: string;
+  name: string;
+  unit_id: number;
+  unit: UnitBasic;
+  status: string;
+}
+
+interface Unit {
+  id: number;
+  name: string;
+  abbreviation: string;
 }
 
 interface IngredienteForm {
-  insumo_id: string;
-  cantidad: string;
-  unidad: string;
+  supply_id: string;
+  quantity: string;
+  unit_id: string;
 }
 
-interface RecetaForm {
-  nombre: string;
-  descripcion: string;
-  estado: "activa" | "inactiva";
-  ingredientes: IngredienteForm[];
+interface RecipeForm {
+  name: string;
+  description: string;
+  yield_quantity: string;
+  yield_unit_id: string;
+  status: "active" | "inactive";
+  ingredients: IngredienteForm[];
 }
 
-type FormErrors = Partial<Record<keyof RecetaForm | "ingredientes_list", string>>;
-
-const RECETAS_INICIALES: Receta[] = [
-  {
-    id: 1,
-    nombre: "Pan de chocolate",
-    descripcion: "Pan esponjoso con sabor intenso a cacao, ideal para el desayuno.",
-    estado: "activa",
-    created_at: "2024-01-15",
-    ingredientes: [
-      { insumo_id: 1, nombre: "Harina de trigo", cantidad: 0.5,  unidad: "kg" },
-      { insumo_id: 2, nombre: "Azúcar",          cantidad: 0.2,  unidad: "kg" },
-      { insumo_id: 8, nombre: "Cacao en polvo",  cantidad: 50,   unidad: "g" },
-      { insumo_id: 3, nombre: "Huevos",          cantidad: 2,    unidad: "unidad" },
-      { insumo_id: 5, nombre: "Leche",           cantidad: 0.25, unidad: "L" },
-    ],
-  },
-  {
-    id: 2,
-    nombre: "Croissant clásico",
-    descripcion: "Croissant hojaldrado y mantequilloso de preparación artesanal.",
-    estado: "activa",
-    created_at: "2024-02-10",
-    ingredientes: [
-      { insumo_id: 1, nombre: "Harina de trigo", cantidad: 1,   unidad: "kg" },
-      { insumo_id: 4, nombre: "Mantequilla",     cantidad: 0.3, unidad: "kg" },
-      { insumo_id: 6, nombre: "Levadura",        cantidad: 20,  unidad: "g" },
-      { insumo_id: 7, nombre: "Sal",             cantidad: 15,  unidad: "g" },
-      { insumo_id: 5, nombre: "Leche",           cantidad: 0.3, unidad: "L" },
-    ],
-  },
-  {
-    id: 3,
-    nombre: "Torta de vainilla",
-    descripcion: "Torta suave y esponjosa con aroma a vainilla.",
-    estado: "inactiva",
-    created_at: "2024-03-05",
-    ingredientes: [
-      { insumo_id: 1,  nombre: "Harina de trigo",  cantidad: 0.4,  unidad: "kg" },
-      { insumo_id: 2,  nombre: "Azúcar",            cantidad: 0.25, unidad: "kg" },
-      { insumo_id: 3,  nombre: "Huevos",            cantidad: 3,    unidad: "unidad" },
-      { insumo_id: 9,  nombre: "Vainilla",          cantidad: 10,   unidad: "ml" },
-      { insumo_id: 10, nombre: "Polvo de hornear",  cantidad: 8,    unidad: "g" },
-    ],
-  },
-];
+type FormErrors = Partial<Record<keyof RecipeForm | "ingredientes_list", string>>;
 
 const emptyIngrediente = (): IngredienteForm => ({
-  insumo_id: "",
-  cantidad: "",
-  unidad: "",
+  supply_id: "",
+  quantity: "",
+  unit_id: "",
 });
 
-const emptyForm = (): RecetaForm => ({
-  nombre: "",
-  descripcion: "",
-  estado: "activa",
-  ingredientes: [emptyIngrediente()],
+const emptyForm = (): RecipeForm => ({
+  name: "",
+  description: "",
+  yield_quantity: "1",
+  yield_unit_id: "",
+  status: "active",
+  ingredients: [emptyIngrediente()],
 });
 
-// ─── Columnas ─────────────────────────────────────────────────────────────────
-const columns: ColumnDef<Receta>[] = [
-  { key: "id",          header: "ID",            width: "5%" },
-  { key: "nombre",      header: "Nombre",        width: "22%" },
-  { key: "descripcion", header: "Descripción",   width: "32%" },
+const columns: ColumnDef<Recipe>[] = [
+  { key: "id", header: "ID", width: "5%" },
+  { key: "name", header: "Nombre", width: "22%" },
+  { key: "description", header: "Descripcion", width: "27%" },
   {
-    key: "ingredientes",
+    key: "yield_unit",
+    header: "Rendimiento",
+    width: "12%",
+    render: (row) => `${row.yield_quantity} ${row.yield_unit?.abbreviation || ""}`,
+  },
+  {
+    key: "ingredients",
     header: "# Ingredientes",
-    width: "15%",
+    width: "12%",
     render: (row) => (
-      <span className="rcf__badge-count">{row.ingredientes.length}</span>
+      <span className="rcf__badge-count">{row.ingredients.length}</span>
     ),
   },
   {
-    key: "estado",
+    key: "status",
     header: "Estado",
-    width: "12%",
+    width: "10%",
     render: (row) => (
       <Badge
-        label={row.estado === "activa" ? "Activa" : "Inactiva"}
-        variant={row.estado === "activa" ? "active" : "inactive"}
+        label={row.status === "active" ? "Activa" : "Inactiva"}
+        variant={row.status === "active" ? "active" : "inactive"}
       />
     ),
   },
 ];
 
-// ─── Página ───────────────────────────────────────────────────────────────────
 export default function Recetas(): JSX.Element {
-  const [recetas, setRecetas]       = useState<Receta[]>(RECETAS_INICIALES);
-  const insumos: Insumo[]           = INSUMOS_MOCK;
-  const [modalOpen, setModalOpen]   = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [supplies, setSupplies] = useState<Supply[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Receta | null>(null);
-  const [viewTarget, setViewTarget] = useState<Receta | null>(null);
-  const [form, setForm]             = useState<RecetaForm>(emptyForm());
-  const [errors, setErrors]         = useState<FormErrors>({});
+  const [editTarget, setEditTarget] = useState<Recipe | null>(null);
+  const [viewTarget, setViewTarget] = useState<Recipe | null>(null);
+  const [form, setForm] = useState<RecipeForm>(emptyForm());
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("recipes");
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [recRes, supRes, unitRes] = await Promise.all([
+          apiFetch("/recipes/"),
+          apiFetch("/supplies/"),
+          apiFetch("/units/"),
+        ]);
+        if (recRes.ok) setRecipes(await recRes.json());
+        if (supRes.ok) setSupplies(await supRes.json());
+        if (unitRes.ok) setUnits(await unitRes.json());
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleCrear = () => {
     setEditTarget(null);
     setForm(emptyForm());
@@ -171,18 +171,20 @@ export default function Recetas(): JSX.Element {
     setModalOpen(true);
   };
 
-  const handleEditar = (receta: Receta) => {
+  const handleEditar = (recipe: Recipe) => {
     setDetailOpen(false);
-    setEditTarget(receta);
+    setEditTarget(recipe);
     setForm({
-      nombre:      receta.nombre,
-      descripcion: receta.descripcion ?? "",
-      estado:      receta.estado,
-      ingredientes: receta.ingredientes.length
-        ? receta.ingredientes.map((ing) => ({
-            insumo_id: String(ing.insumo_id),
-            cantidad:  String(ing.cantidad),
-            unidad:    ing.unidad,
+      name: recipe.name,
+      description: recipe.description ?? "",
+      yield_quantity: String(recipe.yield_quantity),
+      yield_unit_id: String(recipe.yield_unit_id),
+      status: recipe.status,
+      ingredients: recipe.ingredients.length
+        ? recipe.ingredients.map((ing) => ({
+            supply_id: String(ing.supply_id),
+            quantity: String(ing.quantity),
+            unit_id: String(ing.unit_id),
           }))
         : [emptyIngrediente()],
     });
@@ -190,8 +192,8 @@ export default function Recetas(): JSX.Element {
     setModalOpen(true);
   };
 
-  const handleVerDetalle = (receta: Receta) => {
-    setViewTarget(receta);
+  const handleVerDetalle = (recipe: Recipe) => {
+    setViewTarget(recipe);
     setDetailOpen(true);
   };
 
@@ -203,20 +205,21 @@ export default function Recetas(): JSX.Element {
     setForm(emptyForm());
   };
 
-  // ── Ingredientes dinámicos ────────────────────────────────────────────────
+  const supplyById = (id: string) => supplies.find((s) => String(s.id) === id);
+
   const setIngredienteField = (
     index: number,
     field: keyof IngredienteForm,
     value: string
   ) => {
     setForm((prev) => {
-      const updated = [...prev.ingredientes];
+      const updated = [...prev.ingredients];
       updated[index] = { ...updated[index], [field]: value };
-      if (field === "insumo_id") {
-        const insumo = insumos.find((i) => String(i.id) === value);
-        if (insumo) updated[index].unidad = insumo.unidad;
+      if (field === "supply_id") {
+        const supply = supplies.find((s) => String(s.id) === value);
+        if (supply) updated[index].unit_id = String(supply.unit_id);
       }
-      return { ...prev, ingredientes: updated };
+      return { ...prev, ingredients: updated };
     });
     setErrors((prev) => ({ ...prev, ingredientes_list: undefined }));
   };
@@ -224,45 +227,49 @@ export default function Recetas(): JSX.Element {
   const addIngrediente = () =>
     setForm((prev) => ({
       ...prev,
-      ingredientes: [...prev.ingredientes, emptyIngrediente()],
+      ingredients: [...prev.ingredients, emptyIngrediente()],
     }));
 
   const removeIngrediente = (index: number) =>
     setForm((prev) => ({
       ...prev,
-      ingredientes: prev.ingredientes.filter((_, i) => i !== index),
+      ingredients: prev.ingredients.filter((_, i) => i !== index),
     }));
 
-  // ── Formulario ────────────────────────────────────────────────────────────
-  const setField = (field: keyof RecetaForm, value: string) => {
+  const setField = (field: keyof RecipeForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const validate = (): boolean => {
     const e: FormErrors = {};
-    if (!form.nombre.trim()) e.nombre = "El nombre es requerido";
-    const ingValidos = form.ingredientes.every(
-      (ing) => ing.insumo_id && ing.cantidad && Number(ing.cantidad) > 0
+    if (!form.name.trim()) e.name = "El nombre es requerido";
+    if (!form.yield_unit_id) e.yield_unit_id = "Selecciona una unidad";
+    const ingValidos = form.ingredients.every(
+      (ing) => ing.supply_id && ing.quantity && Number(ing.quantity) > 0 && ing.unit_id
     );
-    if (form.ingredientes.length === 0 || !ingValidos)
-      e.ingredientes_list = "Agrega al menos un ingrediente con cantidad válida";
+    if (form.ingredients.length === 0 || !ingValidos)
+      e.ingredientes_list = "Agrega al menos un ingrediente con cantidad valida";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const buildIngredientes = (): Ingrediente[] =>
-    form.ingredientes.map((ing) => {
-      const insumo = insumos.find((i) => String(i.id) === ing.insumo_id);
-      return {
-        insumo_id: Number(ing.insumo_id),
-        nombre:    insumo?.nombre ?? "",
-        cantidad:  Number(ing.cantidad),
-        unidad:    ing.unidad,
-      };
-    });
+  const buildPayload = () => ({
+    name: form.name,
+    description: form.description || null,
+    yield_quantity: parseFloat(form.yield_quantity) || 1,
+    yield_unit_id: parseInt(form.yield_unit_id),
+    status: form.status,
+    ingredients: form.ingredients
+      .filter((ing) => ing.supply_id && ing.quantity && Number(ing.quantity) > 0)
+      .map((ing) => ({
+        supply_id: parseInt(ing.supply_id),
+        quantity: parseFloat(ing.quantity),
+        unit_id: parseInt(ing.unit_id),
+      })),
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -270,72 +277,97 @@ export default function Recetas(): JSX.Element {
       return;
     }
 
-    if (editTarget) {
-      setRecetas((prev) =>
-        prev.map((r) =>
-          r.id === editTarget.id
-            ? {
-                ...editTarget,
-                nombre: form.nombre,
-                descripcion: form.descripcion || null,
-                estado: form.estado,
-                ingredientes: buildIngredientes(),
-              }
-            : r
-        )
-      );
+    try {
+      if (editTarget) {
+        const response = await apiFetch(`/recipes/${editTarget.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(buildPayload()),
+        });
 
-      showAlert("success", "Receta actualizada correctamente.");
-    } else {
-      const newId =
-        recetas.length > 0 ? Math.max(...recetas.map((r) => r.id)) + 1 : 1;
+        if (!response.ok) {
+          const err = await response.json();
+          showAlert("error", err.detail || "Error al actualizar receta");
+          return;
+        }
 
-      setRecetas((prev) => [
-        ...prev,
-        {
-          id: newId,
-          nombre: form.nombre,
-          descripcion: form.descripcion || null,
-          estado: form.estado,
-          ingredientes: buildIngredientes(),
-          created_at: new Date().toISOString().split("T")[0],
-        },
-      ]);
+        const updated: Recipe = await response.json();
+        setRecipes((prev) => prev.map((r) => (r.id === editTarget.id ? updated : r)));
+        showAlert("success", "Receta actualizada correctamente.");
+      } else {
+        const response = await apiFetch("/recipes/", {
+          method: "POST",
+          body: JSON.stringify(buildPayload()),
+        });
 
-      showAlert("success", "Receta creada correctamente.");
+        if (!response.ok) {
+          const err = await response.json();
+          showAlert("error", err.detail || "Error al crear receta");
+          return;
+        }
+
+        const created: Recipe = await response.json();
+        setRecipes((prev) => [...prev, created]);
+        showAlert("success", "Receta creada correctamente.");
+      }
+
+      handleCerrar();
+    } catch {
+      showAlert("error", "Error de conexion con el servidor.");
     }
-
-    handleCerrar();
   };
 
   const handleEliminar = (id: number) => {
     showConfirm({
       title: "Eliminar receta",
-      message: "¿Está seguro que desea eliminar este registro?",
+      message: "¿Esta seguro que desea eliminar este registro?",
       confirmText: "Eliminar",
       cancelText: "Cancelar",
-      onConfirm: () => {
-        setRecetas((prev) => prev.filter((r) => r.id !== id));
-        showAlert("success", "Receta eliminada correctamente.");
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(`/recipes/${id}`, { method: "DELETE" });
+
+          if (!response.ok) {
+            const err = await response.json();
+            showAlert("error", err.detail || "Error al eliminar receta");
+            return;
+          }
+
+          setRecipes((prev) => prev.filter((r) => r.id !== id));
+          showAlert("success", "Receta eliminada correctamente.");
+        } catch {
+          showAlert("error", "Error de conexion con el servidor.");
+        }
       },
     });
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <Layout
+        breadcrumbs={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Produccion" },
+          { label: "Recetas" },
+        ]}
+      >
+        <div className="saip-loading">Cargando recetas...</div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
-        { label: "Panadería"},
+        { label: "Produccion" },
         { label: "Recetas" },
-
       ]}
     >
       <Table
-        sortKey="nombre"
-        title="Gestión de recetas"
+        sortKey="name"
+        title="Gestion de recetas"
         columns={columns}
-        data={recetas}
+        data={recipes}
         searchPlaceholder="Buscar receta"
         headerActions={
           <>
@@ -399,7 +431,6 @@ export default function Recetas(): JSX.Element {
         )}
       />
 
-      {/* ── MODAL CREAR / EDITAR ──────────────────────────────────────────── */}
       <Modal
         isOpen={modalOpen}
         onClose={handleCerrar}
@@ -412,36 +443,69 @@ export default function Recetas(): JSX.Element {
               Nombre <span className="rcf__required">*</span>
             </label>
             <input
-              className={`rcf__input ${errors.nombre ? "rcf__input--error" : ""}`}
+              className={`rcf__input ${errors.name ? "rcf__input--error" : ""}`}
               placeholder="Ej: Pan de chocolate"
-              value={form.nombre}
-              onChange={(e) => setField("nombre", e.target.value)}
+              value={form.name}
+              onChange={(e) => setField("name", e.target.value)}
             />
-            {errors.nombre && <span className="rcf__error">{errors.nombre}</span>}
+            {errors.name && <span className="rcf__error">{errors.name}</span>}
           </div>
 
           <div className="rcf__group">
-            <label className="rcf__label">Descripción</label>
+            <label className="rcf__label">Descripcion</label>
             <textarea
               className="rcf__textarea"
               placeholder="Describe brevemente la receta..."
               rows={2}
-              value={form.descripcion}
-              onChange={(e) => setField("descripcion", e.target.value)}
+              value={form.description}
+              onChange={(e) => setField("description", e.target.value)}
             />
+          </div>
+
+          <div className="rcf__row">
+            <div className="rcf__group rcf__group--half">
+              <label className="rcf__label">Rendimiento</label>
+              <input
+                type="number"
+                className="rcf__input"
+                min={0}
+                step={0.01}
+                placeholder="1"
+                value={form.yield_quantity}
+                onChange={(e) => setField("yield_quantity", e.target.value)}
+              />
+            </div>
+            <div className="rcf__group rcf__group--half">
+              <label className="rcf__label">
+                Unidad de rendimiento <span className="rcf__required">*</span>
+              </label>
+              <select
+                className={`rcf__select ${errors.yield_unit_id ? "rcf__input--error" : ""}`}
+                value={form.yield_unit_id}
+                onChange={(e) => setField("yield_unit_id", e.target.value)}
+              >
+                <option value="">Selecciona</option>
+                {units.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.abbreviation})
+                  </option>
+                ))}
+              </select>
+              {errors.yield_unit_id && <span className="rcf__error">{errors.yield_unit_id}</span>}
+            </div>
           </div>
 
           <div className="rcf__group">
             <label className="rcf__label">Estado</label>
             <select
               className="rcf__select"
-              value={form.estado}
+              value={form.status}
               onChange={(e) =>
-                setField("estado", e.target.value as "activa" | "inactiva")
+                setField("status", e.target.value as "active" | "inactive")
               }
             >
-              <option value="activa">Activa</option>
-              <option value="inactiva">Inactiva</option>
+              <option value="active">Activa</option>
+              <option value="inactive">Inactiva</option>
             </select>
           </div>
 
@@ -472,60 +536,62 @@ export default function Recetas(): JSX.Element {
                 <span></span>
               </div>
 
-              {form.ingredientes.map((ing, idx) => (
-                <div key={idx} className="rcf__ing-row">
-                  <select
-                    className="rcf__select rcf__select--sm"
-                    value={ing.insumo_id}
-                    onChange={(e) =>
-                      setIngredienteField(idx, "insumo_id", e.target.value)
-                    }
-                  >
-                    <option value="">Seleccionar…</option>
-                    {insumos.map((ins) => (
-                      <option key={ins.id} value={String(ins.id)}>
-                        {ins.nombre}
-                      </option>
-                    ))}
-                  </select>
+              {form.ingredients.map((ing, idx) => {
+                const selSupply = supplyById(ing.supply_id);
+                return (
+                  <div key={idx} className="rcf__ing-row">
+                    <select
+                      className="rcf__select rcf__select--sm"
+                      value={ing.supply_id}
+                      onChange={(e) =>
+                        setIngredienteField(idx, "supply_id", e.target.value)
+                      }
+                    >
+                      <option value="">Seleccionar...</option>
+                      {supplies
+                        .filter((s) => s.status === "active")
+                        .map((s) => (
+                          <option key={s.id} value={String(s.id)}>
+                            {s.name}
+                          </option>
+                        ))}
+                    </select>
 
-                  <input
-                    className="rcf__input rcf__input--sm"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0"
-                    value={ing.cantidad}
-                    onChange={(e) =>
-                      setIngredienteField(idx, "cantidad", e.target.value)
-                    }
-                  />
+                    <input
+                      className="rcf__input rcf__input--sm"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0"
+                      value={ing.quantity}
+                      onChange={(e) =>
+                        setIngredienteField(idx, "quantity", e.target.value)
+                      }
+                    />
 
-                  <input
-                    className="rcf__input rcf__input--sm rcf__input--unit"
-                    placeholder="kg, g, L…"
-                    value={ing.unidad}
-                    readOnly={!!ing.insumo_id}
-                    onChange={(e) =>
-                      setIngredienteField(idx, "unidad", e.target.value)
-                    }
-                  />
+                    <input
+                      className="rcf__input rcf__input--sm rcf__input--unit"
+                      placeholder="kg, g, L..."
+                      value={selSupply?.unit?.abbreviation ?? ing.unit_id}
+                      readOnly
+                    />
 
-                  <button
-                    type="button"
-                    className="rcf__remove-ing-btn"
-                    onClick={() => removeIngrediente(idx)}
-                    disabled={form.ingredientes.length === 1}
-                    title="Eliminar ingrediente"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" strokeWidth="2.5">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                    <button
+                      type="button"
+                      className="rcf__remove-ing-btn"
+                      onClick={() => removeIngrediente(idx)}
+                      disabled={form.ingredients.length === 1}
+                      title="Eliminar ingrediente"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
 
             {errors.ingredientes_list && (
@@ -544,24 +610,23 @@ export default function Recetas(): JSX.Element {
         </form>
       </Modal>
 
-      {/* ── DETALLE — componente genérico ─────────────────────────────────── */}
       <Detallemodal
         isOpen={detailOpen}
         onClose={handleCerrar}
-        titulo={viewTarget?.nombre ?? ""}
+        titulo={viewTarget?.name ?? ""}
         estado={
           viewTarget
             ? {
-                label:   viewTarget.estado === "activa" ? "Activa" : "Inactiva",
-                variant: viewTarget.estado === "activa" ? "active" : "inactive",
+                label: viewTarget.status === "active" ? "Activa" : "Inactiva",
+                variant: viewTarget.status === "active" ? "active" : "inactive",
               }
             : undefined
         }
-        descripcion={viewTarget?.descripcion}
+        descripcion={viewTarget?.description}
         itemsLabel="Ingredientes"
-        items={viewTarget?.ingredientes.map((ing) => ({
-          nombre:  ing.nombre,
-          detalle: `${ing.cantidad} ${ing.unidad}`,
+        items={viewTarget?.ingredients.map((ing) => ({
+          nombre: ing.supply?.name ?? `Insumo #${ing.supply_id}`,
+          detalle: `${ing.quantity} ${ing.unit?.abbreviation || ""}`,
         }))}
         accionLabel="Editar receta"
         onAccion={() => viewTarget && handleEditar(viewTarget)}

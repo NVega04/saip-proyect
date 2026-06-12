@@ -170,7 +170,10 @@ class Unit(SQLModel, table=True):
 
     products: List["Product"] = Relationship(back_populates="unit")
     supplies: List["Supply"] = Relationship(back_populates="unit")
-
+    commercial_products: List["CommercialProduct"] = Relationship(  
+        back_populates="unit",
+        sa_relationship_kwargs={"foreign_keys": "[CommercialProduct.unit_id]"}
+    )
 
 class ProductStatus(str, Enum):
     ACTIVE = "active"
@@ -450,6 +453,96 @@ class ProductionOrderSnapshot(SQLModel, table=True):
     stock_before: float
     stock_after: float
 
+
+class ProductCategory(SQLModel, table=True):
+    __tablename__ = "product_categories"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(
+        default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
+    )
+    name: str = Field(max_length=100, unique=True)
+    description: Optional[str] = Field(default=None, max_length=255)
+    status: str = Field(default="active")
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    updated_at: Optional[datetime] = Field(default=None)
+    updated_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_product_category_updated_by"),
+            nullable=True,
+        ),
+    )
+    deleted_at: Optional[datetime] = Field(default=None)
+    deleted_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_product_category_deleted_by"),
+            nullable=True,
+        ),
+    )
+
+    commercial_products: List["CommercialProduct"] = Relationship(
+        back_populates="category"
+    )
+
+
+class CommercialProduct(SQLModel, table=True):
+    __tablename__ = "commercial_products"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(
+        default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
+    )
+    name: str = Field(max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+
+    category_id: int = Field(foreign_key="product_categories.id")
+    category: "ProductCategory" = Relationship(back_populates="commercial_products")
+
+    unit_id: int = Field(foreign_key="units.id")
+    unit: "Unit" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[CommercialProduct.unit_id]"}
+    )
+
+    provider_id: Optional[int] = Field(default=None, foreign_key="providers.id")
+    provider: Optional["Provider"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[CommercialProduct.provider_id]"}
+    )
+
+    purchase_price: float = Field(default=0)
+    sale_price: float = Field(default=0)
+    available_quantity: float = Field(default=0)
+    min_stock: float = Field(default=0)
+    max_stock: float = Field(default=0)
+    status: str = Field(default="active")
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    updated_at: Optional[datetime] = Field(default=None)
+    updated_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_commercial_product_updated_by"),
+            nullable=True,
+        ),
+    )
+    deleted_at: Optional[datetime] = Field(default=None)
+    deleted_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_commercial_product_deleted_by"),
+            nullable=True,
+        ),
+    )
+
+
 class ProviderStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -492,6 +585,10 @@ class Provider(SQLModel, table=True):
     )
 
     contacts: List["ProviderContact"] = Relationship(back_populates="provider")
+    commercial_products: List["CommercialProduct"] = Relationship(
+        back_populates="provider",
+        sa_relationship_kwargs={"foreign_keys": "[CommercialProduct.provider_id]"}
+    )
 
 
 class ProviderContact(SQLModel, table=True):
