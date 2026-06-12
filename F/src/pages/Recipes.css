@@ -37,6 +37,15 @@
   gap: 5px;
 }
 
+.rcf__group--half {
+  flex: 1;
+}
+
+.rcf__row {
+  display: flex;
+  gap: 1rem;
+}
+
 /* ── Label ──────────────────────────────────────────────────────────────────── */
 .rcf__label {
   font-size: 13px;
