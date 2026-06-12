@@ -17,6 +17,7 @@ interface LayoutProps {
 
 export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
   const activeMenu = location.pathname.replace("/", "") || "dashboard";
 
@@ -32,6 +33,8 @@ export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
           onMenuChange={() => {}}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         />
         <main style={styles.content}>
           {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
