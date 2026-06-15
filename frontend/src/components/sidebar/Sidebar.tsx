@@ -288,7 +288,7 @@ function saveExpanded(set: Set<string>) {
 }
 
 // ── Módulos permitidos ─────────────────────────────────────────────────────
-function NavContent({ activeMenu, onItemClick, collapsed }: { activeMenu: string; onItemClick: (id: string) => void; collapsed?: boolean }) {
+function NavContent({ activeMenu, onItemClick, collapsed, onToggleCollapse }: { activeMenu: string; onItemClick: (id: string) => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const allowedModules = getAllowedModules();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(loadExpanded);
 
@@ -324,36 +324,6 @@ function NavContent({ activeMenu, onItemClick, collapsed }: { activeMenu: string
   return (
     <nav style={{ display: "flex", flexDirection: "column", padding: "0.4rem 0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
-      <div
-        onClick={toggleAll}
-        style={{
-          display: "flex", alignItems: "center", gap: "0.4rem",
-          padding: "0.35rem 0.9rem", marginBottom: "0.2rem",
-          cursor: "pointer", userSelect: "none",
-          fontSize: "0.65rem", fontWeight: 500,
-          color: "rgba(255,255,255,0.45)",
-          fontFamily: "'Outfit', system-ui, sans-serif",
-          transition: "color 0.15s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.75)")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          {allCollapsed ? (
-            <>
-              <polyline points="7 13 12 18 17 13" />
-              <polyline points="7 6 12 11 17 6" />
-            </>
-          ) : (
-            <>
-              <polyline points="7 11 12 6 17 11" />
-              <polyline points="7 18 12 13 17 18" />
-            </>
-          )}
-        </svg>
-        {allCollapsed ? "Expandir todo" : "Colapsar todo"}
-      </div>
       {groupOrder.map((group, gi) => {
       const items = grouped[group].filter((item) => {
         if (item.subitems?.length) {
@@ -362,17 +332,82 @@ function NavContent({ activeMenu, onItemClick, collapsed }: { activeMenu: string
         return canAccessModule(item.id, allowedModules);
       });
         if (!items.length) return null;
+        const isPrincipal = group === "principal";
         return (
           <div key={group} style={{ marginBottom: gi < groupOrder.length - 1 ? "0.3rem" : 0 }}>
-            {!collapsed && (
+            {(!collapsed || isPrincipal) && (
               <div style={{
+                display: "flex", alignItems: "center", justifyContent: isPrincipal ? (collapsed ? "center" : "space-between") : "flex-start",
                 fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.13em",
                 textTransform: "uppercase" as const,
                 color: "rgb(255, 229, 199)",
-                padding: "0.75rem 0.9rem 0.28rem",
+                padding: isPrincipal ? (collapsed ? "0.5rem 0" : "0.75rem 0.9rem 0.28rem") : "0.75rem 0.9rem 0.28rem",
                 fontFamily: "'Outfit', system-ui, sans-serif",
               }}>
-                {groupLabels[group]}
+                {(!collapsed || !isPrincipal) && (
+                  <span>{groupLabels[group]}</span>
+                )}
+                {isPrincipal && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                    {!collapsed && (
+                      <button
+                        onClick={toggleAll}
+                        aria-label={allCollapsed ? "Expandir todo" : "Colapsar todo"}
+                        style={{
+                          width: "22px", height: "22px",
+                          border: "1px solid rgba(255,255,255,0.2)",
+                          borderRadius: "5px", background: "none", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "rgba(255,255,255,0.45)", flexShrink: 0,
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                      >
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          {allCollapsed ? (
+                            <>
+                              <polyline points="7 13 12 18 17 13" />
+                              <polyline points="7 6 12 11 17 6" />
+                            </>
+                          ) : (
+                            <>
+                              <polyline points="7 11 12 6 17 11" />
+                              <polyline points="7 18 12 13 17 18" />
+                            </>
+                          )}
+                        </svg>
+                      </button>
+                    )}
+                    {onToggleCollapse && (
+                      <button
+                        id="colapsar"
+                        onClick={onToggleCollapse}
+                        aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+                        style={{
+                          width: "22px", height: "22px",
+                          border: "1px solid rgba(255,255,255,0.2)",
+                          borderRadius: "5px", background: "none", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "rgba(255,255,255,0.7)", flexShrink: 0,
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          {collapsed ? (
+                            <polyline points="9 18 15 12 9 6" />
+                          ) : (
+                            <polyline points="15 18 9 12 15 6" />
+                          )}
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             <div style={{
@@ -534,36 +569,7 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
       overflowY: "auto",
       transition: "width 0.3s ease",
     }}>
-      <div style={{
-        display: "flex",
-        justifyContent: collapsed ? "center" : "flex-end",
-        padding: collapsed ? "0.75rem 0" : "0.5rem",
-      }}>
-        <button
-          onClick={onToggleCollapse}
-          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-          style={{
-            width: "28px", height: "28px",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: "7px", background: "none", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "rgba(255,255,255,0.7)", flexShrink: 0,
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {collapsed ? (
-              <polyline points="9 18 15 12 9 6" />
-            ) : (
-              <polyline points="15 18 9 12 15 6" />
-            )}
-          </svg>
-        </button>
-      </div>
-      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} collapsed={collapsed} />
+      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />
       {!collapsed && <div style={versionTag}>SAIP v1.0</div>}
     </aside>
   );
