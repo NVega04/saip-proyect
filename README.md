@@ -61,13 +61,13 @@ El proyecto se desarrollará de forma iterativa, comenzando con los módulos pri
 
 3. **Instalar dependencias del frontend**
    ```bash
-   cd F
+   cd frontend
    pnpm install
    ```
 
 4. **Instalar dependencias del backend**
    ```bash
-   cd ../B
+   cd ../backend
    uv sync
    ```
 
@@ -87,11 +87,11 @@ El proyecto se desarrollará de forma iterativa, comenzando con los módulos pri
 docker-compose up db -d
 
 # Terminal 2: Backend (puerto 8000)
-cd B
+cd backend
 uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Terminal 3: Frontend (puerto 5173)
-cd F
+cd frontend
 pnpm dev
 ```
 
@@ -112,7 +112,7 @@ docker-compose up --build
 
 ```
 saip-proyect/
-├── F/                          # Frontend (React + TypeScript + Vite)
+├── frontend/                   # Frontend (React + TypeScript + Vite)
 │   ├── src/
 │   │   ├── components/         # Componentes reutilizables
 │   │   ├── pages/              # Páginas de la aplicación
@@ -122,7 +122,7 @@ saip-proyect/
 │   │   └── main.tsx            # Punto de entrada
 │   ├── eslint.config.js        # ESLint 9 flat config
 │   └── vite.config.js
-├── B/                          # Backend (Python + FastAPI)
+├── backend/                   # Backend (Python + FastAPI)
 │   ├── src/
 │   │   ├── main.py             # Punto de entrada FastAPI
 │   │   ├── database.py         # Conexión a DB

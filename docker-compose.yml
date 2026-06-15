@@ -14,12 +14,12 @@ services:
       - app
 
   backend:
-    build: ./B
+    build: ./backend
     container_name: saip_backend
     ports:
       - "8000:8000"
     volumes:
-      - ./B:/app:Z
+      - ./backend:/app:Z
       - /app/.venv
     env_file:
       - .env
@@ -31,12 +31,12 @@ services:
       - app
 
   frontend:
-    build: ./F
+    build: ./frontend
     container_name: saip_frontend
     ports:
       - "5173:5173"
     volumes:
-      - ./F:/src:Z
+      - ./frontend:/src:Z
       - /src/node_modules
     depends_on:
       - backend
