@@ -1,0 +1,66 @@
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import Navbar from "../navbar/Navbar";
+import Sidebar from "../sidebar/Sidebar";
+import Footer from "../footer/Footer";
+import Breadcrumb from "../breadcrumb/Breadcrumb";
+
+interface BreadcrumbItem {
+  label: string;
+  to?: string;
+}
+
+interface LayoutProps {
+  children: React.ReactNode;
+  breadcrumbs?: BreadcrumbItem[];
+}
+
+export default function Layout({ children, breadcrumbs = [] }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const location = useLocation();
+  const activeMenu = location.pathname.replace("/", "") || "dashboard";
+
+  return (
+    <div style={styles.root}>
+      <Navbar
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        sidebarOpen={sidebarOpen}
+      />
+      <div style={styles.body}>
+        <Sidebar
+          activeMenu={activeMenu}
+          onMenuChange={() => {}}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
+        <main style={styles.content}>
+          {breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
+          {children}
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  root: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    background: "#f5f0ea",
+  },
+  body: {
+    display: "flex",
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    padding: "2rem 2.5rem",
+    overflowY: "auto",
+    minWidth: 0,
+  },
+};

@@ -4,8 +4,8 @@
 
 **SAIP** (Sistema Administrativo Integral de Productos) is a bakery inventory/management system.
 
-- **Frontend**: React 19 + TypeScript + Vite + pnpm (in `F/` directory)
-- **Backend**: Python 3.14 + FastAPI + SQLModel (in `B/` directory)
+- **Frontend**: React 19 + TypeScript + Vite + pnpm (in `frontend/` directory)
+- **Backend**: Python 3.14 + FastAPI + SQLModel (in `backend/` directory)
 - **Database**: MySQL 8.0 (Docker)
 - **No test framework** is currently configured
 
@@ -13,7 +13,7 @@
 
 ## Build/Lint/Test Commands
 
-### Frontend (`F/` directory)
+### Frontend (`frontend/` directory)
 
 ```bash
 # Install dependencies
@@ -35,7 +35,7 @@ pnpm preview
 pnpm lint src/pages/dashboard.tsx
 ```
 
-### Backend (`B/` directory)
+### Backend (`backend/` directory)
 
 ```bash
 # Install dependencies (uses uv)
@@ -205,7 +205,7 @@ class UserResponse(BaseModel):
 
 ```
 saip-proyect/
-├── F/                          # Frontend (React + TypeScript + Vite)
+├── frontend/                   # Frontend (React + TypeScript + Vite)
 │   ├── src/
 │   │   ├── components/         # Reusable UI components
 │   │   ├── pages/              # Page components
@@ -215,7 +215,7 @@ saip-proyect/
 │   │   └── main.tsx            # Entry point
 │   ├── eslint.config.js        # ESLint flat config
 │   └── vite.config.js
-├── B/                          # Backend (Python + FastAPI)
+├── backend/                   # Backend (Python + FastAPI)
 │   ├── src/
 │   │   ├── main.py             # FastAPI app entry
 │   │   ├── database.py         # DB connection
