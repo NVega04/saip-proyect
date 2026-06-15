@@ -8,7 +8,7 @@ from src.schemas.schemas import (
     ForgotPasswordRequest,
     ResetPasswordRequest,
 )
-from src.security import verify_password, get_session_expiry, hash_password
+from src.security import verify_password, get_session_expiry, hash_password, create_jwt, decode_jwt
 from src.dependencies import get_current_user
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -94,8 +94,10 @@ def login(
     db.refresh(new_session)
     db.refresh(user)
 
+    jwt_token = create_jwt(new_session.token, user.id, new_session.expires_at)
+
     return LoginResponse(
-        session_token=new_session.token,
+        session_token=jwt_token,
         expires_at=new_session.expires_at,
         user=user,
         terms_required=False,
@@ -108,10 +110,16 @@ def logout(
     current_user: User = Depends(get_current_user),
     session_token: str = Header(..., alias="session_token"),
 ):
-    # Buscar la sesión activa
+    payload = decode_jwt(session_token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido"
+        )
+    internal_token = payload["session_token"]
+
     user_session = db.exec(
         select(SessionApp).where(
-            SessionApp.token == session_token,
+            SessionApp.token == internal_token,
             SessionApp.is_active == True,
         )
     ).first()

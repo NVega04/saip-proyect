@@ -16,6 +16,8 @@ interface SidebarProps {
   onMenuChange: (id: string) => void;
   isOpen?: boolean;
   onClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const Icon = {
@@ -108,21 +110,28 @@ const Icon = {
 
 const menuItems: MenuItem[] = [
   { id: "dashboard",        label: "Dashboard",          path: "/dashboard",  icon: Icon.dashboard,  group: "principal" },
-  { id: "inventario",       label: "Inventario",         path: "/inventario", icon: Icon.inventory,  group: "operaciones" },
-  { id: "proveedores",      label: "Proveedores",        path: "/proveedores",icon: Icon.providers,  group: "operaciones" },
-  { id: "ventas",           label: "Ventas",             path: "/ventas",     icon: Icon.sales,      group: "operaciones" },
-  { id: "produccion",       label: "Producción",         path: "/produccion", icon: Icon.production, group: "operaciones" },
-  { id: "panaderia",          label: "Panadería",            path: "#",           icon: Icon.recipes,    group: "operaciones", subitems: [
-    { id: "unidades",       label: "Unidades de medida",            path: "/units",      icon: Icon.units,      group: "recetas" },
-    { id: "categorias_insumos", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "recetas" },
-    { id: "insumos",         label: "Insumos",             path: "/supplies",   icon: Icon.products,   group: "recetas" },
-    { id: "productos",      label: "Productos terminados",           path: "/products",   icon: Icon.products,   group: "recetas" },
-    { id: "recetas",        label: "Recetas",             path: "/recetas",    icon: Icon.recipes,    group: "recetas" },
+  { id: "produccion",       label: "Producción",         path: "#",           icon: Icon.production, group: "operaciones", subitems: [
+    { id: "production",      label: "Órdenes de producción",  path: "/produccion", icon: Icon.production, group: "produccion" },
+    { id: "recipes",         label: "Recetas",                path: "/recetas",    icon: Icon.recipes,   group: "produccion" },
+    { id: "supplies",        label: "Insumos / Materia Prima", path: "/supplies",  icon: Icon.products,  group: "produccion" },
+    { id: "supply-categories", label: "Categorías de insumos", path: "/supply-categories", icon: Icon.products, group: "produccion" },
+    { id: "units",           label: "Unidades de medida",      path: "/units",    icon: Icon.units,     group: "produccion" },
   ]},
-  { id: "usuarios",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
+  { id: "ventas-comercial", label: "Ventas y Comercial", path: "#",           icon: Icon.sales,      group: "operaciones", subitems: [
+    { id: "sales",           label: "Registrar Venta",         path: "/ventas",   icon: Icon.sales,     group: "ventas" },
+    { id: "sales-history",   label: "Historial de Ventas",    path: "/ventas/historial", icon: Icon.sales, group: "ventas" },
+    { id: "products",        label: "Productos Terminados",    path: "/products", icon: Icon.products,  group: "ventas" },
+    { id: "commercial-products", label: "Productos Comerciales", path: "/commercial-products", icon: Icon.products, group: "ventas" },
+    { id: "product-categories",  label: "Categorías de productos", path: "/product-categories", icon: Icon.products, group: "ventas" },
+  ]},
+  { id: "logistica-compras", label: "Logística y Compras", path: "#",           icon: Icon.inventory,  group: "operaciones", subitems: [
+    { id: "inventary",       label: "Inventario General",     path: "/inventario", icon: Icon.inventory, group: "logistica" },
+    { id: "providers",       label: "Proveedores",            path: "/proveedores", icon: Icon.providers, group: "logistica" },
+  ]},
+  { id: "users",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.users,      group: "administracion" },
+  { id: "reports",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
-  { id: "reportes",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
 ];
 
 const groupLabels: Record<string, string> = {
@@ -148,7 +157,8 @@ function NavItem({
   isExpanded,
   hasSubitems,
   onToggle,
-  isSubitem = false
+  isSubitem = false,
+  collapsed = false,
 }: { 
   item: MenuItem; 
   isActive: boolean; 
@@ -157,6 +167,7 @@ function NavItem({
   hasSubitems?: boolean;
   onToggle?: () => void;
   isSubitem?: boolean;
+  collapsed?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -167,6 +178,35 @@ function NavItem({
       onClick();
     }
   };
+
+  if (collapsed && !isSubitem) {
+    const iconContent = (
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        title={item.label}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "0.5rem", margin: "0 0.5rem",
+          borderRadius: "7px",
+          color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
+          background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
+          cursor: "pointer",
+          transition: "background 0.15s, color 0.15s",
+        }}
+      >
+        <span style={{ display: "flex", color: "inherit" }}>{item.icon}</span>
+      </div>
+    );
+    if (hasSubitems || !item.path || item.path === "#") {
+      return <div onClick={handleClick}>{iconContent}</div>;
+    }
+    return (
+      <Link to={item.path} style={{ textDecoration: "none" }} onClick={onClick}>
+        {iconContent}
+      </Link>
+    );
+  }
 
   const baseStyle: React.CSSProperties = {
     display: "flex", alignItems: "center", gap: "0.6rem",
@@ -231,16 +271,33 @@ function NavItem({
   );
 }
 
+const STORAGE_KEY = "saip_sidebar_expanded";
+
+function loadExpanded(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch { /* ignore */ }
+  return new Set(
+    menuItems.filter((item) => item.subitems?.length).map((item) => item.id)
+  );
+}
+
+function saveExpanded(set: Set<string>) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+}
+
 // ── Módulos permitidos ─────────────────────────────────────────────────────
-function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemClick: (id: string) => void }) {
+function NavContent({ activeMenu, onItemClick, collapsed }: { activeMenu: string; onItemClick: (id: string) => void; collapsed?: boolean }) {
   const allowedModules = getAllowedModules();
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(loadExpanded);
 
   const toggleExpand = (id: string) => {
-    setExpandedItems(prev => {
+    setExpandedItems((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      saveExpanded(next);
       return next;
     });
   };
@@ -249,26 +306,79 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
     onItemClick(id);
   };
 
+  const allCollapsed = expandedItems.size === 0;
+
+  const toggleAll = () => {
+    if (allCollapsed) {
+      const all = new Set(
+        menuItems.filter((item) => item.subitems?.length).map((item) => item.id)
+      );
+      setExpandedItems(all);
+      saveExpanded(all);
+    } else {
+      setExpandedItems(new Set());
+      saveExpanded(new Set());
+    }
+  };
+
   return (
     <nav style={{ display: "flex", flexDirection: "column", padding: "0.4rem 0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');`}</style>
+      <div
+        onClick={toggleAll}
+        style={{
+          display: "flex", alignItems: "center", gap: "0.4rem",
+          padding: "0.35rem 0.9rem", marginBottom: "0.2rem",
+          cursor: "pointer", userSelect: "none",
+          fontSize: "0.65rem", fontWeight: 500,
+          color: "rgba(255,255,255,0.45)",
+          fontFamily: "'Outfit', system-ui, sans-serif",
+          transition: "color 0.15s",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.75)")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          {allCollapsed ? (
+            <>
+              <polyline points="7 13 12 18 17 13" />
+              <polyline points="7 6 12 11 17 6" />
+            </>
+          ) : (
+            <>
+              <polyline points="7 11 12 6 17 11" />
+              <polyline points="7 18 12 13 17 18" />
+            </>
+          )}
+        </svg>
+        {allCollapsed ? "Expandir todo" : "Colapsar todo"}
+      </div>
       {groupOrder.map((group, gi) => {
-        const items = grouped[group].filter((item) =>
-          canAccessModule(item.id, allowedModules)
-        );
+      const items = grouped[group].filter((item) => {
+        if (item.subitems?.length) {
+          return item.subitems.some(sub => canAccessModule(sub.id, allowedModules));
+        }
+        return canAccessModule(item.id, allowedModules);
+      });
         if (!items.length) return null;
         return (
           <div key={group} style={{ marginBottom: gi < groupOrder.length - 1 ? "0.3rem" : 0 }}>
+            {!collapsed && (
+              <div style={{
+                fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.13em",
+                textTransform: "uppercase" as const,
+                color: "rgb(255, 229, 199)",
+                padding: "0.75rem 0.9rem 0.28rem",
+                fontFamily: "'Outfit', system-ui, sans-serif",
+              }}>
+                {groupLabels[group]}
+              </div>
+            )}
             <div style={{
-              fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.13em",
-              textTransform: "uppercase" as const,
-              color: "rgb(255, 229, 199)",
-              padding: "0.75rem 0.9rem 0.28rem",
-              fontFamily: "'Outfit', system-ui, sans-serif",
+              padding: collapsed ? "0 0.2rem" : "0 0.65rem",
+              display: "flex", flexDirection: "column", gap: collapsed ? "1px" : "2px",
             }}>
-              {groupLabels[group]}
-            </div>
-            <div style={{ padding: "0 0.65rem", display: "flex", flexDirection: "column", gap: "2px" }}>
               {items.map((item) => (
                 <div key={item.id}>
                   <NavItem
@@ -278,8 +388,9 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
                     isExpanded={expandedItems.has(item.id)}
                     hasSubitems={!!item.subitems?.length}
                     onToggle={() => toggleExpand(item.id)}
+                    collapsed={collapsed}
                   />
-                  {item.subitems && expandedItems.has(item.id) && (
+                  {item.subitems && expandedItems.has(item.id) && !collapsed && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                       {item.subitems.filter(sub => canAccessModule(sub.id, allowedModules)).map(subitem => (
                         <NavItem
@@ -288,6 +399,7 @@ function NavContent({ activeMenu, onItemClick }: { activeMenu: string; onItemCli
                           isActive={activeMenu === subitem.id}
                           onClick={() => handleSubitemClick(subitem.id)}
                           isSubitem
+                          collapsed={collapsed}
                         />
                       ))}
                     </div>
@@ -358,7 +470,7 @@ const versionTag: React.CSSProperties = {
   letterSpacing: "0.04em",
 };
 
-export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClose }: SidebarProps): JSX.Element {
+export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClose, collapsed = false, onToggleCollapse }: SidebarProps): JSX.Element {
   const [isMobile, setIsMobile] = React.useState(false);
 
   useEffect(() => {
@@ -411,7 +523,7 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
 
   return (
     <aside style={{
-      width: "220px",
+      width: collapsed ? "60px" : "220px",
       minHeight: "calc(100vh - 58px)",
       background: "var(--bakery-sidebar-bg)",
       borderRight: "1px solid rgba(255,255,255,0.08)",
@@ -420,9 +532,39 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
       height: "calc(100vh - 58px)",
       fontFamily: "'Outfit', system-ui, sans-serif",
       overflowY: "auto",
+      transition: "width 0.3s ease",
     }}>
-      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} />
-      <div style={versionTag}>SAIP v1.0</div>
+      <div style={{
+        display: "flex",
+        justifyContent: collapsed ? "center" : "flex-end",
+        padding: collapsed ? "0.75rem 0" : "0.5rem",
+      }}>
+        <button
+          onClick={onToggleCollapse}
+          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+          style={{
+            width: "28px", height: "28px",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "7px", background: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "rgba(255,255,255,0.7)", flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {collapsed ? (
+              <polyline points="9 18 15 12 9 6" />
+            ) : (
+              <polyline points="15 18 9 12 15 6" />
+            )}
+          </svg>
+        </button>
+      </div>
+      <NavContent activeMenu={activeMenu} onItemClick={onMenuChange} collapsed={collapsed} />
+      {!collapsed && <div style={versionTag}>SAIP v1.0</div>}
     </aside>
   );
 }

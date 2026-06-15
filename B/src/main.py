@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI
 from src.routers import users
 from src.routers import roles
@@ -13,6 +14,11 @@ from src.routers import reports
 from src.routers import supply_categories
 from src.routers import supplies
 from src.routers import providers
+from src.routers.product_categories import router as product_categories_router
+from src.routers.commercial_products import router as commercial_products_router
+from src.routers.recipes import router as recipes_router
+
+logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -47,3 +53,6 @@ app.include_router(reports.router)
 app.include_router(supply_categories.router)
 app.include_router(supplies.router)
 app.include_router(providers.router)
+app.include_router(product_categories_router)
+app.include_router(commercial_products_router)
+app.include_router(recipes_router)

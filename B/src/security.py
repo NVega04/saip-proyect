@@ -1,10 +1,15 @@
 import bcrypt
 import secrets
 import string
+import os
+import jwt
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
+
+JWT_SECRET = os.getenv("JWT_SECRET", "cambiar-en-produccion")
+JWT_ALGORITHM = "HS256"
 
 #Definición de duración de la sessión del usuario en horas
 SESSION_DURATION_HOURS = 8
@@ -31,3 +36,18 @@ def create_session_token() -> str:
 
 def get_session_expiry() -> datetime:
     return datetime.now(BOGOTA_TZ) + timedelta(hours=SESSION_DURATION_HOURS)
+
+def create_jwt(session_token: str, user_id: int, expires_at: datetime) -> str:
+    payload = {
+        "sub": str(user_id),
+        "session_token": session_token,
+        "exp": expires_at,
+        "iat": datetime.now(BOGOTA_TZ),
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def decode_jwt(token: str) -> dict | None:
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except jwt.PyJWTError:
+        return None
