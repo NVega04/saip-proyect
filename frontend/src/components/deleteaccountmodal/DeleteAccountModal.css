@@ -41,7 +41,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #3b2510;
+  color: #16425b;
   font-family: "Roboto", sans-serif;
   line-height: 1.4;
 }
@@ -50,7 +50,7 @@
 .da-description {
   margin: 0;
   font-size: 0.85rem;
-  color: #7d5a3c;
+  color: #3a7ca5;
   line-height: 1.5;
 }
 
@@ -69,7 +69,7 @@
 
 .da-consequences li {
   font-size: 0.82rem;
-  color: #7a3b30;
+  color: #2d4a5e;
   padding: 4px 0;
   display: flex;
   align-items: flex-start;
@@ -97,7 +97,7 @@
 
 .da-label {
   font-size: 0.72rem;
-  color: #9e7e62;
+  color: #647a8a;
   font-weight: 500;
   letter-spacing: 0.02em;
 }
@@ -111,11 +111,11 @@
 .da-input {
   width: 100%;
   padding: 0.65rem 2.6rem 0.65rem 0.9rem;
-  border: 1.5px solid #f5f0ea;
-  background: #f5f0ea;
+  border: 1.5px solid #d9dcd6;
+  background: #d9dcd6;
   border-radius: 10px;
   font-size: 0.85rem;
-  color: #3b2510;
+  color: #16425b;
   font-family: "Roboto", sans-serif;
   transition: all 0.25s ease;
   box-sizing: border-box;
@@ -129,7 +129,7 @@
 }
 
 .da-input::placeholder {
-  color: #9e7e62;
+  color: #647a8a;
   opacity: 0.6;
 }
 
@@ -140,7 +140,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #b8a08a;
+  color: #8fa4b2;
   display: flex;
   align-items: center;
   padding: 0;
@@ -148,7 +148,7 @@
 }
 
 .da-eye-btn:hover {
-  color: #7d5a3c;
+  color: #3a7ca5;
 }
 
 /* Contenedor de botones de acción */
@@ -164,10 +164,10 @@
 .da-btn-cancel {
   padding: 0.6rem 1.1rem;
   background: #ffffff;
-  border: 1.5px solid #cfc0b0;
+  border: 1.5px solid #bcc7d0;
   border-radius: 9px;
   font-size: 0.83rem;
-  color: #7d5a3c;
+  color: #3a7ca5;
   cursor: pointer;
   font-family: "Roboto", sans-serif;
   font-weight: 500;
@@ -175,8 +175,8 @@
 }
 
 .da-btn-cancel:hover:not(:disabled) {
-  border-color: #b8a08a;
-  background: #f5f0ea;
+  border-color: #8fa4b2;
+  background: #d9dcd6;
 }
 
 /* Botón de acción destructiva */

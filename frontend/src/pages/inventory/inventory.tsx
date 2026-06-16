@@ -17,7 +17,7 @@ export default function Inventario(): JSX.Element {
             height="64"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#7d5a3c"
+            stroke="#3a7ca5"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"

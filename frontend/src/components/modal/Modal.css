@@ -1,7 +1,7 @@
 .saip-modal__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(59, 37, 16, 0.35);
+  background: rgba(22,66,91,0.35);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   background: var(--bakery-card-bg);
   border-radius: 12px;
   border: 1px solid var(--bakery-border);
-  box-shadow: 0 8px 32px rgba(59, 37, 16, 0.12);
+  box-shadow: 0 8px 32px rgba(22,66,91,0.12);
   max-height: 90vh;
   overflow-y: auto;
   animation: modal-slide-in 0.18s ease;

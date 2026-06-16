@@ -33,7 +33,7 @@ export default function Footer() {
           <div style={styles.brandRow}>
             <div style={styles.logoBox}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="#7d5a3c" strokeWidth="1.5">
+                stroke="#3a7ca5" strokeWidth="1.5">
                 <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
               </svg>
             </div>
@@ -72,30 +72,30 @@ export default function Footer() {
             {/* Instagram */}
             <div style={styles.socialIcon} title="Instagram">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="#9e7e62" strokeWidth="1.6">
+                stroke="#647a8a" strokeWidth="1.6">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                 <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" fill="#9e7e62" stroke="none" />
+                <circle cx="17.5" cy="6.5" r="1" fill="#647a8a" stroke="none" />
               </svg>
             </div>
             {/* Facebook */}
             <div style={styles.socialIcon} title="Facebook">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="#9e7e62" strokeWidth="1.6">
+                stroke="#647a8a" strokeWidth="1.6">
                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </div>
             {/* Twitter/X */}
             <div style={styles.socialIcon} title="Twitter">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="#9e7e62" strokeWidth="1.6">
+                stroke="#647a8a" strokeWidth="1.6">
                 <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
               </svg>
             </div>
             {/* LinkedIn */}
             <div style={styles.socialIcon} title="LinkedIn">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="#9e7e62" strokeWidth="1.6">
+                stroke="#647a8a" strokeWidth="1.6">
                 <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" />
                 <rect x="2" y="9" width="4" height="12" />
                 <circle cx="4" cy="4" r="2" />
@@ -122,7 +122,7 @@ export default function Footer() {
 const styles: Record<string, React.CSSProperties> = {
   footer: {
     background: "#ffffff",
-    borderTop: "1px solid #cfc0b066",
+    borderTop: "1px solid #bcc7d066",
     padding: "1.75rem 2.5rem",
     fontFamily: "'Roboto', sans-serif",
   },
@@ -134,7 +134,7 @@ const styles: Record<string, React.CSSProperties> = {
   colTitle: {
     fontSize: "0.72rem",
     fontWeight: 600,
-    color: "#5c3d1e",
+    color: "#16425b",
     textTransform: "uppercase" as const,
     letterSpacing: "0.07em",
     marginBottom: "0.3rem",
@@ -148,8 +148,8 @@ const styles: Record<string, React.CSSProperties> = {
   logoBox: {
     width: "26px",
     height: "26px",
-    background: "#f5f0ea",
-    border: "1px solid #cfc0b0",
+    background: "#d9dcd6",
+    border: "1px solid #bcc7d0",
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
@@ -158,12 +158,12 @@ const styles: Record<string, React.CSSProperties> = {
   brandName: {
     fontSize: "0.85rem",
     fontWeight: 700,
-    color: "#5c3d1e",
+    color: "#16425b",
   },
   brandDesc: {
     fontSize: "0.72rem",
     fontWeight: 300,
-    color: "#9e7e62",
+    color: "#647a8a",
     lineHeight: 1.6,
     maxWidth: "180px",
     margin: 0,
@@ -176,13 +176,13 @@ const styles: Record<string, React.CSSProperties> = {
   link: {
     fontSize: "0.78rem",
     fontWeight: 400,
-    color: "#9e7e62",
+    color: "#647a8a",
     textDecoration: "none",
   },
   socialTitle: {
     fontSize: "0.72rem",
     fontWeight: 600,
-    color: "#5c3d1e",
+    color: "#16425b",
     textTransform: "uppercase" as const,
     letterSpacing: "0.07em",
     marginBottom: "0.3rem",
@@ -196,8 +196,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: "32px",
     height: "32px",
     borderRadius: "8px",
-    border: "1px solid #cfc0b0",
-    background: "#f5f0ea",
+    border: "1px solid #bcc7d0",
+    background: "#d9dcd6",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -205,7 +205,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "all 0.15s ease",
   },
   bottom: {
-    borderTop: "1px solid #f0e8e0",
+    borderTop: "1px solid #dadfe3",
     paddingTop: "1rem",
     display: "flex",
     alignItems: "center",
@@ -215,7 +215,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   copy: {
     fontSize: "0.68rem",
-    color: "#b8a08a",
+    color: "#8fa4b2",
   },
   bottomLinks: {
     display: "flex",
@@ -223,7 +223,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   bottomLink: {
     fontSize: "0.68rem",
-    color: "#b8a08a",
+    color: "#8fa4b2",
     textDecoration: "none",
   },
 };

@@ -27,7 +27,7 @@
 .saip-confirm__header h3 {
   margin: 0;
   font-size: 1rem;
-  color: #3b1f08;
+  color: #16425b;
 }
 
 .saip-confirm__body {
@@ -37,7 +37,7 @@
 .saip-confirm__body p {
   margin: 0;
   font-size: 0.92rem;
-  color: #5c3d1e;
+  color: #16425b;
   line-height: 1.45;
 }
 
@@ -58,8 +58,8 @@
 }
 
 .saip-confirm__btn--cancel {
-  background: #f5f0ea;
-  color: #7d5a3c;
+  background: #d9dcd6;
+  color: #3a7ca5;
 }
 
 .saip-confirm__btn--danger {

@@ -9,9 +9,9 @@
 }
 
 .saip-badge--access {
-  background: #f5f0ea;
-  color: #7d5a3c;
-  border-color: #cfc0b0;
+  background: #d9dcd6;
+  color: #3a7ca5;
+  border-color: #bcc7d0;
 }
 
 .saip-badge--active {
@@ -27,7 +27,7 @@
 }
 
 .saip-badge--warning {
-  background: #fdf8ee;
+  background: #e9ebed;
   color: #8a6a1a;
   border-color: #e0d0a0;
 }

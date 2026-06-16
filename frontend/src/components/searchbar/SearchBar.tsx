@@ -40,17 +40,17 @@ export default function SearchBar({
 
   const FilterIcon = () => {
     if (sortOrder === "asc")  return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
         <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
       </svg>
     );
     if (sortOrder === "desc") return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
         <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
       </svg>
     );
     return (
-   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="2">
+   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
      <line x1="3" y1="5"  x2="21" y2="5"/>
      <line x1="3" y1="10" x2="16" y2="10"/>
      <line x1="3" y1="15" x2="11" y2="15"/>
@@ -66,7 +66,7 @@ export default function SearchBar({
     <div className="searchbar">
       <div className="searchbar__input-wrapper">
         <svg className="searchbar__icon" width="14" height="14" viewBox="0 0 24 24"
-          fill="none" stroke="#9e7e62" strokeWidth="2">
+          fill="none" stroke="#647a8a" strokeWidth="2">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>

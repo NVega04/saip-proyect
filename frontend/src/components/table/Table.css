@@ -59,7 +59,7 @@
 }
 
 .saip-table__row:hover {
-  background: #EDE0CC;
+  background: #d5dadf;
 }
 
 .saip-table__row:not(:last-child) td {
@@ -99,7 +99,7 @@
 }
 
 .saip-table__action-btn:hover {
-  background: #EDE0CC;
+  background: #d5dadf;
   color: var(--bakery-sidebar-bg);
 }
 

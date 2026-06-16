@@ -340,7 +340,7 @@ function NavContent({ activeMenu, onItemClick, collapsed, onToggleCollapse }: { 
                 display: "flex", alignItems: "center", justifyContent: isPrincipal ? (collapsed ? "center" : "space-between") : "flex-start",
                 fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.13em",
                 textTransform: "uppercase" as const,
-                color: "rgb(255, 229, 199)",
+                color: "rgb(186, 209, 224)",
                 padding: isPrincipal ? (collapsed ? "0.5rem 0" : "0.75rem 0.9rem 0.28rem") : "0.75rem 0.9rem 0.28rem",
                 fontFamily: "'Outfit', system-ui, sans-serif",
               }}>
@@ -531,7 +531,7 @@ export default function Sidebar({ activeMenu, onMenuChange, isOpen = true, onClo
         {isOpen && (
           <div onClick={onClose} aria-hidden="true" style={{
             position: "fixed", inset: 0,
-            background: "rgba(59,31,8,0.22)",
+            background: "rgba(22,66,91,0.22)",
             backdropFilter: "blur(3px)",
             zIndex: 150, cursor: "pointer",
           }} />

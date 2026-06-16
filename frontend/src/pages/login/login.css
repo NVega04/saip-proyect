@@ -1,10 +1,10 @@
 :root {
-  --dark: #5c3d1e;
-  --medium: #7d5a3c;
-  --mid: #9e7e62;
-  --light: #b8a08a;
-  --pale: #cfc0b0;
-  --bg: #f5f0ea;
+  --dark: #16425b;
+  --medium: #3a7ca5;
+  --mid: #647a8a;
+  --light: #8fa4b2;
+  --pale: #bcc7d0;
+  --bg: #d9dcd6;
   --white: #ffffff;
 }
 
@@ -37,7 +37,7 @@ body {
   background: var(--white);
   border-radius: 24px;
   padding: 16px;
-  box-shadow: 0 20px 40px rgba(92, 61, 30, 0.08);
+  box-shadow: 0 20px 40px rgba(22, 66, 91, 0.08);
   border: 1px solid rgba(0,0,0,0.08);
 
 }
@@ -228,11 +228,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #b0a99f;
+  color: #a4b8c4;
   line-height: 1;
 }
 
-.toggle-pw:hover { color: #7a736b; }
+.toggle-pw:hover { color: #647a8a; }
 
 /* ── Opciones ── */
 .options-row {
@@ -282,7 +282,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(92, 61, 30, 0.2);
+  box-shadow: 0 10px 20px rgba(22, 66, 91, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +292,7 @@ body {
 .btn-submit:hover {
   background: var(--medium);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(92, 61, 30, 0.25);
+  box-shadow: 0 12px 24px rgba(22, 66, 91, 0.25);
 }
 
 .btn-submit:active { transform: translateY(0); }

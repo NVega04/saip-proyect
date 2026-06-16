@@ -147,7 +147,7 @@ useEffect(() => {
               <div className="carousel-overlay" />
               {/* 🔥 card del logo */}
               <div className="carousel-logo-card">
-                <img src="/Images/Logo-saip.png" alt="SAIP" />
+                <img src="/images/logo.png" alt="SAIP" />
               </div>
             </div>
             {/* ── Panel derecho ── */}

@@ -16,7 +16,7 @@ const modules: Module[] = [
     label: "Gestión de usuarios",
     desc: "Gestión detallada de los usuarios.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 00-3-3.87" />
@@ -29,7 +29,7 @@ const modules: Module[] = [
     label: "Gestión de roles",
     desc: "Administración, creación y distribución de roles.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3">
         <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
       </svg>
     ),
@@ -39,7 +39,7 @@ const modules: Module[] = [
     label: "Recetas",
     desc: "Gestión detallada de las recetas.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3">
         <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
         <line x1="9" y1="7" x2="15" y2="7" />
@@ -53,7 +53,7 @@ const modules: Module[] = [
     label: "Proveedores",
     desc: "Administración de contactos y contratos de proveedores.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <rect x="1" y="3" width="15" height="13" rx="1" />
         <path d="M16 8h4l3 5v4h-7V8z" />
         <circle cx="5.5" cy="18.5" r="2.5" />
@@ -66,7 +66,7 @@ const modules: Module[] = [
     label: "Ventas",
     desc: "Detalle y administración de las ventas.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="1" x2="12" y2="23" />
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
       </svg>
@@ -77,7 +77,7 @@ const modules: Module[] = [
     label: "Producción",
     desc: "Detalle y control de la producción",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="2,20 2,12 6,8 6,12 10,8 10,12 14,8 14,20" />
         <line x1="2" y1="20" x2="22" y2="20" />
         <line x1="14" y1="20" x2="14" y2="10" />
@@ -94,7 +94,7 @@ const modules: Module[] = [
     label: "Inventario",
     desc: "Gestión detallada del inventario.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
         <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
         <line x1="12" y1="22.08" x2="12" y2="12" />
@@ -106,7 +106,7 @@ const modules: Module[] = [
     label: "Acerca de SAIP",
     desc: "Información sobre el sistema SAIP.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -118,7 +118,7 @@ const modules: Module[] = [
     label: "Contáctanos",
     desc: "Información y canales de contacto.",
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
       </svg>
     ),
@@ -128,7 +128,7 @@ const modules: Module[] = [
   label: "Reportes",
   desc: "Descarga reportes en Excel por entidad.",
   icon: (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.3" strokeLinecap="round">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.3" strokeLinecap="round">
       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
       <polyline points="14 2 14 8 20 8"/>
       <line x1="16" y1="13" x2="8" y2="13"/>
@@ -208,13 +208,13 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "#5c3d1e",
+    color: "#16425b",
     marginBottom: "1.5rem",
     fontFamily: "'Roboto', sans-serif",
   },
   card: {
     background: "#ffffff",
-    border: "1px solid #cfc0b066",
+    border: "1px solid #bcc7d066",
     borderRadius: "8px",
     display: "flex",
     cursor: "pointer",
@@ -224,12 +224,12 @@ const styles: Record<string, React.CSSProperties> = {
   cardLabel: {
     fontSize: "1rem",
     fontWeight: 700,
-    color: "#5c3d1e",
+    color: "#16425b",
   },
   cardDesc: {
     fontSize: "0.8rem",
     fontWeight: 300,
-    color: "#9e7e62",
+    color: "#647a8a",
     lineHeight: 1.5,
   },
 };
