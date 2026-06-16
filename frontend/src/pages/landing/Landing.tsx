@@ -58,7 +58,7 @@ export default function Landing() {
           </div>
 
           <div className="landing-hero__content">
-            <span className="landing-hero__tag">🥖 Gestión para negocios</span>
+            <span className="landing-hero__tag">Gestión para negocios</span>
             <h1 className="landing-hero__title">
               Administra tu negocio<br />
               <span className="landing-hero__title--accent">de forma inteligente</span>

@@ -139,11 +139,30 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               ))}
             </button>
           )}
-
-          <Link to="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-            {!isMobile && (
-              <img src="/images/logo.png" alt="SAIP" style={{ height: "36px", width: "auto" }} />
-            )}
+          <Link to="/dashboard" style={{
+            display: "flex", alignItems: "center", gap: "0.65rem", textDecoration: "none",
+          }}>
+            <div style={{
+              width: "35px", height: "35px",
+              background: "#ffffff", borderRadius: "7px",
+              border: "1px solid rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <img src="/images/logo.png" alt="SAIP" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
+            </div>
+            <span style={{
+              fontSize: "1rem", fontWeight: 700, color: "#ffffff",
+              fontFamily: "'Outfit', sans-serif",
+            }}>
+              SAIP
+            </span>
+            <span style={{
+              fontSize: "0.72rem", color: "rgba(255,255,255,0.6)",
+              borderLeft: "1px solid rgba(255,255,255,0.2)",
+              paddingLeft: "0.6rem", fontFamily: "'Outfit', sans-serif",
+            }}>
+              Sistema de administración integral de productos
+            </span>
           </Link>
         </div>
 
