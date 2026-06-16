@@ -5,7 +5,7 @@
   gap: 6px;
   margin-bottom: 14px;
   font-size: 14px;
-  color: #8b6b4a;
+  color: #4a6375;
 }
 
 .saip-breadcrumb__item {
@@ -15,7 +15,7 @@
 }
 
 .saip-breadcrumb__link {
-  color: #8b6b4a;
+  color: #4a6375;
   text-decoration: none;
   transition: opacity 0.2s ease;
 }
@@ -26,10 +26,10 @@
 }
 
 .saip-breadcrumb__current {
-  color: #4e342e;
+  color: #1b2f3d;
   font-weight: 600;
 }
 
 .saip-breadcrumb__separator {
-  color: #b89b7a;
+  color: #8fa4b2;
 }

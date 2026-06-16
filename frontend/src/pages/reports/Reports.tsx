@@ -15,7 +15,7 @@ const entities: ReportEntity[] = [
     label: "Usuarios",
     desc: "Listado completo de usuarios registrados en el sistema.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6" strokeLinecap="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
         <circle cx="9" cy="7" r="4"/>
         <path d="M23 21v-2a4 4 0 00-3-3.87"/>
@@ -28,7 +28,7 @@ const entities: ReportEntity[] = [
     label: "Roles",
     desc: "Roles definidos en el sistema con su estado actual.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6" strokeLinecap="round">
         <rect x="3" y="11" width="18" height="11" rx="2"/>
         <path d="M7 11V7a5 5 0 0110 0v4"/>
       </svg>
@@ -39,7 +39,7 @@ const entities: ReportEntity[] = [
     label: "Unidades",
     desc: "Listado de unidades de medida configuradas en el sistema.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6" strokeLinecap="round">
         <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
         <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
         <line x1="12" y1="22.08" x2="12" y2="12"/>
@@ -51,7 +51,7 @@ const entities: ReportEntity[] = [
     label: "Insumos",
     desc: "Listado de insumos con stock y categorizacion.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d5a3c" strokeWidth="1.6" strokeLinecap="round">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6" strokeLinecap="round">
         <path d="M3 6h18M3 12h18M3 18h18"/>
       </svg>
     ),
@@ -145,7 +145,7 @@ export default function Reportes() {
       </div>
 
       <div style={styles.infoBox}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9e7e62" strokeWidth="1.6">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#647a8a" strokeWidth="1.6">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/>
           <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -160,13 +160,13 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: "1.5rem",
     fontWeight: 700,
-    color: "#5c3d1e",
+    color: "#16425b",
     marginBottom: "0.35rem",
     fontFamily: "'Outfit', system-ui, sans-serif",
   },
   subtitle: {
     fontSize: "0.88rem",
-    color: "#9e7e62",
+    color: "#647a8a",
     fontFamily: "'Outfit', system-ui, sans-serif",
   },
   grid: {
@@ -176,7 +176,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   card: {
     background: "#ffffff",
-    border: "1px solid #cfc0b066",
+    border: "1px solid #bcc7d066",
     borderRadius: "10px",
     padding: "1.25rem 1.5rem",
     display: "flex",
@@ -188,8 +188,8 @@ const styles: Record<string, React.CSSProperties> = {
   cardIcon: {
     width: "44px",
     height: "44px",
-    background: "#f5f0ea",
-    border: "1px solid #e8ddd4",
+    background: "#d9dcd6",
+    border: "1px solid #d1d7db",
     borderRadius: "10px",
     display: "flex",
     alignItems: "center",
@@ -202,12 +202,12 @@ const styles: Record<string, React.CSSProperties> = {
   cardLabel: {
     fontSize: "0.92rem",
     fontWeight: 600,
-    color: "#5c3d1e",
+    color: "#16425b",
     marginBottom: "0.2rem",
   },
   cardDesc: {
     fontSize: "0.8rem",
-    color: "#9e7e62",
+    color: "#647a8a",
     lineHeight: 1.5,
   },
   downloadBtn: {
@@ -215,7 +215,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     gap: "0.4rem",
     padding: "0.55rem 1.1rem",
-    background: "#5c3d1e",
+    background: "#16425b",
     color: "#ffffff",
     border: "none",
     borderRadius: "8px",
@@ -252,9 +252,9 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "flex-start",
     gap: "0.5rem",
     fontSize: "0.78rem",
-    color: "#9e7e62",
-    background: "#f5f0ea",
-    border: "1px solid #e8ddd4",
+    color: "#647a8a",
+    background: "#d9dcd6",
+    border: "1px solid #d1d7db",
     borderRadius: "8px",
     padding: "0.75rem 1rem",
     marginTop: "1.5rem",

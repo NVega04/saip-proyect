@@ -15,7 +15,7 @@ export default function AcercaDe(): JSX.Element {
         <header className="acerca__header">
           <div className="acerca__brand">
             <img
-              src="/Images/Logo-saip.png"
+              src="/images/logo.png"
               alt="SAIP Logo"
               className="acerca__logo"
             />

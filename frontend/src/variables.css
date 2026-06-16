@@ -1,9 +1,9 @@
 /* src/variables.css */
 :root { 
   /* Sidebar / Navbar */
-  --bakery-sidebar-bg:        #6B3A1F;
-  --bakery-sidebar-hover:     #6B3A1F;
-  --bakery-sidebar-active:    #7C4A22;
+  --bakery-sidebar-bg:        #003459;
+  --bakery-sidebar-hover:     #003459;
+  --bakery-sidebar-active:    #3a7ca5;
   --bakery-sidebar-text:      #FFFFFF;
 
   /* Cards doradas */
@@ -19,17 +19,17 @@
   --bakery-btn-text:          #FFFFFF;
 
   /* Fondos */
-  --bakery-bg:                #F5F0E8;
+  --bakery-bg:                #d9dcd6;
   --bakery-card-bg:           #FFFFFF;
 
   /* Texto general */
-  --bakery-text-primary:      #2C1A0E;
-  --bakery-text-secondary:    #6B5744;
-  --bakery-text-muted:        #9C8272;
+  --bakery-text-primary:      #0f1f2e;
+  --bakery-text-secondary:    #4a6375;
+  --bakery-text-muted:        #7a8e9a;
 
   /* Bordes */
-  --bakery-border:            #DDD0C0;
-  --bakery-border-focus:      #A0722A;
+  --bakery-border:            #c4cdd3;
+  --bakery-border-focus:      #3a7ca5;
 
   /* Estados */
   --bakery-success:           #1E7E34;

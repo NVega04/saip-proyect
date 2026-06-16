@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import './login.css';
 import { apiFetch, getMe } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
-import { useEffect} from "react";
 import Modal from "../../components/modal/Modal";
 import Alerta from "../../components/alert/Alert";
 
@@ -40,23 +39,6 @@ export default function Login() {
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertType, setAlertType] = useState<"success" | "error" | "warning" | "info">("error");
-  const images = [
-  "/Images/Pan 1.jpg",
-  "/Images/Pan 2.jpg",
-  "/Images/Pan 3.jpg",
-  "/Images/Pan 4.jpg",
-  "/Images/Pan 5.jpeg",
-];
-
-const [currentIndex, setCurrentIndex] = useState(0);
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  }, 3000);
-
-  return () => clearInterval(interval);
-}, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -137,17 +119,8 @@ useEffect(() => {
           <div className="card-inner">
             {/* ── Panel izquierdo ── */}
             <div className="panel-image">
-              <img
-                key={currentIndex}
-                src={images[currentIndex]}
-                alt="login visual"
-                className="carousel-image"
-              />
-               {/* 🔥 overlay oscuro */}
-              <div className="carousel-overlay" />
-              {/* 🔥 card del logo */}
               <div className="carousel-logo-card">
-                <img src="/Images/Logo-saip.png" alt="SAIP" />
+                <img src="/images/logo.png" alt="SAIP" />
               </div>
             </div>
             {/* ── Panel derecho ── */}

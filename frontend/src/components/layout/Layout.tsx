@@ -51,7 +51,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
-    background: "#f5f0ea",
+    background: "#d9dcd6",
   },
   body: {
     display: "flex",

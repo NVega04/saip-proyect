@@ -12,8 +12,8 @@
   height: 22px;
   padding: 0 8px;
   border-radius: 99px;
-  background: var(--color-primary-light, #cfc0b066);
-  color: var(--color-primary, #3d2314);
+  background: var(--color-primary-light, #bcc7d066);
+  color: var(--color-primary, #0f1f2e);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -75,7 +75,7 @@
 }
 
 .rcf__input:focus {
-  border-color: var(--color-primary, #cfc0b066);
+  border-color: var(--color-primary, #bcc7d066);
   box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
 }
 
@@ -182,10 +182,10 @@
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  border: 1px solid var(--color-primary, #3d2314);
+  border: 1px solid var(--color-primary, #0f1f2e);
   border-radius: 5px;
   background: transparent;
-  color: var(--color-primary, #3d2314);
+  color: var(--color-primary, #0f1f2e);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -194,7 +194,7 @@
 }
 
 .rcf__add-ing-btn:hover {
-  background: var(--color-primary, #cfc0b066);
+  background: var(--color-primary, #bcc7d066);
   color: #fff;
 }
 

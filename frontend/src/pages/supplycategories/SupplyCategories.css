@@ -19,7 +19,7 @@
 .scf__label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--dark, #3b1f08);
+  color: var(--dark, #16425b);
   font-family: 'Outfit', system-ui, sans-serif;
 }
 
@@ -32,11 +32,11 @@
 .scf__textarea,
 .scf__select {
   padding: 0.65rem 0.85rem;
-  border: 1px solid var(--border-s, rgba(107, 58, 24, 0.30));
+  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.30));
   border-radius: 7px;
   font-size: 0.9rem;
   font-family: 'Outfit', system-ui, sans-serif;
-  color: var(--dark, #3b1f08);
+  color: var(--dark, #16425b);
   background: var(--white, #fff);
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
@@ -45,8 +45,8 @@
 .scf__input:focus,
 .scf__textarea:focus,
 .scf__select:focus {
-  border-color: var(--medium, #6b3a18);
-  box-shadow: 0 0 0 3px rgba(107, 58, 24, 0.12);
+  border-color: var(--medium, #3a7ca5);
+  box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
 }
 
 .scf__input--error {
@@ -74,7 +74,7 @@
   gap: 0.75rem;
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border, rgba(107, 58, 24, 0.18));
+  border-top: 1px solid var(--border, rgba(58, 124, 165, 0.18));
 }
 
 .sc-badge {
@@ -106,15 +106,15 @@
 .sc-supply-tag {
   display: inline-block;
   padding: 0.15rem 0.5rem;
-  background-color: rgba(107, 58, 24, 0.08);
-  color: var(--dark, #3b1f08);
+  background-color: rgba(58, 124, 165, 0.08);
+  color: var(--dark, #16425b);
   border-radius: 6px;
   font-size: 0.75rem;
   font-family: 'Outfit', system-ui, sans-serif;
 }
 
 .sc-supplies-empty {
-  color: rgba(107, 58, 24, 0.5);
+  color: rgba(58, 124, 165, 0.5);
   font-size: 0.8rem;
   font-style: italic;
   font-family: 'Outfit', system-ui, sans-serif;

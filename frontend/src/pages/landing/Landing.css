@@ -1,17 +1,17 @@
 :root {
-  --dark: #5c3d1e;
-  --medium: #7d5a3c;
-  --mid: #9e7e62;
-  --light: #b8a08a;
-  --pale: #cfc0b0;
-  --bg: #f5f0ea;
+  --dark: #16425b;
+  --medium: #3a7ca5;
+  --mid: #647a8a;
+  --light: #8fa4b2;
+  --pale: #bcc7d0;
+  --bg: #d9dcd6;
   --white: #ffffff;
 }
 
 .landing {
   font-family: 'Roboto', sans-serif;
-  background: radial-gradient(circle at 10% 20%, #f3eae2 0%, transparent 40%),
-              radial-gradient(circle at 90% 0%, #e8ddd4 0%, transparent 35%),
+  background: radial-gradient(circle at 10% 20%, #dde2e5 0%, transparent 40%),
+              radial-gradient(circle at 90% 0%, #d1d7db 0%, transparent 35%),
               var(--bg);
   color: var(--dark);
   min-height: 100vh;
@@ -21,11 +21,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.7);
-  border-bottom: 1px solid #cfc0b033;
+  background: #003459;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   padding: 0 3rem;
-  height: 60px;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,8 +39,8 @@
 .landing-nav__logo {
   width: 35px;
   height: 35px;
-  background: var(--bg);
-  border: 1px solid var(--pale);
+  background: #ffffff;
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -57,13 +56,13 @@
 .landing-nav__name {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--dark);
+  color: #ffffff;
 }
 
 .landing-nav__sub {
   font-size: 0.72rem;
-  color: var(--light);
-  border-left: 1px solid var(--pale);
+  color: rgba(255,255,255,0.6);
+  border-left: 1px solid rgba(255,255,255,0.2);
   padding-left: 0.6rem;
   margin-left: 0.2rem;
 }
@@ -72,7 +71,7 @@
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--white);
-  background: var(--dark);
+  background: #3a7ca5;
   border: none;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
@@ -81,13 +80,11 @@
   transition: background 0.15s ease;
 }
 
-.landing-nav__btn:hover { background: var(--medium); }
+.landing-nav__btn:hover { background: #2d6b8f; }
 
 /* ── HERO ── */
 .landing-hero {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 5rem 2rem 4rem;
+  padding: 5rem 4rem 4rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
@@ -109,23 +106,14 @@
   align-items: center;
   justify-content: center;
 
-  background: var(--bg);
+  background: #d9dcd6;
   z-index: 5;
 
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .landing-hero-logo img {
-  width: 100vw;
-  max-width: none;
-  height: auto;
-  object-fit: contain;
-  transition: transform 0.4s ease;
-  transform: scale(4);
-}
-
-.landing-hero-logo img {
-  width: 140px;
+  width: 800px;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 8px 20px rgba(0,0,0,0.1));
@@ -136,8 +124,8 @@
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--medium);
-  background: #f0e8df;
-  border: 1px solid #e0cfbe;
+  background: #dadfe3;
+  border: 1px solid #c9d1d6;
   padding: 0.3rem 0.85rem;
   border-radius: 999px;
   margin-bottom: 1.25rem;
@@ -196,7 +184,7 @@
 .landing-btn-primary:hover {
   background: var(--medium);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px #7d5a3c33;
+  box-shadow: 0 6px 16px #3a7ca533;
 }
 
 .landing-btn-ghost {
@@ -220,7 +208,7 @@
 .landing-hero__svg {
   width: 100%;
   max-width: 340px;
-  filter: drop-shadow(0 25px 60px rgba(92, 61, 30, 0.2));
+  filter: drop-shadow(0 25px 60px rgba(22, 66, 91, 0.2));
   transform: scale(1.05);
 }
 
@@ -249,7 +237,7 @@
 
 .landing-hero__card-divider {
   border: none;
-  border-top: 1px solid #f0e8e0;
+  border-top: 1px solid #dadfe3;
   margin: 1rem 0;
 }
 
@@ -307,7 +295,7 @@
 
 .landing-feature-card {
   background: var(--white);
-  border: 1px solid #ede4d8;
+  border: 1px solid #d6dbe0;
   border-radius: 16px;
   padding: 1.6rem;
   transition: all 0.25s ease;
@@ -317,14 +305,14 @@
 .landing-feature-card:hover {
   box-shadow: 0 20px 40px rgba(0,0,0,0.08);
   transform: translateY(-6px);
-  border-color: #e0d5cc;
+  border-color: #cdd4d9;
 }
 
 .landing-feature-card__icon {
   width: 44px;
   height: 44px;
   background: var(--white);
-  border: 1px solid #e8ddd4;
+  border: 1px solid #d1d7db;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -350,7 +338,7 @@
   padding: 5rem 2rem;
   max-width: 1100px;
   margin: 0 auto;
-  background: linear-gradient(180deg, #faf7f3, #f3ebe4);
+  background: linear-gradient(180deg, #e5e8eb, #dde2e5);
   border-radius: 20px;
 }
 
@@ -379,8 +367,8 @@
 .landing-about__pill {
   font-size: 0.78rem;
   color: var(--medium);
-  background: #f0e8df;
-  border: 1px solid #e0cfbe;
+  background: #dadfe3;
+  border: 1px solid #c9d1d6;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
   transition: all 0.2s ease;
@@ -392,14 +380,14 @@
   gap: 6px;
   cursor: pointer;
   text-decoration: none;
-  color: #5c3d1e;
-  border: 1px solid #e8ddd4;
-  background: #f0e8df;
+  color: #16425b;
+  border: 1px solid #d1d7db;
+  background: #dadfe3;
   transition: all 0.25s ease;
 }
 
 .landing-about__pill--github:hover {
-  background: #5c3d1e;
+  background: #16425b;
   color: #fff;
   transform: translateY(-2px);
 }
@@ -411,14 +399,14 @@
 
 .timeline-title {
   margin-bottom: 16px;
-  color: #5c3d1e;
+  color: #16425b;
 }
 
 .timeline-item {
   position: relative;
   margin-bottom: 20px;
   padding-left: 20px;
-  border-left: 2px solid #e8ddd4;
+  border-left: 2px solid #d1d7db;
 }
 
 .timeline-dot {
@@ -427,18 +415,18 @@
   top: 4px;
   width: 12px;
   height: 12px;
-  background: #5c3d1e;
+  background: #16425b;
   border-radius: 50%;
 }
 
 .timeline-item strong {
   font-size: 14px;
-  color: #5c3d1e;
+  color: #16425b;
 }
 
 .timeline-item p {
   font-size: 13px;
-  color: #8c6f5a;
+  color: #4a6375;
   margin: 4px 0 0;
 }
 
@@ -475,7 +463,7 @@
 /* ── FOOTER ── */
 .landing-footer {
   background: var(--white);
-  border-top: 1px solid #cfc0b044;
+  border-top: 1px solid #bcc7d044;
   padding: 1.25rem 3rem;
   display: flex;
   align-items: center;
@@ -494,13 +482,13 @@
   margin-left: 12px;
   display: flex;
   align-items: center;
-  color: #7d5a3c;
+  color: #3a7ca5;
   font-size: 20px;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .landing-footer__github:hover {
-  color: #5c3d1e;
+  color: #16425b;
   transform: scale(1.15);
 }
 

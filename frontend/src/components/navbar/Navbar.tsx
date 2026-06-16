@@ -64,19 +64,19 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           position: relative;
           font-family: 'Outfit', system-ui, sans-serif;
           font-size: .82rem; font-weight: 400;
-          color: var(--bakery-text-secondary);
+          color: rgba(255,255,255,0.75);
           text-decoration: none; padding-bottom: 2px;
           transition: color .2s;
         }
         .saip-link::after {
           content: ''; position: absolute;
           bottom: -2px; left: 0; width: 0; height: 1.5px;
-          background: var(--bakery-sidebar-bg);
+          background: #ffffff;
           transition: width .25s ease;
         }
-        .saip-link:hover { color: var(--bakery-text-primary); }
+        .saip-link:hover { color: #ffffff; }
         .saip-link:hover::after { width: 100%; }
-        .saip-trigger:hover { background: var(--bakery-bg) !important; }
+        .saip-trigger:hover { background: rgba(255,255,255,0.1) !important; }
         .saip-dd-item {
           display: flex; align-items: center; gap: 9px;
           width: 100%; padding: 11px 14px;
@@ -87,7 +87,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
         .saip-dd-item:hover { background: var(--bakery-bg) !important; color: var(--bakery-text-primary) !important; }
         .saip-dd-danger { color: var(--bakery-danger) !important; }
         .saip-dd-danger:hover { background: var(--bakery-danger-bg) !important; }
-        .saip-hbg:hover { background: var(--bakery-bg) !important; }
+        .saip-hbg:hover { background: rgba(255,255,255,0.1) !important; }
         @keyframes saip-drop {
           from { opacity: 0; transform: translateY(-6px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -96,11 +96,11 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
 
       <nav style={{
         height: "58px",
-        background: "var(--bakery-card-bg)",
+        background: "#003459",
         borderBottom: scrolled
-          ? "1px solid var(--bakery-border)"
-          : "1px solid var(--bakery-border)",
-        boxShadow: scrolled ? "0 1px 8px rgba(59,31,8,0.09)" : "none",
+          ? "1px solid rgba(255,255,255,0.1)"
+          : "1px solid rgba(255,255,255,0.1)",
+        boxShadow: scrolled ? "0 1px 8px rgba(22,66,91,0.09)" : "none",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 1.5rem",
         position: "sticky", top: 0, zIndex: 100,
@@ -119,16 +119,16 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                 display: "flex", flexDirection: "column",
                 justifyContent: "center", alignItems: "center", gap: "4.5px",
                 width: "36px", height: "36px",
-                border: "1px solid var(--bakery-border)",
+                border: "1px solid rgba(255,255,255,0.2)",
                 borderRadius: "7px", cursor: "pointer", padding: "6px",
-                background: sidebarOpen ? "var(--bakery-bg)" : "transparent",
+                background: sidebarOpen ? "rgba(255,255,255,0.1)" : "transparent",
                 transition: "background 0.2s",
               }}
             >
               {[0, 1, 2].map((i) => (
                 <span key={i} style={{
                   display: "block", width: "15px", height: "1.5px",
-                  background: "var(--bakery-sidebar-bg)", borderRadius: "2px",
+                   background: "#ffffff", borderRadius: "2px",
                   transition: "transform 0.25s ease, opacity 0.2s ease",
                   transform: sidebarOpen
                     ? i === 0 ? "rotate(45deg) translate(4px, 4px)"
@@ -139,31 +139,30 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               ))}
             </button>
           )}
-
-          <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
+          <Link to="/dashboard" style={{
+            display: "flex", alignItems: "center", gap: "0.65rem", textDecoration: "none",
+          }}>
             <div style={{
-              width: "34px", height: "34px",
-              background: "var(--bakery-sidebar-bg)",
-              border: "1px solid var(--bakery-border)",
-              borderRadius: "7px",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              width: "35px", height: "35px",
+              background: "#ffffff", borderRadius: "7px",
+              border: "1px solid rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                stroke="#ffffff" strokeWidth="1.7" strokeLinecap="round">
-                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
-                <path d="M9 21V12h6v9"/>
-              </svg>
+              <img src="/images/logo.png" alt="SAIP" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
             </div>
-            {!isMobile && (
-              <span style={{
-                fontFamily: "'Outfit', system-ui, sans-serif",
-                fontSize: "1rem", fontWeight: 700,
-                color: "var(--bakery-text-primary)",
-                letterSpacing: "0.07em", lineHeight: 1,
-              }}>
-                SAIP
-              </span>
-            )}
+            <span style={{
+              fontSize: "1rem", fontWeight: 700, color: "#ffffff",
+              fontFamily: "'Outfit', sans-serif",
+            }}>
+              SAIP
+            </span>
+            <span style={{
+              fontSize: "0.72rem", color: "rgba(255,255,255,0.6)",
+              borderLeft: "1px solid rgba(255,255,255,0.2)",
+              paddingLeft: "0.6rem", fontFamily: "'Outfit', sans-serif",
+            }}>
+              Sistema de administración integral de productos
+            </span>
           </Link>
         </div>
 
@@ -189,7 +188,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
                 <span style={{
                   fontSize: "0.82rem", fontWeight: 600,
-                  color: "var(--bakery-text-primary)",
+                  color: "#ffffff",
                   fontFamily: "'Outfit', system-ui, sans-serif", lineHeight: 1,
                 }}>
                   {user?.nombre ?? "· · ·"}
@@ -197,10 +196,10 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <span style={{
                     fontSize: "0.7rem", fontWeight: 300,
-                    color: "var(--bakery-text-secondary)", lineHeight: 1,
-                    fontFamily: "'Outfit', system-ui, sans-serif",
-                  }}>
-                    {user?.rol ?? ""}
+                   color: "rgba(255,255,255,0.7)", lineHeight: 1,
+                   fontFamily: "'Outfit', system-ui, sans-serif",
+                 }}>
+                   {user?.rol ?? ""}
                   </span>
                   {user && (
                     <span style={{
@@ -238,7 +237,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
             </div>
 
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="var(--bakery-text-muted)" strokeWidth="2.2"
+              stroke="rgba(255,255,255,0.5)" strokeWidth="2.2"
               style={{ transition: "transform 0.2s", transform: menuOpen ? "rotate(180deg)" : "none", flexShrink: 0 }}>
               <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -250,7 +249,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               background: "var(--bakery-card-bg)",
               border: "1px solid var(--bakery-border)",
               borderRadius: "11px",
-              boxShadow: "0 4px 20px rgba(59,31,8,0.12)",
+              boxShadow: "0 4px 20px rgba(22,66,91,0.12)",
               minWidth: "190px", zIndex: 300, overflow: "hidden",
               animation: "saip-drop 0.18s ease",
             }}>
@@ -259,7 +258,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                   <div style={{ padding: "12px 14px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
                     <span style={{
                       fontSize: "0.83rem", fontWeight: 600,
-                      color: "var(--bakery-text-primary)",
+                color: "#ffffff",
                       fontFamily: "'Outfit', system-ui, sans-serif",
                     }}>
                       {user.nombre}

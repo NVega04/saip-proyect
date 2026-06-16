@@ -33,7 +33,7 @@
   padding: 10px 12px;
   background: var(--color-surface-muted, #f9fafb);
   border-radius: 6px;
-  border-left: 3px solid var(--color-primary, #3d2314);
+  border-left: 3px solid var(--color-primary, #0f1f2e);
 }
 
 /* ── Campos tipo ficha ───────────────────────────────────────────────────────── */
@@ -125,10 +125,10 @@
 }
 
 .dm__item-detalle {
-  color: var(--color-primary, #3d2314);
+  color: var(--color-primary, #0f1f2e);
   font-weight: 600;
   font-size: 13px;
-  background: var(--color-primary-light, #cfc0b066);
+  background: var(--color-primary-light, #bcc7d066);
   padding: 2px 8px;
   border-radius: 99px;
 }
@@ -139,5 +139,5 @@
   justify-content: flex-end;
   gap: 10px;
   padding-top: 8px;
-  border-top: 1px solid var(--color-border, #cfc0b066);
+  border-top: 1px solid var(--color-border, #bcc7d066);
 }
