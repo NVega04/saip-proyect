@@ -7,11 +7,18 @@ services:
       MYSQL_DATABASE: db_saip_proyect
       MYSQL_ROOT_PASSWORD: root_password
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - app
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   backend:
     build: ./backend
