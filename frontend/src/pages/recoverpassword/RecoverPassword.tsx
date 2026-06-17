@@ -6,6 +6,7 @@ import "./RecoverPassword.css";
 import { useAlert } from "../../context/AlertContext";
 import PasswordStrengthBar from "../../components/passwordstrengthbar/PasswordStrengthBar";
 import { getPasswordStrength } from "../../utils/passwordStrength";
+import { apiFetch } from "../../utils/api";
 
 export default function RecoverPassword() {
   const [token, setToken] = useState<string | null>(null);
@@ -76,9 +77,8 @@ function ForgotForm() {
     setIsLoading(true);
     try {
       showAlert("success", "Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.");
-      const res = await fetch("http://localhost:8000/session/forgot-password", {
+      const res = await apiFetch("/session/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
       if (!res.ok) throw new Error();
@@ -185,9 +185,8 @@ function ResetForm({ token }: { token: string }) {
         setError(null);
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/session/reset-password", {
+      const res = await apiFetch("/session/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, new_password: newPassword }),
       });
       if (!res.ok) {
