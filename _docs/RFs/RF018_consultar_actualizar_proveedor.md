@@ -1,138 +1,89 @@
-# RF018: Consultar y Actualizar Proveedor
+# RF-018 — Consultar y actualizar proveedor
 
 ---
-
 
 ## Identificación
 
-| Campo             | Valor                                   |
-| ----------------- | --------------------------------------- |
-| **ID**            | RF-018                                  |
-| **Nombre**        | Consultar y Actualizar Proveedor        |
-| **Módulo**        | Compras / Catálogo de Proveedores       |
-| **Prioridad**     | Media-Alta                              |
-| **Estado**        | Pendiente de implementación             |
-| **Fecha**         | Febrero 2026                            |
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-018 |
+| **Nombre** | Consultar y actualizar proveedor |
+| **Módulo** | Proveedores |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
 
 ---
 
-# 3. Descripción
+## Descripción
 
-El sistema debe permitir la visualización detallada de la información de los proveedores registrados, así como la actualización de sus datos de contacto y condiciones comerciales.
-
-Esta funcionalidad garantiza que la administración de la panadería cuente siempre con información vigente para la gestión de compras, permitiendo modificar campos como:
-
-- Teléfono  
-- Dirección  
-- Persona de contacto  
-- Correos electrónicos  
-- Condiciones comerciales  
-
-Las modificaciones deben realizarse sin perder el historial del proveedor, preservando la trazabilidad de cambios.
-
-El sistema no debe permitir la eliminación física de registros; únicamente se permitirá cambiar el estado del proveedor a **Inactivo** cuando ya no se utilice.
+El sistema debe permitir la consulta detallada de proveedores (incluyendo sus contactos asociados) y la actualización de sus datos. También permite gestionar contactos de proveedor mediante CRUD anidado.
 
 ---
-
-# 4. Entradas
 
 ## Entradas
 
-| Campo               | Tipo          | Obligatorio | Validaciones                                                   |
-| ------------------- | ------------- | ----------- | -------------------------------------------------------------- |
-| `provider_id`       | UUID / Entero | Sí          | Debe existir en el catálogo                                    |
-| `phone`             | Texto         | No          | Formato válido de teléfono                                     |
-| `email`             | Texto (email) | No          | Formato de email válido, máximo 255 caracteres                 |
-| `address`           | Texto         | No          | Máximo 255 caracteres                                          |
-| `contact_person`    | Texto         | No          | Máximo 255 caracteres                                          |
-| `commercial_terms`  | Texto         | No          | Máximo 500 caracteres                                          |
-| `status`            | Enum          | No          | Valores permitidos: `ACTIVE`, `INACTIVE`                       |
-| `updated_by`        | UUID / Entero | Sí          | Usuario autenticado con rol autorizado                         |
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `company` | Texto | No | Máximo 150 caracteres |
+| `nit` | Texto | No | Máximo 20 caracteres |
+| `email` | Texto (email) | No | Formato de email válido |
+| `status` | Enum | No | `active` / `inactive` |
 
 ---
 
-# 5. Proceso Paso a Paso del Requerimiento
+## Proceso
 
-## Consulta de Proveedor
+### Consulta
 
-1. El usuario accede al módulo de Proveedores.  
-2. El sistema permite buscar proveedores por nombre, identificación o contacto.  
-3. El usuario selecciona un proveedor del listado.  
-4. El sistema muestra la información completa del proveedor de forma clara y estructurada.  
-5. Se registra automáticamente un log de consulta con usuario, fecha y hora.
+1. El usuario accede al módulo de proveedores (`/proveedores`).
+2. El sistema carga la lista completa con tabla de proveedores.
+3. El usuario selecciona un proveedor para ver detalle, incluyendo contactos asociados.
 
-## Actualización de Proveedor
+### Actualización
 
-1. El usuario accede a la opción de edición.  
-2. El sistema valida que el usuario tenga rol **Administrador** o **Compras**.  
-3. El usuario modifica los campos permitidos.  
-4. El sistema valida:
-   - Formato correcto de correo electrónico (si se modifica).  
-   - Formato válido de teléfono (si se modifica).  
-5. El usuario confirma los cambios.  
-6. El sistema:
-   - Guarda la actualización en base de datos.  
-   - Mantiene el historial de cambios.  
-   - Registra automáticamente un log de auditoría con usuario, fecha y hora.  
+1. El usuario accede a la opción de edición de un proveedor.
+2. Modifica los campos permitidos (razón social, NIT, correo, estado).
+3. Frontend envía `PATCH /providers/{id}` con JWT.
+4. Backend valida datos y actualiza el registro.
+5. Se registra auditoría.
+
+### Gestión de contactos
+
+1. Desde el detalle del proveedor, se pueden crear, editar o eliminar contactos.
+2. Contactos anidados: `POST /providers/{id}/contacts/`, `PATCH /providers/{id}/contacts/{cid}`, `DELETE /providers/{id}/contacts/{cid}`.
+3. Cada contacto tiene: nombre (obligatorio), email, teléfono, notas.
 
 ---
-
-# 6. Salidas
 
 ## Salidas
 
-| Escenario                                  | Código HTTP | Respuesta                                                      |
-| ------------------------------------------ | ----------- | -------------------------------------------------------------- |
-| Consulta exitosa                           | 200         | Datos completos del proveedor                                 |
-| Actualización exitosa                      | 200         | Datos actualizados del proveedor                              |
-| Usuario sin permisos                       | 403         | Mensaje de error: "Unauthorized action"                       |
-| Proveedor no encontrado                    | 404         | Mensaje de error: "Provider not found"                        |
-| Error de validación                        | 422         | Detalle de errores de validación                              |
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Consulta exitosa | 200 | Datos del proveedor con contactos |
+| Actualización exitosa | 200 | Datos actualizados |
+| Proveedor no encontrado | 404 | Recurso no encontrado |
+| Datos inválidos | 422 | Detalle de errores |
 
 ---
 
-## Endpoint Asociado
+## Endpoints asociados
 
-| Método | Ruta                          | Auth requerida |
-| ------ | ----------------------------- | -------------- |
-| GET    | `/api/v1/providers/{id}`      | Sí             |
-| GET    | `/api/v1/providers`           | Sí             |
-| PUT    | `/api/v1/providers/{id}`      | Sí             |
-| PATCH  | `/api/v1/providers/{id}`      | Sí             |
-
----
-
-# 7. Reglas de Negocio
-
-1. **Permisos de Acceso**  
-   - Solo usuarios con rol **Administrador** o **Compras** pueden editar proveedores.  
-   - Otros roles solo pueden consultar si tienen permisos de lectura.
-
-2. **Validación de Datos**  
-   - El correo electrónico y teléfono deben pasar por el mismo proceso de validación aplicado en la creación (RF017).  
-
-3. **Historial de Cambios**  
-   - No se permite eliminación física del proveedor.  
-   - Solo se permite cambiar su estado a `INACTIVE`.  
-   - Toda modificación debe quedar registrada en auditoría.
-
-4. **Registro de Auditoría**  
-   Cada consulta o edición debe registrar automáticamente:
-   - Usuario  
-   - Fecha  
-   - Hora  
-   - Tipo de acción (`VIEW` o `UPDATE`)
-
-5. **Consulta Eficiente**  
-   El sistema debe permitir búsqueda rápida y filtrable desde el catálogo para facilitar la gestión operativa.
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| GET | `/providers/` | Sí | Listar proveedores |
+| GET | `/providers/{id}` | Sí | Obtener proveedor con contactos |
+| PATCH | `/providers/{id}` | Sí | Actualizar proveedor |
+| POST | `/providers/{id}/contacts/` | Sí | Agregar contacto a proveedor |
+| PATCH | `/providers/{id}/contacts/{cid}` | Sí | Actualizar contacto |
+| DELETE | `/providers/{id}/contacts/{cid}` | Sí | Eliminar contacto (soft delete) |
+| DELETE | `/providers/{id}` | Sí | Eliminación lógica de proveedor |
 
 ---
 
-# Impacto en el Sistema
+## Reglas de negocio
 
-Este requerimiento permite:
-
-- Mantener información actualizada para la gestión de compras.  
-- Garantizar trazabilidad y control administrativo.  
-- Evitar pérdida de datos históricos.  
-- Mejorar la eficiencia operativa mediante consultas rápidas y seguras.
+- **RN-055**: El NIT y correo deben ser únicos al actualizar.
+- **RN-056**: No se permite eliminación física del proveedor, solo baja lógica.
+- **RN-057**: Los contactos se gestionan como CRUD anidado dentro del proveedor.
+- **RN-058**: Toda modificación se registra en auditoría.

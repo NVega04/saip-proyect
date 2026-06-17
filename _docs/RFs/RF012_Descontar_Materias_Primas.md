@@ -1,76 +1,72 @@
-RF-012 — Descontar Materias Primas
-<!-- ¿Qué? Requisito funcional que ejecuta el descuento automático de insumos al confirmar una orden de producción. ¿Para qué? Mantener la integridad del inventario y reflejar la fabricación del producto terminado. ¿Impacto? Sin este proceso el stock sería inconsistente y no habría trazabilidad confiable. -->
+# RF-012 — Descontar materias primas al producir
 
-Identificación
+---
 
-| Campo         | Valor                       |
-| ------------- | --------------------------- |
-| **ID**        | RF-010                      |
-| **Nombre**    | Descontar Materias Primas   |
-| **Módulo**    | **Producción / Inventario** |
-| **Prioridad** | Alta                        |
-| **Estado**    | **Pendiente**               |
-| **Fecha**     | **Septiembre 2025**         |
+## Identificación
 
-Descripción
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-012 |
+| **Nombre** | Descontar materias primas al producir |
+| **Módulo** | Producción / Inventario |
+| **Prioridad** | Alta |
+| **Estado** | Pendiente |
+| **Fecha** | Febrero 2026 |
 
-Al confirmar una Orden de Producción, el sistema debe descontar automáticamente del inventario las cantidades de materias primas definidas en la lista de la receta y aumentar el stock del producto terminado.
+---
 
-Entradas
+## Descripción
 
-| Campo                 | Tipo   | Obligatorio | Validaciones                    |
-| --------------------- | ------ | ----------- | ------------------------------- |
-| `production_order_id` | **ID** | Sí          | Debe existir y estar confirmada |
-| `recipe_version`      | **ID** | Sí          | Debe estar vigente              |
-| `waste_percentage`    | Número | No          | Debe ser mayor o igual a 0      |
-| `user_id`             | **ID** | Sí          | Usuario autenticado             |
+Al confirmar una orden de producción, el sistema debe descontar automáticamente del inventario las cantidades de materias primas definidas en la receta, calcular el rendimiento total y capturar snapshots del stock antes y después del consumo.
 
-Proceso
+---
 
-El sistema recibe la orden de producción confirmada.
+## Entradas
 
-Consulta la receta y sus cantidades requeridas.
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `production_order_id` | Entero | Sí | Debe existir y estar confirmada |
+| `recipe_id` | Entero | Sí | Debe existir y estar activa |
+| `quantity_multiplier` | Decimal | Sí | Mayor a 0 |
 
-Valida disponibilidad de stock por cada insumo (incluye conversiones y mínimos).
+---
 
-Aplica merma si fue configurada.
+## Proceso
 
-Si algún insumo falla, la operación completa se cancela.
+1. El sistema recibe la orden de producción confirmada.
+2. Consulta la receta y sus cantidades requeridas por ingrediente.
+3. Multiplica cada cantidad por el `quantity_multiplier`.
+4. Valida disponibilidad de stock para cada insumo.
+5. Si algún insumo falta, la operación completa se cancela.
+6. Si todo es correcto, descuenta cada insumo y crea `ProductionOrderSnapshot` por cada uno (`stock_before`, `stock_after`, `quantity_used`).
+7. Incrementa el stock del producto terminado asociado (si existe).
+8. Registra auditoría completa.
 
-Si todo es correcto, descuenta materias primas.
+---
 
-Incrementa el inventario del producto terminado.
+## Salidas
 
-Registra auditoría: quién, cuándo, sede, versión de receta y cantidades.
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Operación exitosa | 200 | Confirmación de descuentos |
+| Stock insuficiente | 400 | Detalle de insumos faltantes |
+| Datos inválidos | 422 | Errores de validación |
 
-Vincula los movimientos con la orden de producción.
+---
 
-Salidas
+## Endpoints asociados
 
-| Escenario          | Código HTTP | Respuesta                                                     |
-| ------------------ | ----------- | ------------------------------------------------------------- |
-| Operación exitosa  | 200         | Confirmación de descuentos e incremento de producto terminado |
-| Stock insuficiente | 400         | Detalle de insumos faltantes y cantidades requeridas          |
-| Datos inválidos    | 422         | Errores de validación                                         |
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| POST | `/production/orders/{id}/complete` | Sí | Completar orden y descontar insumos |
 
-Endpoint asociado
+---
 
-| Método | Ruta                                     | Auth requerida |
-| ------ | ---------------------------------------- | -------------- |
-| POST   | **/api/v1/production/consume-materials** | Sí             |
+## Reglas de negocio
 
-Reglas de negocio
-
-RN-001: Solo se ejecuta con orden previamente confirmada.
-
-RN-002: La receta debe estar vigente.
-
-RN-003: Debe validarse stock suficiente por cada insumo.
-
-RN-004: Puede configurarse merma por ítem o por orden.
-
-RN-005: La operación es atómica; si falla un descuento no se realiza ninguno.
-
-RN-006: Toda transacción debe generar auditoría completa.
-
-RN-007: Si la orden se anula, los movimientos deben revertirse automáticamente.
+- **RN-067**: Solo se ejecuta con orden previamente confirmada.
+- **RN-068**: La receta debe estar vigente.
+- **RN-069**: Debe validarse stock suficiente por cada insumo.
+- **RN-070**: La operación es atómica; si falla un descuento no se realiza ninguno.
+- **RN-071**: Se captura snapshot de stock antes/después por cada insumo.
+- **RN-072**: Toda transacción debe generar auditoría completa.

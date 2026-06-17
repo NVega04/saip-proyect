@@ -1,66 +1,65 @@
-RF-011 — Ver receta individual
-<!-- ¿Qué? Requisito funcional que permite consultar el detalle completo de una receta. ¿Para qué? Facilitar la planificación y el control de la producción. ¿Impacto? Sin esta funcionalidad no habría visibilidad detallada ni apoyo a la toma de decisiones. -->
+# RF-011 — Ver receta individual
 
-Identificación
+---
 
-| Campo         | Valor                 |
-| ------------- | --------------------- |
-| **ID**        | RF-050                |
-| **Nombre**    | Ver receta individual |
-| **Módulo**    | **Recetas**           |
-| **Prioridad** | Alta                  |
-| **Estado**    | **Pendiente**         |
-| **Fecha**     | **Septiembre 2025**   |
+## Identificación
 
-Descripción
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-011 |
+| **Nombre** | Ver receta individual |
+| **Módulo** | Recetas |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
 
-El sistema debe permitir a los usuarios consultar de manera detallada la información completa de una receta específica, incluyendo nombre, categoría y lista de ingredientes, con el fin de apoyar la planificación y control en la producción de la panadería.
+---
 
-Entradas
+## Descripción
 
-| Campo       | Tipo   | Obligatorio | Validaciones                                         |
-| ----------- | ------ | ----------- | ---------------------------------------------------- |
-| `recipe_id` | **ID** | Sí          | Debe existir y estar activo en el sistema            |
-| `user_id`   | **ID** | Sí          | Debe estar autenticado y tener permisos según su rol |
+El sistema debe permitir a los usuarios consultar el detalle completo de una receta específica, incluyendo nombre, descripción, producto asociado, rendimiento, y lista de ingredientes con cantidades y unidades.
 
-Proceso
+---
 
-El usuario accede al listado general de recetas.
+## Entradas
 
-Selecciona una receta específica.
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `recipe_id` | Entero | Sí | Debe existir y estar activo en el sistema |
 
-El sistema valida autenticación y permisos.
+---
 
-El sistema consulta la información almacenada.
+## Proceso
 
-Se muestran nombre, categoría, ingredientes, cantidades, pasos, tiempos y costos.
+1. El usuario accede al módulo de recetas (`/recetas`) y visualiza el listado.
+2. Selecciona una receta para ver su detalle.
+3. El sistema consulta `GET /recipes/{id}` que retorna la receta con ingredientes.
+4. Se muestra: nombre, descripción, producto asociado (si tiene), cantidad de rendimiento, unidad, estado, y tabla de ingredientes (insumo, cantidad, unidad, notas).
+5. La vista permite editar la receta o sus ingredientes si se tienen permisos.
 
-La vista es solo de lectura.
+---
 
-El usuario puede regresar al listado general.
+## Salidas
 
-Salidas
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Consulta exitosa | 200 | Datos completos de la receta con ingredientes |
+| Receta no encontrada | 404 | Recurso no encontrado |
+| No autenticado | 401 | Token inválido |
 
-| Escenario            | Código HTTP | Respuesta                                       |
-| -------------------- | ----------- | ----------------------------------------------- |
-| Consulta exitosa     | 200         | Datos completos de la receta                    |
-| No autorizado        | 403         | Mensaje de acceso denegado                      |
-| Receta no encontrada | 404         | Mensaje indicando que no existe o está inactiva |
+---
 
-Endpoint asociado
+## Endpoints asociados
 
-| Método | Ruta                            | Auth requerida |
-| ------ | ------------------------------- | -------------- |
-| GET    | **/api/v1/recipes/{recipe_id}** | Sí             |
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| GET | `/recipes/` | Sí | Listar recetas |
+| GET | `/recipes/{id}` | Sí | Obtener receta con ingredientes |
 
-Reglas de negocio
+---
 
-RN-001: Solo usuarios autenticados pueden visualizar recetas.
+## Reglas de negocio
 
-RN-002: Los permisos dependen del rol asignado.
-
-RN-003: La información es únicamente de consulta; no se permite edición desde esta vista.
-
-RN-004: No deben mostrarse recetas eliminadas o incompletas.
-
-RN-005: La interfaz debe mantener consistencia visual y permitir volver al listado.
+- **RN-040**: Solo usuarios autenticados pueden visualizar recetas.
+- **RN-041**: La información es de consulta; permite edición si se tienen permisos.
+- **RN-042**: No se muestran recetas eliminadas (soft delete).

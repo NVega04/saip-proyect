@@ -1,68 +1,69 @@
-RF-010 — Control de salidas de inventario
-<!-- ¿Qué? Requisito funcional que define el registro y control de las salidas de inventario. ¿Para qué? Garantizar trazabilidad y actualización automática del stock. ¿Impacto? Sin este requisito no habría control confiable de disminución de existencias. -->
+# RF-010 — Control de salidas de inventario
 
-Identificación
+---
 
-| Campo        | Tipo   | Obligatorio | Validaciones                                             |
-| ------------ | ------ | ----------- | -------------------------------------------------------- |
-| `product_id` | **ID** | Sí          | Debe existir en el inventario                            |
-| `quantity`   | Número | Sí          | Debe ser mayor a 0 y no superar el stock disponible      |
-| `reason`     | Texto  | Sí          | Valores permitidos: venta, producción, devolución, merma |
-| `user_id`    | **ID** | Sí          | Debe corresponder a un usuario registrado                |
-| `date`       | Fecha  | Sí          | No puede ser futura                                      |
+## Identificación
 
-Descripción
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-010 |
+| **Nombre** | Control de salidas de inventario |
+| **Módulo** | Inventario |
+| **Prioridad** | Alta |
+| **Estado** | Pendiente |
+| **Fecha** | Febrero 2026 |
 
-El sistema debe permitir registrar, validar y controlar todas las salidas de insumos y productos terminados del inventario, asegurando que cada movimiento quede documentado con fecha, responsable y motivo de la salida.
+---
 
-Entradas
+## Descripción
 
-| Campo        | Tipo   | Obligatorio | Validaciones                                             |
-| ------------ | ------ | ----------- | -------------------------------------------------------- |
-| `product_id` | **ID** | Sí          | Debe existir en el inventario                            |
-| `quantity`   | Número | Sí          | Debe ser mayor a 0 y no superar el stock disponible      |
-| `reason`     | Texto  | Sí          | Valores permitidos: venta, producción, devolución, merma |
-| `user_id`    | **ID** | Sí          | Debe corresponder a un usuario registrado                |
-| `date`       | Fecha  | Sí          | No puede ser futura                                      |
+El sistema debe permitir registrar, validar y controlar todas las salidas de insumos del inventario, asegurando que cada movimiento quede documentado con fecha, responsable y motivo de la salida. Debe impedir salidas que superen el stock disponible.
 
-Proceso
+---
 
-El usuario selecciona el insumo o producto.
+## Entradas
 
-El usuario ingresa la cantidad a retirar y el motivo.
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `supply_id` | Entero | Sí | Debe existir en `supplies` |
+| `quantity` | Decimal | Sí | Mayor a 0 y menor o igual al stock disponible |
+| `reason` | Texto | Sí | Motivo de la salida (producción, merma, ajuste, etc.) |
 
-El sistema valida que exista stock suficiente.
+---
 
-El sistema registra la salida con fecha y responsable.
+## Proceso
 
-El inventario se actualiza automáticamente descontando la cantidad.
+1. El usuario selecciona un insumo del inventario.
+2. Ingresa la cantidad a retirar y el motivo.
+3. El sistema valida que exista stock suficiente.
+4. Si el stock es insuficiente, bloquea la operación.
+5. Si es válido, descuenta la cantidad del `available_quantity`.
+6. Registra movimiento de salida en el historial.
+7. Si el stock queda por debajo del mínimo, muestra alerta.
 
-El movimiento queda almacenado en el historial para trazabilidad.
+---
 
-El sistema muestra un mensaje de confirmación del registro.
- 
-Salidas
+## Salidas
 
-| Escenario          | Código HTTP | Respuesta                                                 |
-| ------------------ | ----------- | --------------------------------------------------------- |
-| Registro exitoso   | 201         | Mensaje de confirmación y datos del movimiento            |
-| Stock insuficiente | 400         | Mensaje de error indicando que no hay cantidad disponible |
-| Datos inválidos    | 422         | Detalle de los errores de validación                      |
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Salida registrada | 201 | Nuevo stock actualizado |
+| Stock insuficiente | 400 | Mensaje indicando stock disponible insuficiente |
+| Datos inválidos | 422 | Detalle de errores |
 
-Endpoint asociado
+---
 
-| Método | Ruta                          | Auth requerida |
-| ------ | ----------------------------- | -------------- |
-| POST   | **/api/v1/inventory/outputs** | Sí             |
+## Endpoints asociados
 
-Reglas de negocio
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| POST | `/inventory/supplies/{id}/output` | Sí | Registrar salida de insumo |
 
-RN-001: No se puede registrar una salida mayor al stock disponible.
+---
 
-RN-002: Toda salida debe quedar asociada a un usuario responsable.
+## Reglas de negocio
 
-RN-003: El inventario se actualiza inmediatamente después del registro.
-
-RN-004: El historial de salidas debe poder consultarse mediante filtros por fecha, producto, usuario y motivo.
-
-RN-005: El sistema debe confirmar visualmente cada salida registrada.
+- **RN-063**: No se puede registrar una salida mayor al stock disponible.
+- **RN-064**: Toda salida debe quedar asociada a un usuario responsable.
+- **RN-065**: El inventario se actualiza inmediatamente después del registro.
+- **RN-066**: Si el stock resultante es menor al mínimo, se muestra alerta.

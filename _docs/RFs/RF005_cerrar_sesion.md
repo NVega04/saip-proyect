@@ -1,58 +1,82 @@
 # RF-005 — Cerrar sesión
-<!--
-  ¿Qué? Requisito funcional que permite a los usuarios autenticados finalizar su sesión de forma segura en la plataforma SAIP.
-  ¿Para qué? Documentar el proceso de logout que invalida la sesión activa y protege contra accesos no autorizados en el mismo dispositivo.
-  ¿Impacto? Sin este requisito, las sesiones permanecerían abiertas indefinidamente, exponiendo el sistema a riesgos de acceso no autorizado si el dispositivo es compartido o robado.
--->
+
 ---
+
 ## Identificación
-| Campo     | Valor                  |
-|-----------|------------------------|
-| **ID**    | RF-005                 |
-| **Nombre**| Cerrar sesión          |
-| **Módulo**| Autenticación          |
-| **Prioridad** | Alta               |
-| **Estado**| Implementado           |
-| **Fecha** | Febrero 2026           |
+
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-005 |
+| **Nombre** | Cerrar sesión |
+| **Módulo** | Autenticación |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
+
 ---
+
 ## Descripción
-El sistema debe permitir a los usuarios autenticados cerrar su sesión de forma segura, garantizando que la sesión activa se invalide correctamente y se eliminen los datos temporales asociados (como tokens). Esta funcionalidad asegura que, una vez cerrada la sesión, ninguna otra persona pueda interactuar con el sistema desde el mismo dispositivo sin volver a autenticarse.
+
+El sistema debe permitir a los usuarios autenticados cerrar su sesión de forma segura (individual o en todos los dispositivos), garantizando que la sesión activa se invalide en base de datos y que el JWT correspondiente quede inservible.
+
 ---
+
 ## Entradas
-| Campo          | Tipo          | Obligatorio | Validaciones                                      |
-|----------------|---------------|-------------|---------------------------------------------------|
-| (Ninguna entrada adicional del usuario) | -     | -           | La solicitud debe ir acompañada del token JWT válido en el header Authorization |
+
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| (Ninguna) | - | - | La solicitud debe incluir el JWT válido en header `session-token` |
+
 ---
+
 ## Proceso
-1. El usuario autenticado selecciona la opción "Cerrar sesión" (botón o enlace en el menú de perfil/header).
-2. El frontend envía una solicitud POST al backend (con el token JWT en el header).
-3. El backend valida que el token sea válido y no haya expirado.
-4. Invalida el token de acceso actual (blacklist en BD o Redis si aplica, o simplemente deja que expire naturalmente si es stateless con corta expiración).
-5. Elimina cualquier dato de sesión temporal asociado (cookies de sesión si aplica, refresh tokens si se usan).
-6. Registra el evento de logout en logs de auditoría (user_id, timestamp, IP, user-agent).
-7. Retorna respuesta de éxito.
-8. El frontend elimina tokens locales (localStorage/sessionStorage), limpia caché relevante y redirige al usuario a la página de login.
-9. Impide navegación hacia atrás (usando history.replaceState o similar) para evitar acceso a vistas protegidas desde caché del navegador.
-10. Cualquier intento posterior de acceder a recursos protegidos sin nuevo login debe fallar con 401/403.
+
+### Cierre de sesión individual
+
+1. El usuario autenticado selecciona "Cerrar sesión" en la interfaz.
+2. Frontend envía `POST /session/logout` con el JWT en header `session-token`.
+3. Backend:
+   - Decodifica el JWT y extrae el UUID interno de sesión.
+   - Busca la sesión en BD por ese UUID.
+   - Marca la sesión como `is_active = false`.
+4. Frontend limpia `localStorage` y redirige a `/login`.
+
+### Cierre de sesión en todos los dispositivos
+
+1. El usuario selecciona "Cerrar sesión en todos los dispositivos".
+2. Frontend envía `POST /session/logout-all`.
+3. Backend:
+   - Busca todas las sesiones activas del usuario.
+   - Marca todas como `is_active = false`.
+4. Frontend limpia `localStorage` y redirige a `/login`.
+
 ---
+
 ## Salidas
-| Escenario                              | Código HTTP | Respuesta                                                                 |
-|----------------------------------------|-------------|---------------------------------------------------------------------------|
-| Cierre de sesión exitoso               | 200         | Mensaje: "Sesión cerrada correctamente" o vacío (204 No Content)          |
-| Token inválido/expirado/no proporcionado | 401      | Mensaje: "No autorizado" o redirección implícita a login                  |
-| Error interno                          | 500         | Mensaje genérico: "Error al procesar la solicitud"                        |
+
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Cierre de sesión exitoso | 200 | "Sesión cerrada correctamente" |
+| Cierre en todos los dispositivos | 200 | "Sesión cerrada en todos los dispositivos." |
+| Token inválido | 401 | "Token inválido" |
+| Sesión no encontrada | 404 | "Sesión no encontrada" |
+| Error interno | 500 | Mensaje genérico |
+
 ---
-## Endpoint asociado
-| Método | Ruta                       | Auth requerida |
-|--------|----------------------------|----------------|
-| POST   | `/api/v1/session/logout`      | Sí (JWT)       |
+
+## Endpoints asociados
+
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| POST | `/session/logout` | Sí (JWT) | Cerrar sesión actual |
+| POST | `/session/logout-all` | Sí (JWT) | Cerrar sesión en todos los dispositivos |
+
 ---
+
 ## Reglas de negocio
-- RN-030: El cierre de sesión invalida inmediatamente el token de acceso activo en el servidor (mediante blacklist o invalidación si es necesario).
-- RN-031: No debe ser posible reutilizar el token o credenciales anteriores tras logout sin una nueva autenticación completa.
-- RN-032: El sistema no permite regresar a pantallas protegidas mediante el botón "atrás" del navegador o caché local (implementar medidas como no-cache headers y history manipulation).
-- RN-033: La opción de cerrar sesión debe estar disponible en todo momento para el usuario autenticado (en header, menú de perfil, etc.).
-- RN-034: Tras cierre exitoso, redirigir siempre a la página de login con mensaje de confirmación claro: "Has cerrado sesión correctamente".
-- RN-035: Cualquier intento de acceder a recursos protegidos después de logout debe ser rechazado con código 401/403 y mensaje que obligue a iniciar sesión nuevamente.
-- RN-036: Registrar el evento de cierre de sesión en logs de auditoría con detalles mínimos (user_id, timestamp, IP, dispositivo aproximado) para trazabilidad y detección de anomalías.
-- RN-037: Si se usan refresh tokens, invalidarlos también durante el logout para evitar sesiones persistentes.
+
+- **RN-024**: El cierre de sesión invalida la sesión en base de datos (`is_active = false`), no solo el token local.
+- **RN-025**: No es posible reutilizar el JWT tras logout porque la sesión en BD está inactiva.
+- **RN-026**: La opción de cerrar sesión debe estar disponible en todo momento (navbar).
+- **RN-027**: Tras cierre exitoso, se redirige al login y se limpia `localStorage`.
+- **RN-028**: Cualquier intento de acceder a recursos protegidos después de logout responde 401 y redirige al login.
