@@ -4,23 +4,23 @@
   --bakery-sidebar-bg:        #003459;
   --bakery-sidebar-hover:     #003459;
   --bakery-sidebar-active:    #3a7ca5;
-  --bakery-sidebar-text:      #FFFFFF;
+  --bakery-sidebar-text:      #f2f2f2;
 
   /* Cards doradas */
   --bakery-accent:            #3a7ca5;
   --bakery-accent-light:      #63a6c4;
-  --bakery-accent-text:       #FFFFFF;
+  --bakery-accent-text:       #f2f2f2;
 
   /* Botones */
   --bakery-btn-primary:       #1A3A8F;
   --bakery-btn-primary-hover: #142E72;
   --bakery-btn-danger:        #C0392B;
   --bakery-btn-danger-hover:  #A02F23;
-  --bakery-btn-text:          #FFFFFF;
+  --bakery-btn-text:          #f2f2f2;
 
   /* Fondos */
   --bakery-bg:                #d9dcd6;
-  --bakery-card-bg:           #FFFFFF;
+  --bakery-card-bg:           #f2f2f2;
 
   /* Texto general */
   --bakery-text-primary:      #0f1f2e;

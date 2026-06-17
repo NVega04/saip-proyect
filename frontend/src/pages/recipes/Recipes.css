@@ -68,7 +68,7 @@
   border-radius: 6px;
   font-size: 13.5px;
   color: var(--color-text, #111827);
-  background: var(--color-surface, #fff);
+  background: var(--color-surface, #f2f2f2);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
@@ -101,7 +101,7 @@
 }
 
 .rcf__input--unit:not([readonly]) {
-  background: var(--color-surface, #fff);
+  background: var(--color-surface, #f2f2f2);
   color: var(--color-text, #111827);
 }
 
@@ -113,7 +113,7 @@
   border-radius: 6px;
   font-size: 13.5px;
   color: var(--color-text, #111827);
-  background: var(--color-surface, #fff);
+  background: var(--color-surface, #f2f2f2);
   outline: none;
   resize: vertical;
   font-family: inherit;
@@ -135,7 +135,7 @@
   border-radius: 6px;
   font-size: 13.5px;
   color: var(--color-text, #111827);
-  background: var(--color-surface, #fff)
+  background: var(--color-surface, #f2f2f2)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
     no-repeat right 9px center;
   appearance: none;
@@ -195,7 +195,7 @@
 
 .rcf__add-ing-btn:hover {
   background: var(--color-primary, #bcc7d066);
-  color: #fff;
+  color: #f2f2f2;
 }
 
 /* Contenedor de la lista de ingredientes */
