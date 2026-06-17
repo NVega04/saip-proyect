@@ -44,8 +44,10 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await apiFetch("/session/login", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/session/login`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, accepted_terms: termsAcceptedRef.current }),
       });
 
