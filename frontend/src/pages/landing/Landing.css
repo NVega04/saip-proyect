@@ -5,7 +5,7 @@
   --light: #8fa4b2;
   --pale: #bcc7d0;
   --bg: #d9dcd6;
-  --white: #ffffff;
+  --white: #f2f2f2;
 }
 
 .landing {
@@ -39,7 +39,7 @@
 .landing-nav__logo {
   width: 35px;
   height: 35px;
-  background: #ffffff;
+  background: #f2f2f2;
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px;
   display: flex;
@@ -56,7 +56,7 @@
 .landing-nav__name {
   font-size: 1rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #f2f2f2;
 }
 
 .landing-nav__sub {
@@ -388,7 +388,7 @@
 
 .landing-about__pill--github:hover {
   background: #16425b;
-  color: #fff;
+  color: #f2f2f2;
   transform: translateY(-2px);
 }
 

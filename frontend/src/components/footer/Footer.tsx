@@ -121,7 +121,7 @@ export default function Footer() {
 
 const styles: Record<string, React.CSSProperties> = {
   footer: {
-    background: "#ffffff",
+    background: "#f2f2f2",
     borderTop: "1px solid #bcc7d066",
     padding: "1.75rem 2.5rem",
     fontFamily: "'Roboto', sans-serif",

@@ -99,7 +99,7 @@ const Icon = {
   </svg>
   ),
   providers:(
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f2f2f2" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
        <rect x="1" y="3" width="15" height="13" rx="1" />
        <path d="M16 8h4l3 5v4h-7V8z" />
        <circle cx="5.5" cy="18.5" r="2.5" />
@@ -189,7 +189,7 @@ function NavItem({
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "0.5rem", margin: "0 0.5rem",
           borderRadius: "7px",
-          color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
+          color: isActive ? "#f2f2f2" : hovered ? "#f2f2f2" : "rgba(255,255,255,0.85)",
           background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
           cursor: "pointer",
           transition: "background 0.15s, color 0.15s",
@@ -214,7 +214,7 @@ function NavItem({
     borderRadius: "7px",
     fontSize: isSubitem ? "0.78rem" : "0.81rem",
     fontWeight: isActive ? 600 : 400,
-    color: isActive ? "#ffffff" : hovered ? "#ffffff" : "rgba(255,255,255,0.85)",
+    color: isActive ? "#f2f2f2" : hovered ? "#f2f2f2" : "rgba(255,255,255,0.85)",
     background: isActive ? "var(--bakery-sidebar-active)" : hovered ? "var(--bakery-sidebar-hover)" : "transparent",
     boxShadow: "none",
     cursor: "pointer",
@@ -472,7 +472,7 @@ function SidebarLogo({ withClose, onClose }: { withClose?: boolean; onClose?: ()
       <span style={{
         fontFamily: "'Outfit', system-ui, sans-serif",
         fontSize: "0.95rem", fontWeight: 700,
-        color: "#ffffff", flex: 1, letterSpacing: "0.07em",
+        color: "#f2f2f2", flex: 1, letterSpacing: "0.07em",
       }}>
         SAIP
       </span>
