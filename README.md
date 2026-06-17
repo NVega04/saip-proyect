@@ -2,7 +2,7 @@
 
 ## Objetivo del Proyecto
 
-Desarrollar un **Sistema Administrativo Integral de Productos (SAIP)** en plataforma web, diseñado específicamente para pequeñas panaderías como La Parmesana, con el fin de:
+SAIP es un **Sistema Administrativo Integral de Productos** en plataforma web, diseñado específicamente para pequeñas panaderías como La Parmesana. El proyecto se encuentra en fase activa de desarrollo con los siguientes objetivos:
 
 - Automatizar y optimizar procesos clave: ventas, inventario, compras, proveedores, producción de materias primas y administración básica.
 - Centralizar la información mediante formularios digitales y consultas en tiempo real.
@@ -11,27 +11,43 @@ Desarrollar un **Sistema Administrativo Integral de Productos (SAIP)** en plataf
 - Facilitar la toma de decisiones estratégicas y aumentar la rentabilidad.
 - Sentar las bases para escalar a otras panaderías de mediana y amplia capacidad en fases futuras.
 
-## Alcance Inicial
+## Estado del Proyecto
 
-El sistema se enfoca en optimizar procesos transversales de una pequeña panadería familiar:
+El sistema se desarrolla de forma iterativa. A continuación se muestra el estado actual de cada módulo:
 
-- Control de inventarios y materias primas
-- Registro y gestión de ventas
-- Gestión de proveedores y compras
-- Producción y registro de materias primas utilizadas
-- Administración básica (reportes simples, finanzas elementales)
-
-
-
-El proyecto se desarrollará de forma iterativa, comenzando con los módulos prioritarios identificados en el levantamiento inicial.
+| Módulo | Backend | Frontend | Estado |
+|--------|---------|----------|--------|
+| **Autenticación** (login/logout, JWT, rate-limiting) | Completo | Completo | ✅ Completado |
+| **Usuarios** (CRUD, soft-delete, recuperación de contraseña) | Completo | Completo | ✅ Completado |
+| **Roles y permisos** (CRUD, asignación de módulos por rol) | Completo | Completo | ✅ Completado |
+| **Unidades de medida** (CRUD) | Completo | Completo | ✅ Completado |
+| **Categorías de insumos** (CRUD) | Completo | Completo | ✅ Completado |
+| **Insumos** (materias primas, CRUD) | Completo | Completo | ✅ Completado |
+| **Productos** (CRUD, bloqueo/desbloqueo) | Completo | Completo | ✅ Completado |
+| **Categorías de productos** (CRUD) | Completo | Completo | ✅ Completado |
+| **Productos comerciales** (CRUD) | Completo | Completo | ✅ Completado |
+| **Proveedores y contactos** (CRUD con contactos anidados) | Completo | Completo | ✅ Completado |
+| **Recetas** (CRUD con ingredientes anidados) | Completo | Completo | ✅ Completado |
+| **Reportes** (9 tipos de reportes Excel descargables) | Completo | Completo | ✅ Completado |
+| **Órdenes de producción** | Modelos listos, sin endpoints | Página placeholder | 🔶 Parcial |
+| **Ventas** | No iniciado | Página placeholder | ❌ Pendiente |
+| **Historial de ventas** | No iniciado | Página placeholder | ❌ Pendiente |
+| **Control de inventario** | No iniciado | Página placeholder | ❌ Pendiente |
+| **Órdenes de compra** | No iniciado | No iniciado | ❌ Pendiente |
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 |------|------------|
 | **Frontend** | React 19 + TypeScript + Vite + pnpm |
-| **Backend** | Python 3.14 + FastAPI + SQLModel |
+| **Backend** | Python 3.14 + FastAPI + SQLModel + PyMySQL |
 | **Base de datos** | MySQL 8.0 (Docker) |
+| **Migraciones** | Alembic |
+| **Autenticación** | JWT + bcrypt + sesiones por token |
+| **Reportes** | Pandas + openpyxl (Excel) |
+| **Rate-limiting** | SlowAPI |
+| **Correo** | SMTP (bienvenida, recuperación, desactivación) |
+| **Orquestación** | Docker Compose |
 
 ---
 
@@ -76,6 +92,13 @@ El proyecto se desarrollará de forma iterativa, comenzando con los módulos pri
    docker-compose up db -d
    ```
 
+6. **Ejecutar migraciones y seed de datos**
+   ```bash
+   cd backend
+   uv run python -m alembic upgrade head
+   uv run python seed_data.py
+   ```
+
 ---
 
 ## Ejecución del Proyecto
@@ -95,6 +118,8 @@ cd frontend
 pnpm dev
 ```
 
+> **Nota:** La primera vez o tras reiniciar la DB, ejecuta `uv run alembic upgrade head` y `uv run python seed_data.py` para crear las tablas y el usuario administrador por defecto.
+
 ### Modo Docker completo
 
 ```bash
@@ -104,7 +129,8 @@ docker-compose up --build
 | Servicio | URL |
 |----------|-----|
 | Frontend | http://localhost:5173 |
-| Backend | http://localhost:8000 |
+| Backend (API) | http://localhost:8000 |
+| Documentación Swagger | http://localhost:8000/docs |
 
 ---
 
@@ -112,68 +138,160 @@ docker-compose up --build
 
 ```
 saip-proyect/
-├── frontend/                   # Frontend (React + TypeScript + Vite)
+├── frontend/                        # Frontend (React + TypeScript + Vite)
 │   ├── src/
-│   │   ├── components/         # Componentes reutilizables
-│   │   ├── pages/              # Páginas de la aplicación
-│   │   ├── context/            # Contextos (AuthContext.tsx)
-│   │   ├── utils/              # Utilidades (api.ts)
-│   │   ├── App.tsx             # App principal con routing
-│   │   └── main.tsx            # Punto de entrada
-│   ├── eslint.config.js        # ESLint 9 flat config
+│   │   ├── components/              # Componentes reutilizables (modulares)
+│   │   │   ├── alert/               # Sistema de notificaciones
+│   │   │   ├── badge/               # Etiquetas de estado
+│   │   │   ├── breadcrumb/          # Migas de pan
+│   │   │   ├── button/              # Botones reutilizables
+│   │   │   ├── confirmmodal/        # Modal de confirmación
+│   │   │   ├── deleteaccountmodal/  # Modal de baja de cuenta
+│   │   │   ├── detailmodal/         # Modal de detalle
+│   │   │   ├── footer/              # Pie de página
+│   │   │   ├── layout/              # Layout principal (Navbar + Sidebar + Footer)
+│   │   │   ├── modal/               # Modal genérico
+│   │   │   ├── navbar/              # Barra de navegación superior
+│   │   │   ├── pagination/          # Paginación
+│   │   │   ├── passwordstrengthbar/ # Indicador de fortaleza de contraseña
+│   │   │   ├── profilemodal/        # Modal de perfil
+│   │   │   ├── protectedroute/      # Ruta protegida por autenticación/módulo
+│   │   │   ├── searchbar/           # Barra de búsqueda
+│   │   │   ├── sidebar/             # Barra lateral de navegación
+│   │   │   └── table/               # Tabla genérica reutilizable
+│   │   ├── pages/                   # Páginas de la aplicación
+│   │   │   ├── acercade/            # Acerca de
+│   │   │   ├── commercialproducts/  # Productos comerciales
+│   │   │   ├── dashboard/           # Dashboard principal
+│   │   │   ├── inventory/           # Inventario (en construcción)
+│   │   │   ├── landing/             # Landing page
+│   │   │   ├── login/               # Inicio de sesión
+│   │   │   ├── productcategories/   # Categorías de productos
+│   │   │   ├── production/          # Producción (en construcción)
+│   │   │   ├── products/            # Productos
+│   │   │   ├── profile/             # Perfil de usuario
+│   │   │   ├── providers/           # Proveedores
+│   │   │   ├── recipes/             # Recetas
+│   │   │   ├── recoverpassword/     # Recuperación de contraseña
+│   │   │   ├── reports/             # Reportes
+│   │   │   ├── roles/               # Roles
+│   │   │   ├── sales/               # Ventas (en construcción)
+│   │   │   ├── saleshistory/        # Historial de ventas (en construcción)
+│   │   │   ├── supplies/            # Insumos (materias primas)
+│   │   │   ├── supplycategories/    # Categorías de insumos
+│   │   │   ├── units/               # Unidades de medida
+│   │   │   └── user/                # Usuarios
+│   │   ├── context/                 # Contextos de React
+│   │   │   ├── AlertContext.tsx      # Sistema de alertas
+│   │   │   ├── AuthContext.tsx       # Estado de autenticación
+│   │   │   └── ConfirmContext.tsx    # Confirmación de acciones
+│   │   ├── hooks/                   # Hooks personalizados
+│   │   │   └── useReportDownload.ts # Descarga de reportes Excel
+│   │   ├── utils/                   # Utilidades
+│   │   │   ├── api.ts               # Cliente HTTP (apiFetch)
+│   │   │   ├── permissions.ts       # Verificación de permisos por módulo
+│   │   │   └── passwordStrength.ts  # Cálculo de fortaleza de contraseña
+│   │   ├── App.tsx                  # App principal con routing
+│   │   ├── main.tsx                 # Punto de entrada
+│   │   └── variables.css            # Variables CSS globales
+│   ├── eslint.config.js             # ESLint 9 flat config
 │   └── vite.config.js
-├── backend/                   # Backend (Python + FastAPI)
+├── backend/                         # Backend (Python + FastAPI)
 │   ├── src/
-│   │   ├── main.py             # Punto de entrada FastAPI
-│   │   ├── database.py         # Conexión a DB
-│   │   ├── security.py         # Utilidades de auth
-│   │   ├── models/             # Modelos SQLModel
-│   │   ├── routers/             # Rutas de API
-│   │   └── schemas/            # Schemas Pydantic
+│   │   ├── main.py                  # Punto de entrada FastAPI (CORS, routers, rate-limit)
+│   │   ├── database.py              # Conexión a MySQL vía SQLModel
+│   │   ├── security.py              # Hashing bcrypt, JWT, generación de tokens
+│   │   ├── dependencies.py          # Dependencias (get_current_user, require_module, require_admin)
+│   │   ├── email.py                 # Envío de correos SMTP (bienvenida, recuperación, desactivación)
+│   │   ├── models/
+│   │   │   └── models.py            # 16 modelos SQLModel
+│   │   ├── schemas/
+│   │   │   └── schemas.py           # Schemas Pydantic de solicitud/respuesta
+│   │   ├── routers/
+│   │   │   ├── session.py           # Login, logout, recuperación de contraseña
+│   │   │   ├── users.py             # CRUD de usuarios
+│   │   │   ├── roles.py             # CRUD de roles
+│   │   │   ├── role_modules.py      # Asignación de módulos a roles
+│   │   │   ├── units.py             # CRUD de unidades de medida
+│   │   │   ├── products.py          # CRUD de productos (con bloqueo)
+│   │   │   ├── supplies.py          # CRUD de insumos
+│   │   │   ├── supply_categories.py # CRUD de categorías de insumos
+│   │   │   ├── providers.py         # CRUD de proveedores + contactos anidados
+│   │   │   ├── product_categories.py# CRUD de categorías de productos
+│   │   │   ├── commercial_products.py# CRUD de productos comerciales
+│   │   │   ├── recipes.py           # CRUD de recetas + ingredientes anidados
+│   │   │   └── reports.py           # Generación de reportes Excel (9 entidades)
+│   │   └── __init__.py
+│   ├── alembic/                     # Migraciones de base de datos
+│   │   ├── versions/                # 12+ migraciones incrementales
+│   │   └── alembic.ini
+│   ├── seed_data.py                 # Datos iniciales (roles Admin/Vendedor, admin por defecto)
 │   └── pyproject.toml
-├── docker-compose.yml          # Orquestación Docker
-├── saip.sql                     # Schema de la base de datos
-├── .env                         # Variables de entorno (no committed)
-└── _docs/                       # Documentación de requerimientos
+├── docker-compose.yml               # Orquestación Docker (db + backend + frontend)
+├── saip.sql                         # Schema legacy de referencia (no usado por el código actual)
+├── .env                             # Variables de entorno (no versionado)
+└── _docs/                           # Documentación de requerimientos
+    ├── HUs/                         # 19 Historias de Usuario
+    ├── RFs/                         # 19 Requerimientos Funcionales
+    ├── RNFs/                        # 10 Requerimientos No Funcionales
+    └── restrictions/                # Restricciones del proyecto
 ```
 
 ---
 
-## Fases del Proyecto (Resumen)
+## Fases del Proyecto
 
-1. **Análisis y Levantamiento**  
-   - Identificar requerimientos funcionales y no funcionales  
-   - Analizar procesos actuales y oportunidades de mejora  
-   - Validar con actores clave (familia propietaria)
+### 1. Análisis y Levantamiento ✅ Completado
+- Identificación de requerimientos funcionales y no funcionales
+- Análisis de procesos actuales y oportunidades de mejora
+- Validación con actores clave (familia propietaria)
+- 19 requerimientos funcionales y 10 no funcionales documentados
 
-2. **Diseño**  
-   - Definir arquitectura y estructura del sistema  
-   - Modelar procesos (diagramas de casos de uso, flujos, ER)  
-   - Diseñar base de datos, interfaces y estándares de accesibilidad
+### 2. Diseño ✅ Completado
+- Arquitectura y estructura del sistema definida
+- Modelado de base de datos (16 tablas, soft-delete, relaciones)
+- Diseño de componentes frontend reutilizables
+- Sistema de permisos basado en módulos por rol
+- Estándares de accesibilidad y UX definidos
 
-3. **Desarrollo**  
-   - Construir módulos principales  
-   - Integrar base de datos y funcionalidades
+### 3. Desarrollo 🔶 En curso
+#### Completado:
+- Autenticación completa (JWT + sesiones + rate-limiting)
+- CRUD completo de usuarios, roles y asignación de módulos
+- CRUD de insumos, productos, productos comerciales y categorías
+- CRUD de unidades de medida
+- CRUD de proveedores con contactos anidados
+- CRUD de recetas con ingredientes anidados
+- Reportes descargables en Excel (9 tipos)
+- Recuperación de contraseña por correo
+- Componentes UI reutilizables (tabla, modal, paginación, etc.)
 
-4. **Pruebas**  
-   - Unitarias, integración, rendimiento y seguridad  
-   - Validación con usuarios reales
+#### Pendiente:
+- Órdenes de producción (modelos listos, endpoints y UI pendientes)
+- Módulo de ventas y historial
+- Control de inventario (movimientos y stock)
+- Órdenes de compra
+- Conexión de páginas placeholder con datos reales
 
-5. **Implementación y Soporte**  
-   - Puesta en producción  
-   - Capacitación a usuarios  
-   - Monitoreo inicial y ajustes
+### 4. Pruebas ⏳ Pendiente
+- Unitarias, integración, rendimiento y seguridad
+- Validación con usuarios reales
 
-¡Bienvenidos al proyecto SAIP!  
-Este sistema busca transformar la gestión diaria de La Parmesana en algo más eficiente y sostenible, y servir como base para otras panaderías similares.
+### 5. Implementación y Soporte ⏳ Pendiente
+- Puesta en producción
+- Capacitación a usuarios
+- Monitoreo inicial y ajustes
 
+---
 
-## Uso de los componentes reutilizables
+## Uso de componentes reutilizables
 
-Para uso del Layout, se debe usar el siguiente codigo en la vista en donde se desee usar
+### Layout
 
+El componente `Layout` ya envuelve automáticamente con `Navbar`, `Sidebar` y `Footer`. Solo se pasa el contenido como `children`:
 
-import Layout from './components/Layout'
+```tsx
+import Layout from "./components/layout/Layout";
 
 export default function Dashboard() {
   return (
@@ -181,32 +299,63 @@ export default function Dashboard() {
       <h1>Módulos principales</h1>
       {/* tu contenido aquí */}
     </Layout>
-  )
-}
-
-
-El Layout ya envuelve automáticamente con Navbar, Sidebar y Footer — solo se el contenido como children (hijo).
-
-### Ejemplo de uso Dashboard.tsx
-
-export default function Dashboard(): JSX.Element {
-  return (
-    <Layout>
-      <h1 style={styles.title}>Módulos principales</h1>
-      <div style={styles.grid}>
-        {modules.map((mod) => (
-          <div key={mod.id} style={styles.card}>
-            {mod.icon}
-            <div style={styles.cardLabel}>{mod.label}</div>
-            <div style={styles.cardDesc}>{mod.desc}</div>
-          </div>
-        ))}
-      </div>
-    </Layout>
   );
 }
+```
 
+### Tabla genérica
+
+El componente `Table` se usa en todas las páginas CRUD:
+
+```tsx
+import Table from "../../components/table/Table";
+
+<Table
+  columns={[
+    { key: "name", label: "Nombre" },
+    { key: "email", label: "Correo" },
+    { key: "role_name", label: "Rol" },
+  ]}
+  data={users}
+  onEdit={(user) => handleEdit(user)}
+  onDelete={(user) => handleDelete(user)}
+/>
+```
+
+### Ruta protegida
+
+```tsx
+import ProtectedRoute from "../components/protectedroute/ProtectedRoute";
+
+<Route
+  path="/proveedores"
+  element={
+    <ProtectedRoute module="providers">
+      <Proveedores />
+    </ProtectedRoute>
+  }
+/>
+```
+
+### Cliente HTTP
+
+```tsx
+import { apiFetch } from "../utils/api";
+
+// El token se incluye automáticamente desde localStorage
+const response = await apiFetch("/endpoint", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
+```
+
+---
 
 ## Modelo de base de datos
 
 ![Modelo de base de datos](./images/saip_erd.svg)
+
+---
+
+*SAIP - Sistema Administrativo Integral de Productos*
+*Transformando la gestión diaria de La Parmesana en algo más eficiente y sostenible.*
