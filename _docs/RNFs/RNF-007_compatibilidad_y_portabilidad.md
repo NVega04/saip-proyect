@@ -10,7 +10,7 @@
 | **Nombre** | Compatibilidad y Portabilidad |
 | **Categoría** | Soporte multiplataforma, navegadores y entornos de ejecución |
 | **Prioridad** | Alta |
-| **Estado** | Pendiente |
+| **Estado**    | Implementado |
 
 ---
 
@@ -86,3 +86,17 @@ Garantizar que los cambios no rompan la compatibilidad:
 - Matriz de pruebas de compatibilidad (navegadores × dispositivos × SO) ejecutada antes de cada release mayor
 - Smoke tests automatizados en CI/CD para al menos 3 combinaciones principales
 - Registro de incidencias específicas de compatibilidad con capturas y pasos para reproducir
+
+## Notas de implementación
+
+**Implementado:**
+- RNF-007.1 — React 19 + TypeScript + Vite; compatible con Chrome, Firefox, Edge (últimas versiones)
+- RNF-007.2 — Diseño responsive básico con Flexbox/Grid y breakpoints; ShadCN UI adapta componentes
+- RNF-007.3 — Docker multi-plataforma (Linux, macOS, Windows)
+- RNF-007.4 — MySQL 8.0 (producción) + SQLAlchemy ORM abstrae el motor; SQLite no configurado actualmente
+- RNF-007.5 — Docker + docker-compose.yml completo con backend, frontend y MySQL
+- RNF-007.6 — HTML5, CSS3, TypeScript, REST JSON con OpenAPI/Swagger (FastAPI automático), JWT
+
+**Pendiente:**
+- RNF-007.7 — Impresión de tickets y exportación a PDF/Excel/CSV
+- RNF-007.8 — Pruebas de compatibilidad automatizadas en CI/CD

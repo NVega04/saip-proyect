@@ -1,132 +1,70 @@
-# RF015: Asociación de Inventario de Insumos con Recetas
-
-
-## Identificación
-
-| Campo             | Valor                                                   |
-| ----------------- | ------------------------------------------------------- |
-| **ID**            | RF-015                                                  |
-| **Nombre**        | Asociación de Inventario de Insumos con Recetas         |
-| **Módulo**        | Producción / Recetas / Inventario                       |
-| **Prioridad**     | Alta                                                    |
-| **Estado**        | Pendiente de implementación                             |
-| **Fecha**         | Febrero 2026                                            |
+# RF-015 — Asociación de Inventario de Insumos con Recetas
 
 ---
 
-# 3. Descripción
+## Identificación
 
-El sistema debe permitir la configuración técnica de las recetas vinculando los insumos (materias primas) previamente registrados en el **RF007**.  
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-015 |
+| **Nombre** | Asociación de inventario de insumos con recetas |
+| **Módulo** | Recetas |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
 
-Esta funcionalidad permite definir la composición exacta de cada producto de panadería, especificando:
+---
 
-- Cantidades requeridas  
-- Unidades de medida  
-- Porcentajes de merma  
-- Nivel de stock mínimo asociado  
+## Descripción
 
-Este requerimiento es un componente esencial para:
-
-- Calcular el costo real de producción.  
-- Ejecutar el descuento automático de inventario al registrar una producción.  
-- Garantizar trazabilidad y consistencia en el control de inventarios.  
-
-Sin una asociación robusta entre recetas e insumos, el control de inventarios sería impreciso y afectaría procesos posteriores como el descuento automático de materias primas.
+El sistema debe permitir asociar insumos (materias primas) registrados en el catálogo a las recetas, definiendo cantidades, unidades de medida y notas opcionales. Esta asociación se gestiona dentro del CRUD de recetas mediante ingredientes anidados.
 
 ---
 
 ## Entradas
 
-| Campo                    | Tipo              | Obligatorio | Validaciones                                                                 |
-| ------------------------ | ----------------- | ----------- | ---------------------------------------------------------------------------- |
-| `recipe_id`              | UUID / Entero     | Sí          | Debe existir en el módulo de recetas                                         |
-| `ingredient_id`          | UUID / Entero     | Sí          | Debe existir previamente en el módulo de inventario (RF007)                 |
-| `quantity`               | Decimal           | Sí          | Mayor a 0                                                                    |
-| `unit_of_measure`        | Texto             | Sí          | Debe coincidir con la unidad configurada en el maestro de insumos           |
-| `waste_percentage`       | Decimal (%)       | No          | Entre 0 y 100                                                                |
-| `substitute_ingredient`  | UUID / Entero     | No          | Si se define, debe tener unidad compatible o factor de conversión definido  |
-| `minimum_stock_level`    | Decimal           | No          | Mayor o igual a 0                                                            |
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `recipe_id` | Entero | Sí | Debe existir en `recipes` |
+| `supply_id` | Entero | Sí | Debe existir en `supplies` |
+| `quantity` | Decimal | Sí | Mayor a 0 |
+| `unit_id` | Entero | Sí | Debe existir en `units` |
+| `notes` | Texto | No | Máximo 255 caracteres |
 
 ---
 
-# 5. Proceso Paso a Paso del Requerimiento
+## Proceso
 
-1. El usuario accede a la ficha técnica de una receta existente.  
-2. El sistema muestra un listado filtrable de los insumos disponibles en inventario.  
-3. El usuario selecciona un insumo.  
-4. El usuario ingresa:
-   - Cantidad requerida  
-   - Unidad de medida  
-   - Nivel de stock mínimo (opcional)  
-5. El sistema valida:
-   - Que el insumo exista en inventario (RF007).  
-   - Que no esté duplicado dentro de la misma receta.  
-   - Que la unidad de medida sea válida y coincidente.  
-6. El usuario guarda la configuración.  
-7. El sistema:
-   - Persiste la asociación en base de datos.  
-   - Actualiza inmediatamente la ficha técnica del producto.  
-   - Genera automáticamente un registro de auditoría (log).  
+1. El usuario accede a la edición de una receta existente.
+2. Agrega un insumo seleccionándolo del listado de insumos disponibles.
+3. Ingresa cantidad requerida, unidad de medida y notas opcionales.
+4. Frontend envía `PATCH /recipes/{id}` con la lista completa de ingredientes.
+5. Backend reemplaza los ingredientes anteriores por los nuevos.
+6. Se registra auditoría.
 
 ---
 
 ## Salidas
 
-| Escenario                                  | Código HTTP | Respuesta                                                                 |
-| ------------------------------------------ | ----------- | ------------------------------------------------------------------------- |
-| Asociación creada exitosamente             | 201         | Datos de la asociación creada                                             |
-| Insumo duplicado en la receta              | 400         | Mensaje de error: "Ingredient already associated to recipe"               |
-| Insumo inexistente                         | 404         | Mensaje de error: "Ingredient not found in inventory"                     |
-| Unidad incompatible                        | 422         | Detalle de error de validación de unidad                                  |
-| Error de validación general                | 422         | Detalle de los errores de validación                                      |
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Asociación guardada | 200 | Datos de la receta actualizada |
+| Insumo no encontrado | 404 | Recurso no encontrado |
+| Datos inválidos | 422 | Detalle de errores |
 
 ---
 
-## Endpoint Asociado
+## Endpoints asociados
 
-| Método | Ruta                                      | Auth requerida |
-| ------ | ------------------------------------------ | -------------- |
-| POST   | `/api/v1/recipes/{recipe_id}/ingredients` | Sí             |
-| PUT    | `/api/v1/recipes/{recipe_id}/ingredients/{id}` | Sí        |
-| DELETE | `/api/v1/recipes/{recipe_id}/ingredients/{id}` | Sí        |
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| PATCH | `/recipes/{id}` | Sí | Actualizar receta (reemplaza ingredientes) |
 
 ---
 
-# 7. Reglas de Negocio
+## Reglas de negocio
 
-1. **Validación de Unicidad**  
-   No se permite asociar el mismo insumo más de una vez dentro de una misma receta.
-
-2. **Gestión de Sustitutos**  
-   Si se define un insumo sustituto:
-   - Debe tener unidad de medida compatible, o  
-   - Debe existir un factor de conversión previamente configurado.
-
-3. **Integridad de Datos**  
-   Solo pueden asociarse insumos creados previamente en el módulo de inventario (RF007).
-
-4. **Stock Mínimo Parametrizable**  
-   Cada insumo asociado puede tener un nivel mínimo de stock configurado para alertar sobre la viabilidad de producción.
-
-5. **Trazabilidad (Log de Auditoría)**  
-   Cualquier creación, modificación o eliminación de asociación debe generar un registro histórico que incluya:
-   - Usuario responsable  
-   - Fecha  
-   - Hora  
-   - Detalle del cambio realizado  
-
-6. **Validación de Unidades**  
-   Las unidades ingresadas deben coincidir con las configuradas en el maestro de insumos para evitar errores de conversión y cálculos incorrectos.
-
----
-
-# Impacto en el Sistema
-
-Este requerimiento garantiza que los datos utilizados posteriormente en el proceso de descuento automático de materias primas sean precisos y confiables.
-
-Permite:
-
-- Cálculo correcto de costos de producción.  
-- Descuento automático exacto de inventario.  
-- Planeación de producción basada en disponibilidad real.  
-- Trazabilidad completa ante auditorías internas.  
+- **RN-047**: No se permite asociar el mismo insumo más de una vez en la misma receta (se reemplaza la lista completa).
+- **RN-048**: Solo pueden asociarse insumos existentes y activos.
+- **RN-049**: La unidad de medida debe existir en el catálogo de unidades.
+- **RN-050**: Toda modificación de ingredientes se registra en auditoría.

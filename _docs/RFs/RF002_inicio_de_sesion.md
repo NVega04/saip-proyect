@@ -1,62 +1,91 @@
 # RF-002 — Inicio de sesión
-<!--
-  ¿Qué? Requisito funcional que permite a los usuarios registrados autenticarse en la plataforma SAIP ingresando credenciales válidas.
-  ¿Para qué? Documentar el proceso seguro de login que garantiza identificación única y acceso controlado a información y funcionalidades.
-  ¿Impacto? Sin este requisito, no se podría controlar el acceso, comprometiendo la seguridad, integridad de datos y trazabilidad de acciones en el sistema.
--->
+
 ---
+
 ## Identificación
-| Campo     | Valor                  |
-|-----------|------------------------|
-| **ID**    | RF-002                 |
-| **Nombre**| Inicio de sesión       |
-| **Módulo**| Autenticación          |
-| **Prioridad** | Alta               |
-| **Estado**| Implementado           |
-| **Fecha** | Febrero 2026           |
+
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-002 |
+| **Nombre** | Inicio de sesión |
+| **Módulo** | Autenticación |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
+
 ---
+
 ## Descripción
-El sistema debe permitir que los usuarios accedan a la plataforma SAIP ingresando su correo electrónico (o usuario) junto con una contraseña válida. Esta funcionalidad garantiza que cada persona se identifique de manera segura y acceda únicamente a la información y opciones que le corresponden dentro del sistema, protegiendo los datos sensibles y aplicando controles de seguridad.
+
+El sistema debe permitir que los usuarios accedan a la plataforma SAIP ingresando su correo electrónico y contraseña, mediante un esquema de autenticación **híbrido JWT + sesión en base de datos**.
+
+### Arquitectura del token híbrido
+
+1. **Login**: Backend verifica credenciales (bcrypt), invalida sesiones anteriores, crea `SessionApp` en BD con token UUID + expiración a 8h, firma un JWT (HS256) con el UUID interno como payload.
+2. **Cliente**: Almacena el JWT en `localStorage` bajo `session_token`.
+3. **Cada request**: Frontend envía JWT en header `session-token`. Backend decodifica JWT, extrae UUID, busca sesión en BD, verifica activa y vigente.
+4. **Ventaja**: JWT garantiza integridad (firmado); BD permite revocación en servidor (logout, cambio de contraseña, desactivación).
+
 ---
+
 ## Entradas
-| Campo     | Tipo          | Obligatorio | Validaciones                                      |
-|-----------|---------------|-------------|---------------------------------------------------|
-| `email` o `username` | Texto (email o alfanumérico) | Sí | Formato válido según tipo (email RFC o username sin espacios), máximo 255 caracteres |
-| `password`| Texto         | Sí          | No vacío (validación de longitud y formato básica en frontend) |
+
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `email` | Texto (email) | Sí | Formato de email válido |
+| `password` | Texto | Sí | No vacío |
+| `accepted_terms` | Booleano | No | Si el usuario no ha aceptado términos, debe enviar `true` |
+
 ---
+
 ## Proceso
-1. El usuario accede al formulario de inicio de sesión en la interfaz (web o src).
-2. Ingresa su correo electrónico (o username) y contraseña.
-3. El frontend realiza validaciones básicas (campos no vacíos, formato de email si aplica) y envía POST al backend.
-4. El backend valida los datos con Pydantic.
-5. Busca el usuario por email o username en la base de datos.
-6. Si existe, compara la contraseña proporcionada (hasheada con bcrypt) contra la almacenada.
-7. Verifica que el usuario esté activo (`is_active = true`).
-8. Si todo coincide, genera un token de acceso (JWT) con claims relevantes (user_id, roles, exp, etc.).
-9. Registra el intento exitoso (log de auditoría).
-10. Retorna el token y datos básicos del usuario (sin información sensible).
-11. En caso de fallo: registra intento fallido, aplica rate limiting si supera umbral, y retorna error sin revelar detalles sensibles.
+
+1. El usuario accede al formulario de inicio de sesión en `http://localhost:5173/login`.
+2. Ingresa correo y contraseña.
+3. Frontend envía `POST /session/login` con los datos.
+4. Backend:
+   - Busca usuario por email.
+   - Verifica que esté activo (`status = active`).
+   - Compara contraseña con bcrypt.
+   - Si es primera vez o no ha aceptado términos, requiere `accepted_terms = true`.
+   - Invalida sesiones activas anteriores (`is_active = false`).
+   - Crea nueva sesión (`SessionApp` con token UUID, expira a 8h, `is_active = true`).
+   - Genera JWT firmado con HS256 que contiene `session_token` (UUID) y `sub` (user_id).
+   - Retorna `{ session_token: JWT, expires_at, user, modules }`.
+5. Frontend almacena JWT en `localStorage`, módulos permitidos en `localStorage`, redirige al dashboard.
+
 ---
+
 ## Salidas
-| Escenario                  | Código HTTP | Respuesta                                                                 |
-|----------------------------|-------------|---------------------------------------------------------------------------|
-| Inicio de sesión exitoso   | 200         | `{ "access_token": "...", "token_type": "bearer", "user": {id, email, full_name, roles, ...} }` |
-| Credenciales incorrectas   | 401         | Mensaje: "Credenciales inválidas" (sin especificar si es email o contraseña) |
-| Cuenta inactiva/bloqueada  | 403         | Mensaje: "Cuenta inactiva o bloqueada temporalmente. Contacta al administrador" |
-| Datos inválidos (validación) | 422       | Detalle de errores por campo                                              |
-| Demasiados intentos fallidos | 429     | Mensaje: "Demasiados intentos. Intenta nuevamente en X minutos"           |
-| Error interno              | 500         | Mensaje genérico: "Error al procesar la solicitud"                        |
+
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Inicio de sesión exitoso | 200 | `{ session_token: "(JWT)", expires_at, user, terms_required }` |
+| Credenciales incorrectas | 401 | "Credenciales inválidas." |
+| Cuenta inactiva | 403 | "El usuario está inactivo. Contacte al administrador." |
+| Términos no aceptados | 403 | "Debe aceptar los términos y condiciones para continuar." |
+| Demasiados intentos | 429 | Rate limit exceeded (5/min por IP) |
+| Error interno | 500 | Mensaje genérico |
+
 ---
-## Endpoint asociado
-| Método | Ruta                       | Auth requerida |
-|--------|----------------------------|----------------|
-| POST   | `/api/v1/session/login`       | No             |
+
+## Endpoints asociados
+
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| POST | `/session/login` | No | Inicio de sesión (rate-limited: 5/min) |
+| POST | `/session/logout` | Sí (JWT) | Cerrar sesión |
+| POST | `/session/logout-all` | Sí (JWT) | Cerrar sesión en todos los dispositivos |
+
 ---
+
 ## Reglas de negocio
-- RN-008: El acceso al sistema solo se concede si las credenciales (email/username + contraseña) coinciden exactamente con las almacenadas en la base de datos y el usuario está activo.
-- RN-009: La contraseña nunca se envía ni almacena en texto plano; siempre se compara mediante hash bcrypt.
-- RN-010: En caso de credenciales incorrectas, el sistema no revela detalles sensibles (ej. "usuario no existe" vs "contraseña incorrecta") para evitar enumeración de cuentas.
-- RN-011: Se implementa rate limiting por IP o por cuenta (ej. máximo 5-10 intentos fallidos en 15 minutos) para prevenir ataques de fuerza bruta.
-- RN-012: Tras autenticación exitosa, se genera un token JWT con expiración corta (ej. 30-60 minutos) y se asocian roles/permisos para control de acceso posterior.
-- RN-013: Se registra cada intento de login (exitoso o fallido) en logs de auditoría con timestamp, IP y user-agent para trazabilidad y detección de anomalías.
-- RN-014: Una vez autenticado, el usuario accede únicamente a funcionalidades y datos permitidos por sus roles establecidos en el sistema.
+
+- **RN-007**: El acceso solo se concede si las credenciales coinciden y el usuario está activo.
+- **RN-008**: La contraseña nunca se envía ni almacena en texto plano; siempre se compara mediante bcrypt.
+- **RN-009**: En caso de credenciales incorrectas, el sistema no revela qué campo es incorrecto ("Credenciales inválidas.").
+- **RN-010**: Se implementa rate limiting por IP: máximo 5 intentos de login por minuto.
+- **RN-011**: Tras autenticación exitosa, se genera un JWT firmado HS256 con expiración a 8 horas.
+- **RN-012**: El JWT no es suficiente por sí solo; cada request verifica la sesión en BD (is_active + expires_at).
+- **RN-013**: Al iniciar sesión, se invalidan todas las sesiones activas anteriores del mismo usuario.
+- **RN-014**: El usuario debe aceptar términos y condiciones al menos una vez.
