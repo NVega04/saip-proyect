@@ -29,6 +29,7 @@ app = FastAPI(
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8081",
+    "http://161.35.6.77:5173",
     "exp://*",
 ]
 
