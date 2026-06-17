@@ -46,7 +46,7 @@ services:
       - ./frontend:/src:Z
       - /src/node_modules
     environment:
-      - VITE_API_URL=${VITE_API_URL:-http://backend:8000}
+      - VITE_API_URL=${VITE_API_URL}
     depends_on:
       - backend
     networks:
