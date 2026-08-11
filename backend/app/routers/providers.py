@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 import logging
-from src.database import get_session
-from src.models.models import User, Provider, ProviderContact, ProviderStatus
-from src.schemas.schemas import (
+from app.database import get_session
+from app.models.models import User, Provider, ProviderContact, ProviderStatus
+from app.schemas.schemas import (
     ProviderCreate, ProviderResponse, ProviderUpdate,
     ProviderDeleteResponse, ProviderContactCreate,
     ProviderContactResponse, ProviderContactUpdate,
 )
-from src.dependencies import get_current_user
+from app.dependencies import get_current_user
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/providers", tags=["Providers"])
