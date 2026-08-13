@@ -3,16 +3,16 @@ from sqlmodel import Session, select
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from src.database import get_session
-from src.models.models import Recipe, RecipeIngredient, Unit, Supply, User
-from src.schemas.schemas import (
+from app.database import get_session
+from app.models.models import Recipe, RecipeIngredient, Unit, Supply, User
+from app.schemas.schemas import (
     RecipeCreate,
     RecipeUpdate,
     RecipeResponse,
     RecipeIngredientCreate,
     DeleteResponseRecipe,
 )
-from src.dependencies import get_current_user
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
@@ -51,7 +51,7 @@ def create(data: RecipeCreate, session: Session = Depends(get_session), current_
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.yield_unit_id}' no existe.")
 
     if data.product_id is not None:
-        from src.models.models import Product
+        from app.models.models import Product
         product = session.get(Product, data.product_id)
         if not product or product.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El producto con id '{data.product_id}' no existe.")
@@ -109,7 +109,7 @@ def update(recipe_id: int, data: RecipeUpdate, session: Session = Depends(get_se
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.yield_unit_id}' no existe.")
 
     if data.product_id is not None:
-        from src.models.models import Product
+        from app.models.models import Product
         product = session.get(Product, data.product_id)
         if not product or product.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El producto con id '{data.product_id}' no existe.")

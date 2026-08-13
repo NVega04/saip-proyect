@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
-from src.database import get_session
-from src.models.models import Product, ProductStatus, User, Unit
-from src.schemas.schemas import ProductCreate, ProductUpdate, ProductResponse
-from src.dependencies import get_current_user
+from app.database import get_session
+from app.models.models import Product, ProductStatus, User, Unit
+from app.schemas.schemas import ProductCreate, ProductUpdate, ProductResponse
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/products", tags=["Products"])
 

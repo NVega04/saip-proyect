@@ -5,8 +5,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from sqlmodel import SQLModel
-from src.database import mysql_url
-from src.models.models import User, Role
+from app.database import mysql_url
+from app.models.models import User, Role
 
 import os
 # this is the Alembic Config object, which provides

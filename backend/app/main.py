@@ -1,22 +1,22 @@
 import logging
 from fastapi import FastAPI
-from src.routers import users
-from src.routers import roles
-from src.routers import session
+from app.routers import users
+from app.routers import roles
+from app.routers import session
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from src.routers import role_modules
-from src.routers import units
-from src.routers import products
-from src.routers import reports
-from src.routers import supply_categories
-from src.routers import supplies
-from src.routers import providers
-from src.routers.product_categories import router as product_categories_router
-from src.routers.commercial_products import router as commercial_products_router
-from src.routers.recipes import router as recipes_router
+from app.routers import role_modules
+from app.routers import units
+from app.routers import products
+from app.routers import reports
+from app.routers import supply_categories
+from app.routers import supplies
+from app.routers import providers
+from app.routers.product_categories import router as product_categories_router
+from app.routers.commercial_products import router as commercial_products_router
+from app.routers.recipes import router as recipes_router
 
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
