@@ -44,9 +44,8 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/session/login", {
+      const response = await apiFetch("/session/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, accepted_terms: termsAcceptedRef.current }),
       });
 

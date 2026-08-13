@@ -5,70 +5,66 @@
 ## Identificación
 
 | Campo | Valor |
-|------|-------|
-| ID | RF-006 |
-| Nombre | Dar de baja a usuarios |
-| Módulo | Administración de Usuarios |
-| Prioridad | Alta |
-| Estado | Pendiente |
-| Fecha | Febrero 2026 |
+|-------|-------|
+| **ID** | RF-006 |
+| **Nombre** | Dar de baja a usuarios |
+| **Módulo** | Administración / Gestión de usuarios |
+| **Prioridad** | Alta |
+| **Estado** | Implementado |
+| **Fecha** | Febrero 2026 |
 
 ---
 
 ## Descripción
 
-El sistema debe permitir que un administrador pueda dar de baja a usuarios registrados en el sistema, cambiando su estado a **Inactivo**.  
-Esta acción debe impedir que el usuario vuelva a iniciar sesión, pero sin eliminar su información para fines de auditoría y trazabilidad.
+El sistema debe permitir que un administrador pueda desactivar o eliminar lógicamente usuarios registrados. La desactivación cambia el estado a `inactive` impidiendo el inicio de sesión. La eliminación lógica (soft delete) preserva los datos para auditoría.
 
 ---
 
 ## Entradas
 
 | Campo | Tipo | Obligatorio | Validaciones |
-|------|------|-------------|--------------|
-| user_id | UUID / Int | Sí | Debe existir en base de datos |
-| motivo | Texto | Sí | No vacío, mínimo 5 caracteres |
+|-------|------|-------------|--------------|
+| `user_id` | Entero | Sí | Debe existir en base de datos |
+| `status` | Enum (edición) | No | `active` / `inactive` |
 
 ---
 
 ## Proceso
 
-1. El administrador ingresa al módulo de gestión de usuarios.
-2. El sistema muestra el listado de usuarios registrados.
-3. El administrador selecciona un usuario activo.
-4. El administrador selecciona la opción **Dar de baja**.
-5. El sistema solicita el motivo de la baja.
-6. El sistema valida que el usuario exista y que esté en estado activo.
-7. El sistema actualiza el estado del usuario a **Inactivo**.
-8. El sistema registra la operación en auditoría (responsable, fecha, hora y motivo).
-9. El sistema muestra un mensaje de confirmación.
+1. El administrador ingresa al módulo de usuarios (`/usuarios`).
+2. El sistema muestra la lista de usuarios en una tabla.
+3. El administrador selecciona un usuario y elige:
+   - **Desactivar**: cambia `status = inactive`, el usuario no puede iniciar sesión.
+   - **Activar**: cambia `status = active`, restaura el acceso.
+   - **Eliminar**: establece `deleted_at` y `deleted_by` (soft delete).
+4. En todos los casos se registra auditoría (responsable, fecha, hora).
 
 ---
 
 ## Salidas
 
 | Escenario | Código HTTP | Respuesta |
-|----------|------------|----------|
-| Usuario dado de baja exitosamente | 200 | `{ "message": "User deactivated successfully" }` |
-| Usuario no encontrado | 404 | `{ "message": "User not found" }` |
-| Usuario ya inactivo | 409 | `{ "message": "User is already inactive" }` |
-| Datos inválidos | 422 | Detalle de errores de validación |
-| No autorizado | 403 | `{ "message": "Forbidden" }` |
+|-----------|-------------|-----------|
+| Usuario actualizado | 200 | Datos del usuario actualizado |
+| Eliminación lógica exitosa | 200 | Mensaje de confirmación |
+| Usuario no encontrado | 404 | Recurso no encontrado |
+| No autorizado | 403 | "Se requieren permisos de administrador." |
 
 ---
 
-## Endpoint asociado
+## Endpoints asociados
 
-| Método | Ruta | Auth requerida |
-|--------|------|---------------|
-| PATCH | `/api/v1/users/{user_id}/deactivate` | Sí |
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| PUT | `/users/{id}` | Admin | Actualizar usuario (incluye cambio de estado) |
+| DELETE | `/users/{id}` | Admin | Eliminación lógica de usuario |
 
 ---
 
 ## Reglas de negocio
 
-- **RN-010:** Solo los usuarios con rol **Administrador** pueden dar de baja usuarios.
-- **RN-011:** No se permite dar de baja a un usuario que ya esté inactivo.
-- **RN-012:** El usuario dado de baja no podrá iniciar sesión en el sistema.
-- **RN-013:** La baja debe registrarse en auditoría con fecha, hora, responsable y motivo obligatorio.
-- **RN-014:** El sistema no debe eliminar el usuario, solo cambiar su estado a **Inactivo**.
+- **RN-029**: Solo usuarios con `is_admin = true` pueden dar de baja usuarios.
+- **RN-030**: No se permite eliminar físicamente usuarios; solo baja lógica o cambio de estado.
+- **RN-031**: El usuario dado de baja (`inactive`) no podrá iniciar sesión ("El usuario está inactivo. Contacte al administrador.").
+- **RN-032**: Toda operación debe registrarse en auditoría.

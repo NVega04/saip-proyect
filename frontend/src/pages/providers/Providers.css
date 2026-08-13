@@ -27,7 +27,7 @@
   font-family: 'Roboto', sans-serif;
   font-size: 0.85rem;
   color: #16425b;
-  background: #ffffff;
+  background: #f2f2f2;
   border: 1px solid #bcc7d0;
   border-radius: 7px;
   padding: 0.55rem 0.85rem;
@@ -193,7 +193,7 @@
   padding: 0.75rem 1rem;
   border: 1px solid #d6dbe0;
   border-radius: 8px;
-  background: #ffffff;
+  background: #f2f2f2;
   transition: border-color 0.15s ease;
 }
 

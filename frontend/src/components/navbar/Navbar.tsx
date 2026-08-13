@@ -71,10 +71,10 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
         .saip-link::after {
           content: ''; position: absolute;
           bottom: -2px; left: 0; width: 0; height: 1.5px;
-          background: #ffffff;
+          background: #f2f2f2;
           transition: width .25s ease;
         }
-        .saip-link:hover { color: #ffffff; }
+        .saip-link:hover { color: #f2f2f2; }
         .saip-link:hover::after { width: 100%; }
         .saip-trigger:hover { background: rgba(255,255,255,0.1) !important; }
         .saip-dd-item {
@@ -128,7 +128,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               {[0, 1, 2].map((i) => (
                 <span key={i} style={{
                   display: "block", width: "15px", height: "1.5px",
-                   background: "#ffffff", borderRadius: "2px",
+                   background: "#f2f2f2", borderRadius: "2px",
                   transition: "transform 0.25s ease, opacity 0.2s ease",
                   transform: sidebarOpen
                     ? i === 0 ? "rotate(45deg) translate(4px, 4px)"
@@ -144,14 +144,14 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           }}>
             <div style={{
               width: "35px", height: "35px",
-              background: "#ffffff", borderRadius: "7px",
+              background: "#f2f2f2", borderRadius: "7px",
               border: "1px solid rgba(255,255,255,0.15)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <img src="/images/logo.png" alt="SAIP" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
             </div>
             <span style={{
-              fontSize: "1rem", fontWeight: 700, color: "#ffffff",
+              fontSize: "1rem", fontWeight: 700, color: "#f2f2f2",
               fontFamily: "'Outfit', sans-serif",
             }}>
               SAIP
@@ -188,7 +188,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
                 <span style={{
                   fontSize: "0.82rem", fontWeight: 600,
-                  color: "#ffffff",
+                  color: "#f2f2f2",
                   fontFamily: "'Outfit', system-ui, sans-serif", lineHeight: 1,
                 }}>
                   {user?.nombre ?? "· · ·"}
@@ -223,13 +223,13 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               border: "1.5px solid var(--bakery-btn-primary-hover)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "0.7rem", fontWeight: 700,
-              color: "#ffffff",
+              color: "#f2f2f2",
               fontFamily: "'Outfit', system-ui, sans-serif",
               flexShrink: 0, userSelect: "none",
             }}>
               {initials || (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="#ffffff" strokeWidth="1.8">
+                  stroke="#f2f2f2" strokeWidth="1.8">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
@@ -258,7 +258,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
                   <div style={{ padding: "12px 14px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
                     <span style={{
                       fontSize: "0.83rem", fontWeight: 600,
-                color: "#ffffff",
+                color: "#f2f2f2",
                       fontFamily: "'Outfit', system-ui, sans-serif",
                     }}>
                       {user.nombre}

@@ -213,7 +213,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Roboto', sans-serif",
   },
   card: {
-    background: "#ffffff",
+    background: "#f2f2f2",
     border: "1px solid #bcc7d066",
     borderRadius: "8px",
     display: "flex",

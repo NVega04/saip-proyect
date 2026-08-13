@@ -123,7 +123,7 @@
 
 .da-input:focus {
   outline: none;
-  background: #ffffff;
+  background: #f2f2f2;
   border-color: #c0392b;
   box-shadow: 0 2px 8px rgba(192, 57, 43, 0.12);
 }
@@ -163,7 +163,7 @@
 /* Botón cancelar / atrás */
 .da-btn-cancel {
   padding: 0.6rem 1.1rem;
-  background: #ffffff;
+  background: #f2f2f2;
   border: 1.5px solid #bcc7d0;
   border-radius: 9px;
   font-size: 0.83rem;
@@ -189,7 +189,7 @@
   border: none;
   border-radius: 9px;
   font-size: 0.83rem;
-  color: #ffffff;
+  color: #f2f2f2;
   cursor: pointer;
   font-family: "Roboto", sans-serif;
   font-weight: 600;
@@ -214,7 +214,7 @@
   width: 13px;
   height: 13px;
   border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #ffffff;
+  border-top-color: #f2f2f2;
   border-radius: 50%;
   animation: da-spin 0.7s linear infinite;
 }

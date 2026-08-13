@@ -40,7 +40,7 @@
   font-size: 0.9rem;
   font-family: 'Outfit', system-ui, sans-serif;
   color: var(--dark, #16425b);
-  background: var(--white, #fff);
+  background: var(--white, #f2f2f2);
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
   width: 100%;

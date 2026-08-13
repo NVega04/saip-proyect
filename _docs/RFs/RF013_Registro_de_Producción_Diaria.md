@@ -1,76 +1,71 @@
-RF-013 — Registro de Producción Diaria
-<!-- ¿Qué? Requisito funcional para registrar la producción diaria de productos terminados. ¿Para qué? Permitir trazabilidad y preparación de movimientos de inventario posteriores. ¿Impacto? Sin este registro no existiría base formal para ejecutar el consumo de materias primas. -->
+# RF-013 — Registro de producción diaria
 
-Identificación
+---
 
-| Campo         | Valor                         |
-| ------------- | ----------------------------- |
-| **ID**        | RF-009                        |
-| **Nombre**    | Registro de Producción Diaria |
-| **Módulo**    | **Producción**                |
-| **Prioridad** | Alta                          |
-| **Estado**    | **Pendiente**                 |
-| **Fecha**     | **Septiembre 2025**           |
+## Identificación
 
-Descripción
+| Campo | Valor |
+|-------|-------|
+| **ID** | RF-013 |
+| **Nombre** | Registro de producción diaria |
+| **Módulo** | Producción |
+| **Prioridad** | Alta |
+| **Estado** | Pendiente |
+| **Fecha** | Febrero 2026 |
 
-El sistema debe permitir a un usuario autorizado registrar, por fecha y sede, la cantidad producida de cada producto terminado. Al guardar, se genera una Orden de Producción con estado y trazabilidad (usuario, fecha/hora, observaciones).
+---
 
-Entradas
+## Descripción
 
-| Campo             | Tipo   | Obligatorio | Validaciones                            |
-| ----------------- | ------ | ----------- | --------------------------------------- |
-| `product_id`      | **ID** | Sí          | Debe existir y ser producto terminado   |
-| `quantity`        | Número | Sí          | Debe ser mayor a 0                      |
-| `production_date` | Fecha  | Sí          | No puede ser futura según configuración |
-| `site_id`         | **ID** | Sí          | Debe corresponder a una sede válida     |
-| `status`          | Texto  | Sí          | Programada o Confirmada                 |
-| `user_id`         | **ID** | Sí          | Usuario autenticado con permisos        |
+El sistema debe permitir registrar la producción diaria mediante órdenes de producción asociadas a recetas. Las órdenes pasan por estados: `pending` → `in_progress` → `completed` / `cancelled`, con trazabilidad completa.
 
-Proceso
+---
 
-El usuario autorizado accede al módulo de producción.
+## Entradas
 
-Selecciona producto, fecha, sede y cantidad.
+| Campo | Tipo | Obligatorio | Validaciones |
+|-------|------|-------------|--------------|
+| `recipe_id` | Entero | Sí | Debe existir y estar activa |
+| `quantity_multiplier` | Decimal | Sí | Debe ser mayor a 0 |
+| `scheduled_at` | Fecha | No | Fecha programada (opcional) |
+| `notes` | Texto | No | Máximo 500 caracteres |
 
-El sistema valida permisos y datos.
+---
 
-Se crea una Orden de Producción.
+## Proceso
 
-Se asigna estado inicial según configuración.
+1. El usuario accede al módulo de producción y selecciona "Nueva orden".
+2. Selecciona una receta, ingresa multiplicador y fecha programada.
+3. Se crea la orden con estado `pending`.
+4. El usuario puede iniciar la producción (cambia a `in_progress`).
+5. Al completar (RF-012), se descuentan insumos y se cambia a `completed`.
+6. También se puede cancelar la orden con estado `cancelled`.
 
-Se registran trazas: usuario, fecha/hora y observaciones.
+---
 
-La orden queda disponible para que el RF010 ejecute los movimientos de inventario cuando se confirme.
+## Salidas
 
-Salidas
+| Escenario | Código HTTP | Respuesta |
+|-----------|-------------|-----------|
+| Orden creada | 201 | Datos de la orden creada |
+| Orden completada | 200 | Confirmación con descuentos |
+| Orden cancelada | 200 | Confirmación de cancelación |
+| Datos inválidos | 422 | Errores de validación |
 
-| Escenario        | Código HTTP | Respuesta                                  |
-| ---------------- | ----------- | ------------------------------------------ |
-| Registro exitoso | 201         | Datos de la orden creada con identificador |
-| No autorizado    | 403         | Mensaje de acceso denegado                 |
-| Datos inválidos  | 422         | Errores de validación                      |
+---
 
-Endpoint asociado
+## Endpoints asociados
 
-| Método | Ruta                          | Auth requerida |
-| ------ | ----------------------------- | -------------- |
-| POST   | **/api/v1/production/orders** | Sí             |
+| Método | Ruta | Auth requerida | Descripción |
+|--------|------|----------------|-------------|
+| POST | `/production/orders` | Sí | Crear orden de producción |
+| PATCH | `/production/orders/{id}` | Sí | Actualizar estado de orden |
 
-Reglas de negocio
+---
 
-RN-001: Solo usuarios con rol autorizado pueden registrar producción.
+## Reglas de negocio
 
-RN-002: El producto debe estar marcado como producto terminado.
-
-RN-003: Debe indicarse fecha, sede y cantidad válida.
-
-RN-004: La orden inicia en estado Programada o Confirmada según parámetros del sistema.
-
-RN-005: Este proceso no modifica inventario directamente.
-
-RN-006: La afectación de stock se realiza posteriormente mediante el RF010.
-
-RN-007: Debe mantenerse trazabilidad completa de la operación.
-
-RN-008: La operación debe completarse en menos de un minuto.
+- **RN-073**: La receta debe existir y estar activa.
+- **RN-074**: La orden inicia en estado `pending`.
+- **RN-075**: El descuento de insumos se realiza al completar la orden (RF-012).
+- **RN-076**: Debe mantenerse trazabilidad completa de la operación.

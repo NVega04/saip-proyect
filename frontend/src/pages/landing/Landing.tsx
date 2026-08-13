@@ -83,7 +83,7 @@ export default function Landing() {
             <svg className="landing-hero__svg" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
 
               {/* Fondo tarjeta */}
-              <rect x="20" y="20" width="280" height="240" rx="18" fill="#ffffff" stroke="#d1d7db" strokeWidth="1.5"/>
+              <rect x="20" y="20" width="280" height="240" rx="18" fill="#f2f2f2" stroke="#d1d7db" strokeWidth="1.5"/>
 
               {/* Header tarjeta */}
               <rect x="20" y="20" width="280" height="48" rx="18" fill="#d9dcd6"/>
@@ -130,7 +130,7 @@ export default function Landing() {
                   values="0,0; 0,-6; 0,0" dur="3s" repeatCount="indefinite"/>
                 <rect x="195" y="88" width="90" height="36" rx="10" fill="#16425b"/>
                 <text x="240" y="103" fontSize="9" fill="#d9dcd6" textAnchor="middle">Ventas hoy</text>
-                <text x="240" y="116" fontSize="11" fontWeight="bold" fill="#ffffff" textAnchor="middle">+12.4%</text>
+                <text x="240" y="116" fontSize="11" fontWeight="bold" fill="#f2f2f2" textAnchor="middle">+12.4%</text>
               </g>
 
               {/* Punto de datos animado */}

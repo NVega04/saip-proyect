@@ -1,20 +1,14 @@
 # RNF-001 — Seguridad
 
-<!--
-  ¿Qué? Requisito no funcional que define los estándares de seguridad del sistema.
-  ¿Para qué? Garantizar que los datos sensibles (usuarios, inventario, ventas, recetas) estén protegidos contra accesos no autorizados y ataques comunes.
-  ¿Impacto? Un fallo podría exponer información de inventario, producción, ventas o datos personales de usuarios y proveedores.
--->
-
 ## Identificación
 
-| Campo             | Valor                                                  |
-| ----------------- | ------------------------------------------------------ |
-| **ID**            | RNF-001                                                |
-| **Nombre**        | Seguridad                                              |
-| **Categoría**     | Seguridad de la información                            |
-| **Prioridad**     | Crítica                                                |
-| **Estado**        | En proceso / Pendiente de implementación               |
+| Campo         | Valor                       |
+| ------------- | --------------------------- |
+| **ID**        | RNF-001                     |
+| **Nombre**    | Seguridad                   |
+| **Categoría** | Seguridad de la información |
+| **Prioridad** | Crítica                     |
+| **Estado**    | Implementado                |
 
 ## Requisitos
 
@@ -64,3 +58,17 @@ Todas las comunicaciones entre frontend y backend deben realizarse mediante **HT
 
 Credenciales, claves secretas (JWT, BD, SMTP, etc.) deben almacenarse en variables de entorno o archivo `.env` no versionado.  
 Proveer `.env.example` como plantilla.
+
+## Notas de implementación
+
+**Implementado:**
+- RNF-001.1 — Autenticación JWT (HS256) + sesión en BD (tabla `SessionApp`); cierre de sesión invalida el token
+- RNF-001.2 — bcrypt con salt para todas las contraseñas (`security.py`)
+- RNF-001.4 — RBAC por módulos (`require_module()` en backend + `allowedModules` en localStorage + `ProtectedRoute` en frontend)
+- RNF-001.5 — SQLAlchemy ORM previene SQL Injection; Pydantic + UppercaseMixin sanitiza entradas
+- RNF-001.7 — Variables de entorno con `.env` + `.env.example` en raíz del proyecto
+
+**Pendiente:**
+- RNF-001.3 — Recuperación de contraseña por correo (solo existe generación de temp password, sin envío SMTP)
+- RNF-001.5 — Tokens CSRF en formularios y headers anti-XSS
+- RNF-001.6 — HTTPS/TLS (solo modo desarrollo HTTP sin certificado)
