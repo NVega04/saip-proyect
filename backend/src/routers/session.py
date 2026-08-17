@@ -1,23 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlmodel import Session, select
-from app.database import get_session
-from app.models.models import User, SessionApp, PasswordReset
-from app.schemas.schemas import (
+from src.database import get_session
+from src.models.models import User, SessionApp, PasswordReset
+from src.schemas.schemas import (
     LoginRequest,
     LoginResponse,
     ForgotPasswordRequest,
     ResetPasswordRequest,
 )
-from app.security import verify_password, get_session_expiry, hash_password, create_jwt, decode_jwt
-from app.dependencies import get_current_user
+from src.security import verify_password, get_session_expiry, hash_password, create_jwt, decode_jwt
+from src.dependencies import get_current_user
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 import uuid
 import os
 from datetime import datetime, timedelta
 import secrets
-from app.email import send_reset_email
-from app.schemas.schemas import ChangePasswordRequest
+from src.email import send_reset_email
+from src.schemas.schemas import ChangePasswordRequest
 from zoneinfo import ZoneInfo
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")

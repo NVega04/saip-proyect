@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlmodel import Session, select
 import logging
-from app.database import get_session
-from app.models.models import User, Role, UserStatus, SessionApp
-from app.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, UserUpdateResponse, UserUpdate
-from app.security import hash_password, generate_temp_password, verify_password
+from src.database import get_session
+from src.models.models import User, Role, UserStatus, SessionApp
+from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, UserUpdateResponse, UserUpdate
+from src.security import hash_password, generate_temp_password, verify_password
 from datetime import datetime, timezone
-from app.dependencies import get_current_user
-from app.email import send_welcome_email, send_deactivation_email
+from src.dependencies import get_current_user
+from src.email import send_welcome_email, send_deactivation_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)

@@ -7,9 +7,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-from app.database import get_session
-from app.dependencies import get_current_user
-from app.models.models import (
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import (
     User, Role, SessionApp, Product, Supply,
     SupplyCategory, Unit, Recipe, ProductionOrder,
 )

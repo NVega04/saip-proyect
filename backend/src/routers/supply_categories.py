@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
-from app.database import get_session
-from app.models.models import User, SupplyCategory
-from app.schemas.schemas import (
+from src.database import get_session
+from src.models.models import User, SupplyCategory
+from src.schemas.schemas import (
     SupplyCategoryCreate,
     SupplyCategoryResponse,
     SupplyCategoryUpdate,
     DeleteResponseSupplyCategory,
 )
-from app.dependencies import get_current_user
+from src.dependencies import get_current_user
 
 router = APIRouter(prefix="/supply-categories", tags=["SupplyCategories"])
 

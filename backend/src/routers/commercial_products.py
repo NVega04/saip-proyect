@@ -3,15 +3,15 @@ from sqlmodel import Session, select
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app.database import get_session
-from app.models.models import CommercialProduct, ProductCategory, Unit, Provider, User
-from app.schemas.schemas import (
+from src.database import get_session
+from src.models.models import CommercialProduct, ProductCategory, Unit, Provider, User
+from src.schemas.schemas import (
     CommercialProductCreate,
     CommercialProductUpdate,
     CommercialProductResponse,
     DeleteResponseCommercialProduct,
 )
-from app.dependencies import get_current_user
+from src.dependencies import get_current_user
 
 router = APIRouter(prefix="/commercial-products", tags=["CommercialProducts"])
 

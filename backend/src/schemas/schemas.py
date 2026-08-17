@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
-from app.models.models import UserStatus, RoleStatus, ProductStatus, ProviderStatus, RecipeStatus
+from src.models.models import UserStatus, RoleStatus, ProductStatus, ProviderStatus, RecipeStatus
 from datetime import datetime
 
 

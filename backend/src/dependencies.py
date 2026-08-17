@@ -2,9 +2,9 @@ from fastapi import Depends, HTTPException, status, Header
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
-from app.database import get_session
-from app.models.models import SessionApp, User, RoleModule, Module
-from app.security import decode_jwt
+from src.database import get_session
+from src.models.models import SessionApp, User, RoleModule, Module
+from src.security import decode_jwt
 
 def get_current_user(
     session_token: str = Header(..., alias="session-token"),
