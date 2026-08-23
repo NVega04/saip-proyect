@@ -246,3 +246,67 @@ saip-proyect/
 5. **Environment Variables**: Uses `.env` file (not committed to git)
 
 6. **Package Manager**: Frontend uses `pnpm`, not npm or yarn
+
+
+# AUTOMATIZACION DE PRUEBAS CON SELENIUM
+
+Actúa como un experto en automatización de pruebas con Selenium WebDriver + Python.
+
+Estoy trabajando en el proyecto SAIP (Sistema Administrativo Integral de Productos), un sistema de inventario para panadería.
+
+- Frontend: React + TypeScript + Vite corriendo en http://localhost:5173
+- Backend: FastAPI
+- El frontend usa autenticación con token en localStorage (clave: session_token)
+
+### Objetivo
+Crear y ejecutar un script de Selenium llamado `test_saip_15_vistas_doble_prueba.py` que cumpla exactamente con estos requisitos:
+
+1. Probar **15 vistas** del frontend de SAIP.
+2. Por **cada vista** ejecutar **dos pruebas**:
+   - Caso **Negativo** (información errónea o formulario vacío)
+   - Caso **Positivo** (información correcta)
+
+3. Usar al menos estas tres estrategias de localización:
+   - By.ID
+   - By.CSS_SELECTOR
+   - By.XPATH
+
+4. Tomar captura de pantalla (screenshot) de cada caso (positivo y negativo).
+5. Al finalizar mostrar un resumen claro de cuántas pruebas pasaron y cuántas fallaron.
+6. Cerrar el navegador correctamente con `driver.quit()`.
+
+### Lista de las 15 vistas a probar:
+1. Login (/login)
+2. Dashboard (/dashboard)
+3. Productos (/productos)
+4. Crear Producto (/productos/nuevo)
+5. Inventario (/inventario)
+6. Movimientos de Inventario (/inventario/movimientos)
+7. Ventas (/ventas)
+8. Nueva Venta (/ventas/nueva)
+9. Clientes (/clientes)
+10. Proveedores (/proveedores)
+11. Compras (/compras)
+12. Usuarios (/usuarios)
+13. Roles (/roles)
+14. Reportes (/reportes)
+15. Configuración (/configuracion)
+
+### Credenciales de prueba:
+- Correctas: admin@saip.com / admin123
+- Erróneas: usuario_inexistente@saip.com / clave_incorrecta_123
+
+### Instrucciones técnicas:
+- Usa `selenium` + `webdriver-manager`
+- Usa `WebDriverWait` en lugar de solo `time.sleep` cuando sea posible
+- El script debe ser robusto (usar try/except por cada vista)
+- Guarda todas las evidencias (screenshots) en la carpeta actual con nombres claros
+- Si alguna ruta no existe o el selector cambia, adapta el código de forma inteligente
+
+### Pasos que debes realizar:
+1. Verifica si Selenium está instalado. Si no, instálalo (`pip install selenium webdriver-manager`)
+2. Crea el archivo `test_saip_15_vistas_doble_prueba.py` con el código completo
+3. Ejecuta el script
+4. Muéstrame el resultado de la ejecución y un resumen de las evidencias generadas
+
+Empieza ahora.
