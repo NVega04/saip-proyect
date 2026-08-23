@@ -1,0 +1,169 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   Production.css  —  Órdenes de Producción
+   Sigue el mismo sistema de diseño que Recipes.css (prefijo: prd)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Contador de multiplicador en tabla ─────────────────────────────────────── */
+.prd__badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  background: var(--color-primary-light, #bcc7d066);
+  color: var(--color-primary, #0f1f2e);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FORM — prefijo prd (production-register-form)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.prd {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Grupo genérico (label + control + error) ───────────────────────────────── */
+.prd__group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.prd__group--half {
+  flex: 1;
+}
+
+.prd__row {
+  display: flex;
+  gap: 1rem;
+}
+
+/* ── Label ──────────────────────────────────────────────────────────────────── */
+.prd__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #374151);
+  line-height: 1.4;
+}
+
+.prd__required {
+  color: var(--color-danger, #ef4444);
+  margin-left: 2px;
+}
+
+/* ── Input base ─────────────────────────────────────────────────────────────── */
+.prd__input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #f2f2f2);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.prd__input:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+.prd__input--error {
+  border-color: var(--color-danger, #ef4444);
+}
+
+.prd__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* ── Textarea ───────────────────────────────────────────────────────────────── */
+.prd__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #f2f2f2);
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.prd__textarea:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+/* ── Select ─────────────────────────────────────────────────────────────────── */
+.prd__select {
+  width: 100%;
+  height: 36px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #f2f2f2)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 9px center;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.prd__select:focus {
+  border-color: var(--color-primary, #4f46e5);
+  box-shadow: 0 0 0 3px var(--color-primary-ring, rgba(79, 70, 229, 0.12));
+}
+
+/* ── Mensaje de error ───────────────────────────────────────────────────────── */
+.prd__error {
+  font-size: 11.5px;
+  color: var(--color-danger, #ef4444);
+  margin-top: 1px;
+}
+
+/* ── Vista previa del rendimiento esperado ──────────────────────────────────── */
+.prd__preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: var(--color-surface-muted, #f9fafb);
+  border-left: 3px solid var(--color-primary, #4f46e5);
+  font-size: 13px;
+  color: var(--color-text-secondary, #374151);
+}
+
+.prd__preview strong {
+  color: var(--color-text, #111827);
+  font-size: 13.5px;
+}
+
+/* ── Acciones del formulario ────────────────────────────────────────────────── */
+.prd__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  margin-top: 4px;
+}

@@ -8,7 +8,7 @@
 | Título | Registrar producción diaria |
 | Módulo | Producción |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | En progreso |
 | RF asociados | RF013 |
 
 ---
@@ -50,3 +50,14 @@ Como encargado de producción, quiero registrar la producción diaria mediante �
 **Dado** que una orden de producción está en estado `pending` o `in_progress`,
 **cuando** el encargado decide cancelarla,
 **entonces** el estado cambia a `cancelled`, se registra la fecha y hora de cancelación, y se puede agregar una nota del motivo.
+
+---
+
+## Implementación
+
+- Creación, listado (con filtro por estado), detalle, inicio y cancelación de órdenes implementados en `backend/src/routers/production.py`.
+- Migración alembic `c8d41f92ab73`: columnas `started_at` y `cancelled_at` en `production_orders` para trazabilidad del ciclo de vida.
+- Formulario de registro en el frontend (`Production.tsx`) con validaciones, vista previa de rendimiento y notificaciones de éxito/error.
+- La finalización con descuento de insumos (CA-013.3) se implementa junto con HU-012 / RF-012.
+
+Detalle completo de endpoints y reglas: ver `_docs/RFs/RF013_Registro_de_Producción_Diaria.md`.
