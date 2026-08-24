@@ -62,7 +62,6 @@ const emptyContactForm  = (): ContactForm  => ({ name: "", email: "", phone: "",
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Provider>[] = [
-  { key: "id",      header: "ID",      width: "5%"  },
   { key: "company", header: "Empresa", width: "30%" },
   { key: "nit",     header: "NIT",     width: "20%" },
   { key: "email",   header: "Email",   width: "30%" },

@@ -45,7 +45,6 @@ const emptyForm = (): ProductCategoryForm => ({
 });
 
 const columns: ColumnDef<ProductCategory>[] = [
-  { key: "id", header: "ID", width: "5%" },
   { key: "name", header: "Nombre", width: "30%" },
   { key: "description", header: "Descripcion", width: "25%" },
   {

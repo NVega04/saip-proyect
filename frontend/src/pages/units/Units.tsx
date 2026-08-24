@@ -36,7 +36,6 @@ const emptyForm = (): UnitForm => ({
 });
 
 const columns: ColumnDef<Unit>[] = [
-  { key: "id", header: "ID", width: "5%" },
   { key: "name", header: "Nombre", width: "25%" },
   { key: "abbreviation", header: "Abreviatura", width: "15%" },
   { key: "description", header: "Descripcion", width: "35%" },

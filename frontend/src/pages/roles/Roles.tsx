@@ -43,7 +43,6 @@ const emptyForm = (): RoleForm => ({ name: "", description: "", module_ids: [] }
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Role>[] = [
-  { key: "id",          header: "ID",          width: "5%"  },
   { key: "name",        header: "Nombre",      width: "25%" },
   { key: "description", header: "Descripción", width: "50%" },
   {
