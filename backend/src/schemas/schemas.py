@@ -716,6 +716,16 @@ class ProductionOrderStatusChangeResponse(BaseModel):
     changed_by: int
 
 
+class ProductionSnapshotResponse(BaseModel):
+    id: int
+    supply_id: int
+    supply: SupplyBasic
+    quantity_used: float
+    unit_id: int
+    unit: UnitBasic
+    stock_before: float
+    stock_after: float
+
 ## Esquemas relacionados a Sales (Ventas)
 class UserBasic(BaseModel):
     id: int
@@ -726,6 +736,17 @@ class UserBasic(BaseModel):
     class Config:
         from_attributes = True
 
+class ProductionCompleteResponse(BaseModel):
+    message: str
+    id: int
+    status: ProductionOrderStatus
+    total_yield: float
+    completed_at: datetime
+    product_id: Optional[int] = None
+    product_name: Optional[str] = None
+    product_quantity_added: Optional[float] = None
+    snapshots: list[ProductionSnapshotResponse]
+    completed_by: int
 
 class SaleItemCreate(BaseModel):
     item_type: ItemType

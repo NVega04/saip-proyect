@@ -268,6 +268,47 @@ export default function Produccion(): JSX.Element {
     });
   };
 
+  const handleConfirmar = (order: ProductionOrder) => {
+    showConfirm({
+      title: "Confirmar producción",
+      message: [
+        `Receta: "${order.recipe?.name}" (#${order.id})`,
+        `Multiplicador: ×${order.quantity_multiplier}`,
+        `Rendimiento esperado: ${order.total_yield} ${order.recipe?.yield_unit?.abbreviation ?? ""}`,
+        "",
+        "Se descontarán del inventario las materias primas de la receta. Esta acción no se puede deshacer.",
+      ].join("\n"),
+      confirmText: "Confirmar",
+      cancelText: "Volver",
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(
+            `/production/orders/${order.id}/complete`,
+            { method: "POST" }
+          );
+
+          if (!response.ok) {
+            const err = await response.json();
+            showAlert("error", err.detail || "Error al completar la producción");
+            return;
+          }
+
+          const result = await response.json();
+          setOrders((prev) =>
+            prev.map((o) =>
+              o.id === order.id
+                ? { ...o, status: "completed", completed_at: result.completed_at }
+                : o
+            )
+          );
+          showAlert("success", result.message || "Producción completada correctamente.");
+        } catch {
+          showAlert("error", "Error de conexión con el servidor.");
+        }
+      },
+    });
+  };
+
   const handleCancelar = (order: ProductionOrder) => {
     showConfirm({
       title: "Cancelar orden",
@@ -375,24 +416,42 @@ export default function Produccion(): JSX.Element {
               </>
             )}
             {row.status === "in_progress" && (
-              <button
-                className="saip-table__action-btn saip-table__action-btn--danger"
-                title="Cancelar orden"
-                onClick={() => handleCancelar(row)}
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
+              <>
+                <button
+                  className="saip-table__action-btn"
+                  title="Confirmar producción"
+                  onClick={() => handleConfirmar(row)}
                 >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-              </button>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </button>
+                <button
+                  className="saip-table__action-btn saip-table__action-btn--danger"
+                  title="Cancelar orden"
+                  onClick={() => handleCancelar(row)}
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </button>
+              </>
             )}
           </div>
         )}
