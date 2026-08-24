@@ -46,6 +46,7 @@ export default function Login() {
     try {
       const response = await apiFetch("/session/login", {
         method: "POST",
+        skipAuthRedirect: true,
         body: JSON.stringify({ email, password, accepted_terms: termsAcceptedRef.current }),
       });
 
