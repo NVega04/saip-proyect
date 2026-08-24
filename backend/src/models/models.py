@@ -397,7 +397,9 @@ class ProductionOrder(SQLModel, table=True):
     status: ProductionOrderStatus = Field(default=ProductionOrderStatus.PENDING)
 
     scheduled_at: Optional[datetime] = Field(default=None)
+    started_at: Optional[datetime] = Field(default=None)
     completed_at: Optional[datetime] = Field(default=None)
+    cancelled_at: Optional[datetime] = Field(default=None)
     notes: Optional[str] = Field(default=None, max_length=500)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))

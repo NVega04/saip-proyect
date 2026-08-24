@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List
-from src.models.models import UserStatus, RoleStatus, ProductStatus, ProviderStatus, RecipeStatus
+from src.models.models import UserStatus, RoleStatus, ProductStatus, ProviderStatus, RecipeStatus, ProductionOrderStatus
 from datetime import datetime
 
 
@@ -653,3 +653,64 @@ class DeleteResponseRecipe(BaseModel):
     message: str
     deleted_at: datetime
     deleted_by: int
+
+
+## Esquemas relacionados a Production (Producción)
+class RecipeBasic(BaseModel):
+    id: int
+    name: str
+    yield_quantity: float
+    yield_unit: UnitBasic
+
+    class Config:
+        from_attributes = True
+
+
+class ProductionOrderCreate(BaseModel):
+    recipe_id: int
+    quantity_multiplier: float = Field(gt=0)
+    scheduled_at: Optional[datetime] = None
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+
+class ProductionOrderCancelRequest(BaseModel):
+    reason: Optional[str] = Field(default=None, max_length=500)
+
+
+class ProductionOrderResponse(BaseModel):
+    id: int
+    token: str
+    recipe_id: int
+    recipe: RecipeBasic
+    quantity_multiplier: float
+    total_yield: float
+    status: ProductionOrderStatus
+    scheduled_at: Optional[datetime]
+    started_at: Optional[datetime]
+    completed_at: Optional[datetime]
+    cancelled_at: Optional[datetime]
+    notes: Optional[str]
+    created_at: datetime
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
+
+    class Config:
+        from_attributes = True
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v):
+        if isinstance(v, str):
+            return ProductionOrderStatus(v.lower())
+        return v
+
+
+class ProductionOrderStatusChangeResponse(BaseModel):
+    message: str
+    id: int
+    status: ProductionOrderStatus
+    changed_at: datetime
+    changed_by: int
