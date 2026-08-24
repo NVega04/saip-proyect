@@ -92,7 +92,26 @@ def seed():
         )
 
         modules = [
-            {"id": 1, "token": str(uuid.uuid4()), "name": "sales", "label": "Ventas"},
+            {"id": 1, "token": str(uuid.uuid4()), "name": "dashboard", "label": "PANEL PRINCIPAL"},
+            {"id": 2, "token": str(uuid.uuid4()), "name": "users", "label": "USUARIOS"},
+            {"id": 3, "token": str(uuid.uuid4()), "name": "roles", "label": "ROLES"},
+            {"id": 4, "token": str(uuid.uuid4()), "name": "inventory", "label": "INVENTARIO"},
+            {"id": 5, "token": str(uuid.uuid4()), "name": "supplies", "label": "INSUMOS"},
+            {"id": 6, "token": str(uuid.uuid4()), "name": "products", "label": "PRODUCTOS"},
+            {"id": 7, "token": str(uuid.uuid4()), "name": "recipes", "label": "RECETAS"},
+            {"id": 8, "token": str(uuid.uuid4()), "name": "production", "label": "PRODUCCIÓN"},
+            {"id": 9, "token": str(uuid.uuid4()), "name": "providers", "label": "PROVEEDORES"},
+            {"id": 10, "token": str(uuid.uuid4()), "name": "purchases", "label": "COMPRAS"},
+            {"id": 11, "token": str(uuid.uuid4()), "name": "sales", "label": "VENTAS"},
+            {"id": 12, "token": str(uuid.uuid4()), "name": "cash", "label": "CAJA"},
+            {"id": 13, "token": str(uuid.uuid4()), "name": "reports", "label": "REPORTES"},
+            {"id": 14, "token": str(uuid.uuid4()), "name": "quality", "label": "CONTROL DE CALIDAD"},
+            {"id": 15, "token": str(uuid.uuid4()), "name": "delivery", "label": "DOMICILIOS"},
+            {"id": 16, "token": str(uuid.uuid4()), "name": "menu", "label": "MENÚ / CARTA"},
+            {"id": 17, "token": str(uuid.uuid4()), "name": "notifications", "label": "NOTIFICACIONES"},
+            {"id": 18, "token": str(uuid.uuid4()), "name": "audit", "label": "AUDITORÍA"},
+            {"id": 19, "token": str(uuid.uuid4()), "name": "settings", "label": "CONFIGURACIÓN"},
+            {"id": 20, "token": str(uuid.uuid4()), "name": "support", "label": "SOPORTE"},
         ]
         for module in modules:
             conn.execute(
@@ -103,13 +122,15 @@ def seed():
                 module,
             )
 
-        conn.execute(
-            text("DELETE FROM role_modules WHERE module_id = 1")
+        conn.execute(text("DELETE FROM role_modules"))
+        role_modules = []
+        for module_id in range(1, 21):
+            role_modules.append(
+                {"role_id": 1, "module_id": module_id, "token": str(uuid.uuid4())}
+            )
+        role_modules.append(
+            {"role_id": 2, "module_id": 11, "token": str(uuid.uuid4())}
         )
-        role_modules = [
-            {"role_id": 1, "module_id": 1, "token": str(uuid.uuid4())},
-            {"role_id": 2, "module_id": 1, "token": str(uuid.uuid4())},
-        ]
         for rm in role_modules:
             conn.execute(
                 text("""
