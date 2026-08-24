@@ -8,7 +8,7 @@
 | Título | Descontar materias primas al producir |
 | Módulo | Producción |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Realizada |
 | RF asociados | RF012 |
 
 ---
@@ -44,3 +44,16 @@ Como encargado de producción, quiero que el sistema descuente automáticamente 
 **Dado** que se completa una orden de producción,
 **cuando** se descuentan las materias primas,
 **entonces** se registra quién realizó la producción (`created_by`), la fecha y hora, y se actualiza el estado de la orden a `completed`.
+
+---
+
+## Implementación
+
+- Endpoint `POST /production/orders/{id}/complete` en `backend/src/routers/production.py` (solo desde estado `in_progress`).
+- Validación de stock de todos los insumos antes de descontar; si falta alguno se responde 400 con el detalle completo y no se muta nada (operación atómica con un único commit).
+- Bloqueos pesimistas de fila (`SELECT ... FOR UPDATE`, ordenados por id) sobre los insumos involucrados para serializar confirmaciones concurrentes.
+- Bloqueo de unidades inconsistentes entre receta e inventario (sin tabla de conversión).
+- Snapshots por insumo (`stock_before`, `stock_after`, `quantity_used`) e incremento del producto terminado asociado.
+- Frontend: acción "Confirmar producción" con diálogo previo y notificación detallada de faltantes.
+
+Detalle completo: ver `_docs/RFs/RF012_Descontar_Materias_Primas.md`.
