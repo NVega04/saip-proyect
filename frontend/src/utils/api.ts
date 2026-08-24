@@ -1,6 +1,10 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function apiFetch(endpoint: string, options?: RequestInit): Promise<Response> {
+interface ApiFetchOptions extends RequestInit {
+  skipAuthRedirect?: boolean;
+}
+
+export async function apiFetch(endpoint: string, options?: ApiFetchOptions): Promise<Response> {
   const token = localStorage.getItem("session_token");
 
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -12,7 +16,7 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
     },
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && !options?.skipAuthRedirect) {
     localStorage.clear();
     window.location.href = "/";
   }
