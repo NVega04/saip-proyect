@@ -1,0 +1,190 @@
+.sales {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sales__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .sales__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sales__card {
+  background: var(--white, #ffffff);
+  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.30));
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(22, 66, 91, 0.05);
+}
+
+.sales__card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--dark, #16425b);
+  font-family: 'Outfit', system-ui, sans-serif;
+  margin: 0 0 1rem;
+}
+
+.sales__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sales__tab {
+  flex: 1;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.30));
+  border-radius: 8px;
+  background: var(--white, #f2f2f2);
+  color: var(--dark, #16425b);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sales__tab:hover {
+  border-color: var(--medium, #3a7ca5);
+}
+
+.sales__tab--active {
+  background: var(--medium, #3a7ca5);
+  color: #ffffff;
+  border-color: var(--medium, #3a7ca5);
+}
+
+.sales__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.sales__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dark, #16425b);
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.sales__select,
+.sales__input,
+.sales__textarea {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.30));
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-family: 'Outfit', system-ui, sans-serif;
+  color: var(--dark, #16425b);
+  background: var(--white, #f2f2f2);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sales__select:focus,
+.sales__input:focus,
+.sales__textarea:focus {
+  border-color: var(--medium, #3a7ca5);
+  box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.12);
+}
+
+.sales__textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.sales__stock-info {
+  font-size: 0.8rem;
+  color: #666;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.sales__stock-info--low {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.sales__row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.sales__row > .sales__group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.sales__cart {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.sales__cart th,
+.sales__cart td {
+  padding: 0.6rem 0.5rem;
+  text-align: left;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border-s, rgba(58, 124, 165, 0.18));
+}
+
+.sales__cart th {
+  font-weight: 700;
+  color: var(--dark, #16425b);
+  background: rgba(58, 124, 165, 0.06);
+}
+
+.sales__cart-empty {
+  text-align: center;
+  color: #999;
+  padding: 1.5rem 0;
+}
+
+.sales__remove {
+  background: transparent;
+  border: none;
+  color: #c0392b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.sales__remove:hover {
+  background: rgba(192, 57, 43, 0.1);
+}
+
+.sales__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.sales__summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-s, rgba(58, 124, 165, 0.18));
+}
+
+.sales__summary-count {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dark, #16425b);
+  font-family: 'Outfit', system-ui, sans-serif;
+}

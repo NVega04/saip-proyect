@@ -635,3 +635,99 @@ class ProviderContact(SQLModel, table=True):
             nullable=True,
         ),
     )
+
+# Modulo de ventas: venta, item de venta y movimiento de inventario
+class SaleStatus(str, Enum):
+    COMPLETED = "completada"
+    ANNULLED = "anulada"
+
+class ItemType(str, Enum):
+    PRODUCT = "product"
+    COMMERCIAL = "commercial"
+
+class MovementType(str, Enum):
+    SALE = "sale"
+    SALE_ANNULMENT = "sale_annulment"
+
+class Sale(SQLModel, table=True):
+    __tablename__ = "sales"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(
+        default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
+    )
+
+    user_id: int = Field(foreign_key="users.id")
+    user: "User" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Sale.user_id]"}
+    )
+
+    sale_date: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
+    status: SaleStatus = Field(default=SaleStatus.COMPLETED)
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    updated_at: Optional[datetime] = Field(default=None)
+    updated_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_sale_updated_by"),
+            nullable=True,
+        ),
+    )
+    deleted_at: Optional[datetime] = Field(default=None)
+    deleted_by: Optional[int] = Field(
+        default=None,
+        sa_column=Column(
+            Integer,
+            ForeignKey("users.id", use_alter=True, name="fk_sale_deleted_by"),
+            nullable=True,
+        ),
+    )
+
+    items: List["SaleItem"] = Relationship(back_populates="sale")
+
+class SaleItem(SQLModel, table=True):
+    __tablename__ = "sale_items"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(
+        default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
+    )
+
+    sale_id: int = Field(foreign_key="sales.id")
+    sale: "Sale" = Relationship(back_populates="items")
+
+    item_type: ItemType = Field(default=ItemType.PRODUCT)
+    item_id: int
+    item_name: str = Field(max_length=150)
+    quantity: float = Field(default=0)
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
+
+class InventoryMovement(SQLModel, table=True):
+    __tablename__ = "inventory_movements"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(
+        default_factory=lambda: str(uuid.uuid4()), unique=True, index=True
+    )
+
+    item_type: ItemType = Field(default=ItemType.PRODUCT)
+    item_id: int
+    movement_type: MovementType = Field(default=MovementType.SALE)
+    quantity: float = Field(default=0)
+    stock_before: float = Field(default=0)
+    stock_after: float = Field(default=0)
+
+    reference_type: Optional[str] = Field(default=None, max_length=50)
+    reference_id: Optional[int] = Field(default=None)
+
+    user_id: int = Field(foreign_key="users.id")
+    user: "User" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[InventoryMovement.user_id]"}
+    )
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
