@@ -45,7 +45,6 @@ const emptyForm = (): SupplyCategoryForm => ({
 });
 
 const columns: ColumnDef<SupplyCategory>[] = [
-  { key: "id", header: "ID", width: "5%" },
   { key: "name", header: "Nombre", width: "30%" },
   { key: "description", header: "Descripcion", width: "25%" },
   {

@@ -115,7 +115,6 @@ function StockIndicator({ available, min, max }: StockIndicatorProps) {
 }
 
 const columns: ColumnDef<CommercialProduct>[] = [
-  { key: "id", header: "ID", width: "5%" },
   { key: "name", header: "Producto", width: "18%" },
   { key: "category", header: "Categoria", width: "12%",
     render: (row) => row.category?.name || "-" },

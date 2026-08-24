@@ -228,7 +228,6 @@ export default function SalesHistory(): JSX.Element {
             <table className="sales-hist__table">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Fecha</th>
                   <th>Vendedor</th>
                   <th>Items</th>
@@ -240,14 +239,13 @@ export default function SalesHistory(): JSX.Element {
               <tbody>
                 {sales.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="sales-hist__empty">
+                    <td colSpan={6} className="sales-hist__empty">
                       No hay ventas para mostrar.
                     </td>
                   </tr>
                 ) : (
                   sales.map((sale) => (
                     <tr key={sale.id}>
-                      <td>{sale.id}</td>
                       <td>{formatDate(sale.sale_date)}</td>
                       <td>
                         {sale.user.first_name} {sale.user.last_name}

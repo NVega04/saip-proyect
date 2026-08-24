@@ -90,7 +90,6 @@ const formatDate = (value: string | null): string => {
 };
 
 const columns: ColumnDef<ProductionOrder>[] = [
-  { key: "id", header: "ID", width: "6%" },
   {
     key: "recipe",
     header: "Receta",

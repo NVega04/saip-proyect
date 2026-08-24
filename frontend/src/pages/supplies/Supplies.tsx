@@ -84,7 +84,6 @@ const formatDate = (dateStr: string | null): string => {
 };
 
 const columns: ColumnDef<Supply>[] = [
-  { key: "id", header: "ID", width: "5%" },
   { key: "name", header: "Nombre", width: "18%" },
   { key: "category", header: "Categoria", width: "15%", render: (row) => row.category.name },
   { key: "unit", header: "Unidad", width: "10%", render: (row) => `${row.unit.name} (${row.unit.abbreviation})` },
