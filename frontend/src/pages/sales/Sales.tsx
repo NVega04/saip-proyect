@@ -1,36 +1,363 @@
-import { JSX } from "react";
+import { JSX, useState, useEffect } from "react";
 import Layout from "../../components/layout/Layout";
-import "../inventory/Inventory.css";
+import Button from "../../components/button/Button";
+import Badge from "../../components/badge/Badge";
+import { useAlert } from "../../context/AlertContext";
+import { apiFetch } from "../../utils/api";
+import "./Sales.css";
+
+type ItemType = "product" | "commercial";
+
+interface Product {
+  id: number;
+  name: string;
+  unit?: { abbreviation: string };
+  available_quantity: number;
+  min_stock: number;
+  status: string;
+}
+
+interface CartItem {
+  item_type: ItemType;
+  item_id: number;
+  item_name: string;
+  quantity: number;
+}
+
+interface StockWarning {
+  item_name: string;
+  available_quantity: number;
+  min_stock: number;
+}
 
 export default function Ventas(): JSX.Element {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [commercial, setCommercial] = useState<Product[]>([]);
+  const [tab, setTab] = useState<ItemType>("product");
+  const [selectedId, setSelectedId] = useState<number>(0);
+  const [quantity, setQuantity] = useState<string>("1");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [notes, setNotes] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const { showAlert } = useAlert();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [prodRes, comRes] = await Promise.all([
+          apiFetch("/products/"),
+          apiFetch("/commercial-products/"),
+        ]);
+        if (prodRes.ok) {
+          const data: Product[] = await prodRes.json();
+          setProducts(data.filter((p) => p.status === "active"));
+        }
+        if (comRes.ok) {
+          const data: Product[] = await comRes.json();
+          setCommercial(data.filter((p) => p.status === "active"));
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const source = tab === "product" ? products : commercial;
+  const selected = source.find((p) => p.id === selectedId);
+
+  const handleTabChange = (next: ItemType) => {
+    setTab(next);
+    setSelectedId(0);
+    setQuantity("1");
+  };
+
+  const handleAdd = () => {
+    if (!selected) {
+      showAlert("warning", "Selecciona un producto.");
+      return;
+    }
+
+    const qty = parseFloat(quantity);
+    if (!qty || qty <= 0) {
+      showAlert("warning", "La cantidad debe ser mayor a cero.");
+      return;
+    }
+
+    const existing = cart.find(
+      (c) => c.item_type === tab && c.item_id === selected.id
+    );
+    const total = qty + (existing?.quantity ?? 0);
+
+    if (total > selected.available_quantity) {
+      showAlert(
+        "error",
+        `Stock insuficiente para '${selected.name}': disponible ${selected.available_quantity}.`
+      );
+      return;
+    }
+
+    if (existing) {
+      setCart((prev) =>
+        prev.map((c) =>
+          c.item_type === tab && c.item_id === selected.id
+            ? { ...c, quantity: total }
+            : c
+        )
+      );
+    } else {
+      setCart((prev) => [
+        ...prev,
+        {
+          item_type: tab,
+          item_id: selected.id,
+          item_name: selected.name,
+          quantity: qty,
+        },
+      ]);
+    }
+
+    setQuantity("1");
+    showAlert("success", `'${selected.name}' agregado al carrito.`);
+  };
+
+  const handleRemove = (index: number) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRegister = async () => {
+    if (cart.length === 0) {
+      showAlert("warning", "El carrito está vacío.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await apiFetch("/sales/", {
+        method: "POST",
+        body: JSON.stringify({
+          items: cart.map((c) => ({
+            item_type: c.item_type,
+            item_id: c.item_id,
+            quantity: c.quantity,
+          })),
+          notes: notes || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        showAlert("error", err.detail || "Error al registrar la venta.");
+        return;
+      }
+
+      const data: { warnings: StockWarning[] } = await response.json();
+      setCart([]);
+      setNotes("");
+
+      if (data.warnings.length > 0) {
+        const msgs = data.warnings
+          .map(
+            (w) =>
+              `'${w.item_name}' quedó con ${w.available_quantity} (mínimo ${w.min_stock})`
+          )
+          .join("; ");
+        showAlert("warning", `Venta registrada. Stock bajo en: ${msgs}`);
+      } else {
+        showAlert("success", "Venta registrada correctamente.");
+      }
+    } catch {
+      showAlert("error", "Error de conexión con el servidor.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Layout
       breadcrumbs={[
         { label: "Dashboard", to: "/dashboard" },
         { label: "Ventas" },
+        { label: "Registrar venta" },
       ]}
     >
-      <div className="construccion">
-        <div className="construccion__icon">
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#3a7ca5"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="12" y1="1" x2="12" y2="23" />
-            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-          </svg>
+      {loading ? (
+        <div className="saip-loading">Cargando productos...</div>
+      ) : (
+        <div className="sales">
+          <div className="sales__grid">
+            {/* Selector de producto */}
+            <div className="sales__card">
+              <h2 className="sales__card-title">Seleccionar producto</h2>
+
+              <div className="sales__tabs">
+                <button
+                  type="button"
+                  className={`sales__tab ${
+                    tab === "product" ? "sales__tab--active" : ""
+                  }`}
+                  onClick={() => handleTabChange("product")}
+                >
+                  Terminados
+                </button>
+                <button
+                  type="button"
+                  className={`sales__tab ${
+                    tab === "commercial" ? "sales__tab--active" : ""
+                  }`}
+                  onClick={() => handleTabChange("commercial")}
+                >
+                  Comerciales
+                </button>
+              </div>
+
+              <div className="sales__group">
+                <label className="sales__label">
+                  Producto<span style={{ color: "#c0392b" }}>*</span>
+                </label>
+                <select
+                  className="sales__select"
+                  value={selectedId}
+                  onChange={(e) => setSelectedId(parseInt(e.target.value))}
+                >
+                  <option value={0}>Selecciona un producto</option>
+                  {source.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selected && (
+                <div
+                  className={`sales__stock-info ${
+                    selected.available_quantity <= selected.min_stock
+                      ? "sales__stock-info--low"
+                      : ""
+                  }`}
+                >
+                  Stock disponible: {selected.available_quantity}{" "}
+                  {selected.unit?.abbreviation ?? ""} · Mínimo:{" "}
+                  {selected.min_stock}
+                </div>
+              )}
+
+              <div className="sales__row">
+                <div className="sales__group">
+                  <label className="sales__label">
+                    Cantidad<span style={{ color: "#c0392b" }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    className="sales__input"
+                    min={0}
+                    step={1}
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                  />
+                </div>
+                <Button variant="primary" onClick={handleAdd}>
+                  Agregar
+                </Button>
+              </div>
+            </div>
+
+            {/* Carrito */}
+            <div className="sales__card">
+              <h2 className="sales__card-title">Carrito de venta</h2>
+
+              {cart.length === 0 ? (
+                <p className="sales__cart-empty">
+                  No hay productos agregados.
+                </p>
+              ) : (
+                <table className="sales__cart">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Tipo</th>
+                      <th>Cantidad</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cart.map((item, index) => (
+                      <tr key={`${item.item_type}-${item.item_id}`}>
+                        <td>{item.item_name}</td>
+                        <td>
+                          <Badge
+                            label={
+                              item.item_type === "product"
+                                ? "Terminado"
+                                : "Comercial"
+                            }
+                            variant={
+                              item.item_type === "product"
+                                ? "access"
+                                : "warning"
+                            }
+                          />
+                        </td>
+                        <td>{item.quantity}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="sales__remove"
+                            title="Quitar"
+                            onClick={() => handleRemove(index)}
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                              <path d="M10 11v6M14 11v6" />
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <div className="sales__group">
+                <label className="sales__label">Notas (opcional)</label>
+                <textarea
+                  className="sales__textarea"
+                  placeholder="Observaciones sobre la venta..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="sales__summary">
+                <span className="sales__summary-count">
+                  {cart.length} item{cart.length !== 1 ? "s" : ""} ·{" "}
+                  {cart.reduce((acc, c) => acc + c.quantity, 0)} unidades
+                </span>
+                <Button
+                  variant="primary"
+                  onClick={handleRegister}
+                  disabled={submitting || cart.length === 0}
+                >
+                  {submitting ? "Registrando..." : "Registrar venta"}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-        <h1 className="construccion__title">Módulo en construcción</h1>
-        <p className="construccion__desc">
-          Estamos trabajando en este módulo. Muy pronto estará disponible.
-        </p>
-      </div>
+      )}
     </Layout>
   );
 }

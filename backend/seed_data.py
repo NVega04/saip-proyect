@@ -11,11 +11,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "db_saip_proyect")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
 DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
@@ -90,6 +90,34 @@ def seed():
             """),
             admin_user,
         )
+
+        modules = [
+            {"id": 1, "token": str(uuid.uuid4()), "name": "sales", "label": "Ventas"},
+        ]
+        for module in modules:
+            conn.execute(
+                text("""
+                INSERT IGNORE INTO modules (id, token, name, label)
+                VALUES (:id, :token, :name, :label)
+                """),
+                module,
+            )
+
+        conn.execute(
+            text("DELETE FROM role_modules WHERE module_id = 1")
+        )
+        role_modules = [
+            {"role_id": 1, "module_id": 1, "token": str(uuid.uuid4())},
+            {"role_id": 2, "module_id": 1, "token": str(uuid.uuid4())},
+        ]
+        for rm in role_modules:
+            conn.execute(
+                text("""
+                INSERT IGNORE INTO role_modules (role_id, module_id, token)
+                VALUES (:role_id, :module_id, :token)
+                """),
+                rm,
+            )
 
     print("Seeding completado con éxito.")
 
