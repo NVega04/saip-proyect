@@ -59,6 +59,12 @@ interface Supply {
   status: string;
 }
 
+interface ProductLite {
+  id: number;
+  name: string;
+  status: string;
+}
+
 interface Unit {
   id: number;
   name: string;
@@ -74,6 +80,7 @@ interface IngredienteForm {
 interface RecipeForm {
   name: string;
   description: string;
+  product_id: string;
   yield_quantity: string;
   yield_unit_id: string;
   status: "active" | "inactive";
@@ -91,6 +98,7 @@ const emptyIngrediente = (): IngredienteForm => ({
 const emptyForm = (): RecipeForm => ({
   name: "",
   description: "",
+  product_id: "",
   yield_quantity: "1",
   yield_unit_id: "",
   status: "active",
@@ -132,6 +140,7 @@ export default function Recetas(): JSX.Element {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [products, setProducts] = useState<ProductLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -147,14 +156,19 @@ export default function Recetas(): JSX.Element {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [recRes, supRes, unitRes] = await Promise.all([
+        const [recRes, supRes, unitRes, prodRes] = await Promise.all([
           apiFetch("/recipes/"),
           apiFetch("/supplies/"),
           apiFetch("/units/"),
+          apiFetch("/products/"),
         ]);
         if (recRes.ok) setRecipes(await recRes.json());
         if (supRes.ok) setSupplies(await supRes.json());
         if (unitRes.ok) setUnits(await unitRes.json());
+        if (prodRes.ok) {
+          const data: ProductLite[] = await prodRes.json();
+          setProducts(data.filter((p) => p.status === "active"));
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -177,6 +191,7 @@ export default function Recetas(): JSX.Element {
     setForm({
       name: recipe.name,
       description: recipe.description ?? "",
+      product_id: recipe.product_id ? String(recipe.product_id) : "",
       yield_quantity: String(recipe.yield_quantity),
       yield_unit_id: String(recipe.yield_unit_id),
       status: recipe.status,
@@ -257,6 +272,7 @@ export default function Recetas(): JSX.Element {
   const buildPayload = () => ({
     name: form.name,
     description: form.description || null,
+    product_id: form.product_id ? parseInt(form.product_id) : null,
     yield_quantity: parseFloat(form.yield_quantity) || 1,
     yield_unit_id: parseInt(form.yield_unit_id),
     status: form.status,
@@ -493,6 +509,27 @@ export default function Recetas(): JSX.Element {
               </select>
               {errors.yield_unit_id && <span className="rcf__error">{errors.yield_unit_id}</span>}
             </div>
+          </div>
+
+          <div className="rcf__group">
+            <label className="rcf__label">Producto terminado</label>
+            <select
+              className="rcf__select"
+              value={form.product_id}
+              onChange={(e) => setField("product_id", e.target.value)}
+            >
+              <option value="">Sin producto terminado</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <span className="rcf__hint">
+              Al completar una orden de producción de esta receta se sumará el
+              rendimiento al stock de este producto. Sin producto asociado no se
+              registra stock en Productos terminados.
+            </span>
           </div>
 
           <div className="rcf__group">

@@ -659,6 +659,7 @@ class DeleteResponseRecipe(BaseModel):
 class RecipeBasic(BaseModel):
     id: int
     name: str
+    product_id: Optional[int] = None
     yield_quantity: float
     yield_unit: UnitBasic
 

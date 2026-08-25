@@ -19,6 +19,7 @@ interface UnitBasic {
 interface RecipeBasic {
   id: number;
   name: string;
+  product_id?: number | null;
   yield_quantity: number;
   yield_unit: UnitBasic;
 }
@@ -318,6 +319,12 @@ export default function Produccion(): JSX.Element {
         `Receta: "${order.recipe?.name}" (#${order.id})`,
         `Multiplicador: ×${order.quantity_multiplier}`,
         `Rendimiento esperado: ${order.total_yield} ${order.recipe?.yield_unit?.abbreviation ?? ""}`,
+        ...(order.recipe?.product_id
+          ? []
+          : [
+              "",
+              "⚠ Esta receta no tiene producto terminado asociado: no se incrementará el stock de Productos terminados.",
+            ]),
         "",
         "Se descontarán del inventario las materias primas de la receta. Esta acción no se puede deshacer.",
       ].join("\n"),
