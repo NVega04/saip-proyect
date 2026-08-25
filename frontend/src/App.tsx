@@ -13,7 +13,6 @@ import SupplyCategories from "./pages/supplycategories/SupplyCategories";
 import Supplies from "./pages/supplies/Supplies";
 import AcercaDe from "./pages/acercade/AcercaDe";
 import Ventas from "./pages/sales/Sales";
-import SalesHistory from "./pages/saleshistory/SalesHistory";
 import Inventory from "./pages/inventory/inventory";
 import ProtectedRoute from "./components/protectedroute/ProtectedRoute";
 import Perfil from "./pages/profile/Profile";
@@ -46,7 +45,6 @@ function App() {
             <Route path="/inventario" element={<ProtectedRoute module="inventory"><Inventory /></ProtectedRoute>} />
             <Route path="/proveedores" element={<ProtectedRoute module="providers"><Proveedores /> </ProtectedRoute>} />
             <Route path="/ventas" element={<ProtectedRoute module="sales"><Ventas /></ProtectedRoute>} />
-            <Route path="/ventas/historial" element={<ProtectedRoute module="sales"><SalesHistory /></ProtectedRoute>} />
             <Route path="/produccion"  element={<ProtectedRoute module="production"> <Produccion />  </ProtectedRoute>} />
             <Route path="/recetas"     element={<ProtectedRoute module="recipes">    <Recetas />     </ProtectedRoute>} />
             <Route path="/units"       element={<ProtectedRoute module="supplies">   <Units />       </ProtectedRoute>} />

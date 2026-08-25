@@ -118,8 +118,7 @@ const menuItems: MenuItem[] = [
     { id: "units",           label: "Unidades de medida",      path: "/units",    icon: Icon.units,     group: "produccion" },
   ]},
   { id: "ventas-comercial", label: "Ventas y Comercial", path: "#",           icon: Icon.sales,      group: "operaciones", subitems: [
-    { id: "sales",           label: "Registrar Venta",         path: "/ventas",   icon: Icon.sales,     group: "ventas" },
-    { id: "sales-history",   label: "Historial de Ventas",    path: "/ventas/historial", icon: Icon.sales, group: "ventas" },
+    { id: "sales",           label: "Ventas",                 path: "/ventas",   icon: Icon.sales,     group: "ventas" },
     { id: "products",        label: "Productos Terminados",    path: "/products", icon: Icon.products,  group: "ventas" },
     { id: "commercial-products", label: "Productos Comerciales", path: "/commercial-products", icon: Icon.products, group: "ventas" },
     { id: "product-categories",  label: "Categorías de productos", path: "/product-categories", icon: Icon.products, group: "ventas" },
