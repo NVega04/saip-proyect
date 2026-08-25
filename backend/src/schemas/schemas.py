@@ -604,7 +604,7 @@ class RecipeIngredientResponse(BaseModel):
 class RecipeCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
-    product_id: Optional[int] = None
+    product_id: int
     yield_quantity: float = 1
     yield_unit_id: int
     ingredients: list[RecipeIngredientCreate]
