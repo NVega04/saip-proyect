@@ -615,7 +615,7 @@ export default function Recetas(): JSX.Element {
               value={form.product_id}
               onChange={(e) => setField("product_id", e.target.value)}
             >
-              <option value="">Selecciona un producto</option>
+              <option value="">Selecciona un producto existente</option>
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
