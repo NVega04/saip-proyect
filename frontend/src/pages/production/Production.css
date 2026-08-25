@@ -167,3 +167,9 @@
   border-top: 1px solid var(--color-border, #e5e7eb);
   margin-top: 4px;
 }
+
+/* Acciones de fila deshabilitadas mientras hay una petición en vuelo */
+.saip-table__action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

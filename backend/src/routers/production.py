@@ -21,7 +21,10 @@ from src.schemas.schemas import (
     ProductionOrderCancelRequest,
     ProductionOrderResponse,
     ProductionOrderStatusChangeResponse,
+    ProductionSnapshotResponse,
     ProductionCompleteResponse,
+    SupplyBasic,
+    UnitBasic,
 )
 from src.dependencies import get_current_user
 
@@ -198,6 +201,18 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     ).all()
     supply_by_id = {s.id: s for s in locked_supplies}
 
+    # Datos planos (Pydantic) capturados bajo lock: la respuesta se construye
+    # con estos valores en lugar de objetos ORM, evitando validación de
+    # pydantic sobre instancias SQLModel tras el commit (causaba 500 post-commit).
+    supply_info_by_id: dict[int, tuple[SupplyBasic, UnitBasic]] = {}
+    for s in locked_supplies:
+        # La unidad del insumo ya fue validada como consistente arriba.
+        assert s.unit is not None
+        supply_info_by_id[s.id] = (
+            SupplyBasic(id=s.id, token=s.token, name=s.name, status=s.status),
+            UnitBasic(id=s.unit.id, name=s.unit.name, abbreviation=s.unit.abbreviation),
+        )
+
     # Validación completa de stock ANTES de mutar nada: si falta cualquier
     # insumo se aborta toda la operación sin descuentos parciales.
     insufficient = []
@@ -242,8 +257,11 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     product_quantity_added: Optional[float] = None
     product: Optional[Product] = None
     if recipe.product_id is not None:
-        product = session.get(Product, recipe.product_id)
-        if product and product.deleted_at is None:
+        candidate = session.get(Product, recipe.product_id)
+        # Solo se incrementa si el producto existe y no está eliminado; el
+        # payload de respuesta debe ser consistente (id + nombre juntos).
+        if candidate and candidate.deleted_at is None:
+            product = candidate
             product.available_quantity += order.total_yield
             product.updated_at = now
             product.updated_by = current_user.id
@@ -262,10 +280,25 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
         session.add(snapshot)
 
     # Un único commit: si algo falla antes de aquí, no se descuenta nada.
+    # Los ids de los snapshots quedan asignados tras el flush del commit.
     session.commit()
 
+    completed_snapshots = [
+        ProductionSnapshotResponse(
+            id=sn.id,
+            supply_id=sn.supply_id,
+            supply=supply_info_by_id[sn.supply_id][0],
+            quantity_used=sn.quantity_used,
+            unit_id=sn.unit_id,
+            unit=supply_info_by_id[sn.supply_id][1],
+            stock_before=sn.stock_before,
+            stock_after=sn.stock_after,
+        )
+        for sn in snapshots
+    ]
+
     return ProductionCompleteResponse(
-        message=f"Orden de producción #{order.id} completada correctamente. Se descontaron {len(snapshots)} insumo(s).",
+        message=f"Orden de producción #{order.id} completada correctamente. Se descontaron {len(completed_snapshots)} insumo(s).",
         id=order.id,
         status=order.status,
         total_yield=order.total_yield,
@@ -273,6 +306,6 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
         product_id=product.id if product else None,
         product_name=product_name,
         product_quantity_added=product_quantity_added,
-        snapshots=snapshots,
+        snapshots=completed_snapshots,
         completed_by=current_user.id,
     )
