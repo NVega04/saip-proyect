@@ -19,6 +19,7 @@ interface UnitBasic {
 interface RecipeBasic {
   id: number;
   name: string;
+  product_id?: number | null;
   yield_quantity: number;
   yield_unit: UnitBasic;
 }
@@ -89,6 +90,23 @@ const formatDate = (value: string | null): string => {
   });
 };
 
+// FastAPI envía detail como string (HTTPException) o como lista de errores
+// de validación (422); se normaliza a un mensaje legible para el toast.
+const formatErrorDetail = (detail: unknown): string => {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) =>
+        item && typeof item === "object" && "msg" in item
+          ? String((item as { msg: unknown }).msg)
+          : JSON.stringify(item)
+      )
+      .join("; ");
+  }
+  if (detail && typeof detail === "object") return JSON.stringify(detail);
+  return "";
+};
+
 const columns: ColumnDef<ProductionOrder>[] = [
   {
     key: "recipe",
@@ -135,9 +153,28 @@ export default function Produccion(): JSX.Element {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<OrderForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
+  // Id de la orden con acción en vuelo: bloquea reintentos (doble clic) y
+  // deshabilita los botones de esa fila hasta que la petición termine.
+  const [actionInProgressId, setActionInProgressId] = useState<number | null>(
+    null
+  );
+  const [creating, setCreating] = useState(false);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
+
+  const refetchOrders = async (): Promise<boolean> => {
+    try {
+      const res = await apiFetch("/production/orders/");
+      if (res.ok) {
+        setOrders(await res.json());
+        return true;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    return false;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -206,6 +243,8 @@ export default function Produccion(): JSX.Element {
       showAlert("warning", "Completa los campos obligatorios.");
       return;
     }
+    if (creating) return;
+    setCreating(true);
 
     try {
       const response = await apiFetch("/production/orders/", {
@@ -220,16 +259,21 @@ export default function Produccion(): JSX.Element {
 
       if (!response.ok) {
         const err = await response.json();
-        showAlert("error", err.detail || "Error al registrar la orden de producción");
+        showAlert(
+          "error",
+          formatErrorDetail(err.detail) ||
+            "Error al registrar la orden de producción"
+        );
         return;
       }
 
-      const created: ProductionOrder = await response.json();
-      setOrders((prev) => [...prev, created]);
+      await refetchOrders();
       showAlert("success", "Orden de producción registrada correctamente.");
       handleCerrar();
     } catch {
       showAlert("error", "Error de conexión con el servidor.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -240,6 +284,7 @@ export default function Produccion(): JSX.Element {
       confirmText: "Iniciar",
       cancelText: "Cancelar",
       onConfirm: async () => {
+        setActionInProgressId(order.id);
         try {
           const response = await apiFetch(`/production/orders/${order.id}/start`, {
             method: "PATCH",
@@ -247,21 +292,20 @@ export default function Produccion(): JSX.Element {
 
           if (!response.ok) {
             const err = await response.json();
-            showAlert("error", err.detail || "Error al iniciar la orden");
+            showAlert(
+              "error",
+              formatErrorDetail(err.detail) || "Error al iniciar la orden"
+            );
             return;
           }
 
           const result = await response.json();
-          setOrders((prev) =>
-            prev.map((o) =>
-              o.id === order.id
-                ? { ...o, status: "in_progress", started_at: result.changed_at }
-                : o
-            )
-          );
+          await refetchOrders();
           showAlert("success", result.message || "Producción iniciada correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
+        } finally {
+          setActionInProgressId(null);
         }
       },
     });
@@ -274,12 +318,19 @@ export default function Produccion(): JSX.Element {
         `Receta: "${order.recipe?.name}" (#${order.id})`,
         `Multiplicador: ×${order.quantity_multiplier}`,
         `Rendimiento esperado: ${order.total_yield} ${order.recipe?.yield_unit?.abbreviation ?? ""}`,
+        ...(order.recipe?.product_id
+          ? []
+          : [
+              "",
+              "⚠ Esta receta no tiene producto terminado asociado: no se incrementará el stock de Productos terminados.",
+            ]),
         "",
         "Se descontarán del inventario las materias primas de la receta. Esta acción no se puede deshacer.",
       ].join("\n"),
       confirmText: "Confirmar",
       cancelText: "Volver",
       onConfirm: async () => {
+        setActionInProgressId(order.id);
         try {
           const response = await apiFetch(
             `/production/orders/${order.id}/complete`,
@@ -288,21 +339,20 @@ export default function Produccion(): JSX.Element {
 
           if (!response.ok) {
             const err = await response.json();
-            showAlert("error", err.detail || "Error al completar la producción");
+            showAlert(
+              "error",
+              formatErrorDetail(err.detail) || "Error al completar la producción"
+            );
             return;
           }
 
           const result = await response.json();
-          setOrders((prev) =>
-            prev.map((o) =>
-              o.id === order.id
-                ? { ...o, status: "completed", completed_at: result.completed_at }
-                : o
-            )
-          );
+          await refetchOrders();
           showAlert("success", result.message || "Producción completada correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
+        } finally {
+          setActionInProgressId(null);
         }
       },
     });
@@ -315,6 +365,7 @@ export default function Produccion(): JSX.Element {
       confirmText: "Cancelar orden",
       cancelText: "Volver",
       onConfirm: async () => {
+        setActionInProgressId(order.id);
         try {
           const response = await apiFetch(`/production/orders/${order.id}/cancel`, {
             method: "PATCH",
@@ -323,21 +374,20 @@ export default function Produccion(): JSX.Element {
 
           if (!response.ok) {
             const err = await response.json();
-            showAlert("error", err.detail || "Error al cancelar la orden");
+            showAlert(
+              "error",
+              formatErrorDetail(err.detail) || "Error al cancelar la orden"
+            );
             return;
           }
 
           const result = await response.json();
-          setOrders((prev) =>
-            prev.map((o) =>
-              o.id === order.id
-                ? { ...o, status: "cancelled", cancelled_at: result.changed_at }
-                : o
-            )
-          );
+          await refetchOrders();
           showAlert("success", result.message || "Orden cancelada correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
+        } finally {
+          setActionInProgressId(null);
         }
       },
     });
@@ -374,13 +424,16 @@ export default function Produccion(): JSX.Element {
             Nueva orden
           </Button>
         }
-        renderActions={(row) => (
-          <div className="saip-table__actions">
+        renderActions={(row) => {
+          const busy = actionInProgressId === row.id;
+          return (
+            <div className="saip-table__actions">
             {row.status === "pending" && (
               <>
                 <button
                   className="saip-table__action-btn"
                   title="Iniciar producción"
+                  disabled={busy}
                   onClick={() => handleIniciar(row)}
                 >
                   <svg
@@ -397,6 +450,7 @@ export default function Produccion(): JSX.Element {
                 <button
                   className="saip-table__action-btn saip-table__action-btn--danger"
                   title="Cancelar orden"
+                  disabled={busy}
                   onClick={() => handleCancelar(row)}
                 >
                   <svg
@@ -419,6 +473,7 @@ export default function Produccion(): JSX.Element {
                 <button
                   className="saip-table__action-btn"
                   title="Confirmar producción"
+                  disabled={busy}
                   onClick={() => handleConfirmar(row)}
                 >
                   <svg
@@ -435,6 +490,7 @@ export default function Produccion(): JSX.Element {
                 <button
                   className="saip-table__action-btn saip-table__action-btn--danger"
                   title="Cancelar orden"
+                  disabled={busy}
                   onClick={() => handleCancelar(row)}
                 >
                   <svg
@@ -452,8 +508,9 @@ export default function Produccion(): JSX.Element {
                 </button>
               </>
             )}
-          </div>
-        )}
+            </div>
+          );
+        }}
       />
 
       <Modal
@@ -540,11 +597,11 @@ export default function Produccion(): JSX.Element {
           </div>
 
           <div className="prd__actions">
-            <Button variant="secondary" type="button" onClick={handleCerrar}>
+            <Button variant="secondary" type="button" onClick={handleCerrar} disabled={creating}>
               Cancelar
             </Button>
-            <Button variant="primary" type="submit">
-              Registrar orden
+            <Button variant="primary" type="submit" disabled={creating}>
+              {creating ? "Registrando..." : "Registrar orden"}
             </Button>
           </div>
         </form>

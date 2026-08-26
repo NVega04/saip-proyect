@@ -59,6 +59,12 @@ interface Supply {
   status: string;
 }
 
+interface ProductLite {
+  id: number;
+  name: string;
+  status: string;
+}
+
 interface Unit {
   id: number;
   name: string;
@@ -74,10 +80,17 @@ interface IngredienteForm {
 interface RecipeForm {
   name: string;
   description: string;
+  product_id: string;
   yield_quantity: string;
   yield_unit_id: string;
   status: "active" | "inactive";
   ingredients: IngredienteForm[];
+}
+
+interface ProductMiniForm {
+  name: string;
+  description: string;
+  unit_id: string;
 }
 
 type FormErrors = Partial<Record<keyof RecipeForm | "ingredientes_list", string>>;
@@ -91,6 +104,7 @@ const emptyIngrediente = (): IngredienteForm => ({
 const emptyForm = (): RecipeForm => ({
   name: "",
   description: "",
+  product_id: "",
   yield_quantity: "1",
   yield_unit_id: "",
   status: "active",
@@ -131,6 +145,7 @@ export default function Recetas(): JSX.Element {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [products, setProducts] = useState<ProductLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -138,6 +153,16 @@ export default function Recetas(): JSX.Element {
   const [viewTarget, setViewTarget] = useState<Recipe | null>(null);
   const [form, setForm] = useState<RecipeForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [productForm, setProductForm] = useState<ProductMiniForm>({
+    name: "",
+    description: "",
+    unit_id: "",
+  });
+  const [productErrors, setProductErrors] = useState<
+    Partial<Record<keyof ProductMiniForm, string>>
+  >({});
+  const [creatingProduct, setCreatingProduct] = useState(false);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
@@ -146,14 +171,19 @@ export default function Recetas(): JSX.Element {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [recRes, supRes, unitRes] = await Promise.all([
+        const [recRes, supRes, unitRes, prodRes] = await Promise.all([
           apiFetch("/recipes/"),
           apiFetch("/supplies/"),
           apiFetch("/units/"),
+          apiFetch("/products/"),
         ]);
         if (recRes.ok) setRecipes(await recRes.json());
         if (supRes.ok) setSupplies(await supRes.json());
         if (unitRes.ok) setUnits(await unitRes.json());
+        if (prodRes.ok) {
+          const data: ProductLite[] = await prodRes.json();
+          setProducts(data.filter((p) => p.status === "active"));
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -176,6 +206,7 @@ export default function Recetas(): JSX.Element {
     setForm({
       name: recipe.name,
       description: recipe.description ?? "",
+      product_id: recipe.product_id ? String(recipe.product_id) : "",
       yield_quantity: String(recipe.yield_quantity),
       yield_unit_id: String(recipe.yield_unit_id),
       status: recipe.status,
@@ -243,6 +274,7 @@ export default function Recetas(): JSX.Element {
   const validate = (): boolean => {
     const e: FormErrors = {};
     if (!form.name.trim()) e.name = "El nombre es requerido";
+    if (!form.product_id) e.product_id = "Selecciona un producto terminado";
     if (!form.yield_unit_id) e.yield_unit_id = "Selecciona una unidad";
     const ingValidos = form.ingredients.every(
       (ing) => ing.supply_id && ing.quantity && Number(ing.quantity) > 0 && ing.unit_id
@@ -256,6 +288,7 @@ export default function Recetas(): JSX.Element {
   const buildPayload = () => ({
     name: form.name,
     description: form.description || null,
+    product_id: form.product_id ? parseInt(form.product_id) : null,
     yield_quantity: parseFloat(form.yield_quantity) || 1,
     yield_unit_id: parseInt(form.yield_unit_id),
     status: form.status,
@@ -338,6 +371,70 @@ export default function Recetas(): JSX.Element {
         }
       },
     });
+  };
+
+  const handleAbrirProducto = () => {
+    setProductForm({ name: "", description: "", unit_id: "" });
+    setProductErrors({});
+    setProductModalOpen(true);
+  };
+
+  const handleCerrarProducto = () => {
+    setProductModalOpen(false);
+  };
+
+  const setProductoField = (
+    field: keyof ProductMiniForm,
+    value: string
+  ) => {
+    setProductForm((prev) => ({ ...prev, [field]: value }));
+    setProductErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleCrearProducto = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const pe: Partial<Record<keyof ProductMiniForm, string>> = {};
+    if (!productForm.name.trim()) pe.name = "El nombre es requerido";
+    if (!productForm.unit_id) pe.unit_id = "Selecciona una unidad";
+    setProductErrors(pe);
+    if (Object.keys(pe).length > 0) return;
+
+    if (creatingProduct) return;
+    setCreatingProduct(true);
+
+    try {
+      const response = await apiFetch("/products/", {
+        method: "POST",
+        body: JSON.stringify({
+          name: productForm.name.trim(),
+          description: productForm.description || null,
+          unit_id: parseInt(productForm.unit_id),
+          available_quantity: 0,
+          min_stock: 0,
+          max_stock: 0,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        showAlert("error", err.detail || "Error al crear el producto");
+        return;
+      }
+
+      const created: ProductLite = await response.json();
+      setProducts((prev) => [...prev, created]);
+      setField("product_id", String(created.id));
+      showAlert(
+        "success",
+        `Producto "${created.name}" creado y seleccionado.`
+      );
+      setProductModalOpen(false);
+    } catch {
+      showAlert("error", "Error de conexion con el servidor.");
+    } finally {
+      setCreatingProduct(false);
+    }
   };
 
   if (loading) {
@@ -495,6 +592,44 @@ export default function Recetas(): JSX.Element {
           </div>
 
           <div className="rcf__group">
+            <div className="rcf__ing-header">
+              <label className="rcf__label">
+                Producto terminado <span className="rcf__required">*</span>
+              </label>
+              <button
+                type="button"
+                className="rcf__add-ing-btn"
+                onClick={handleAbrirProducto}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Crear producto
+              </button>
+            </div>
+            <select
+              className={`rcf__select ${errors.product_id ? "rcf__input--error" : ""}`}
+              value={form.product_id}
+              onChange={(e) => setField("product_id", e.target.value)}
+            >
+              <option value="">Selecciona un producto existente</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            {errors.product_id && <span className="rcf__error">{errors.product_id}</span>}
+            <span className="rcf__hint">
+              Obligatorio: al completar una orden de producción de esta receta,
+              el rendimiento se suma al stock de este producto en Productos
+              terminados.
+            </span>
+          </div>
+
+          <div className="rcf__group">
             <label className="rcf__label">Estado</label>
             <select
               className="rcf__select"
@@ -604,6 +739,71 @@ export default function Recetas(): JSX.Element {
             </Button>
             <Button variant="primary" type="submit">
               {editTarget ? "Guardar cambios" : "Crear receta"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={productModalOpen}
+        onClose={handleCerrarProducto}
+        title="Nuevo producto terminado"
+        width="440px"
+      >
+        <form className="rcf" onSubmit={handleCrearProducto}>
+          <div className="rcf__group">
+            <label className="rcf__label">
+              Nombre <span className="rcf__required">*</span>
+            </label>
+            <input
+              className={`rcf__input ${productErrors.name ? "rcf__input--error" : ""}`}
+              placeholder="Ej: Pan de chocolate"
+              value={productForm.name}
+              onChange={(e) => setProductoField("name", e.target.value)}
+            />
+            {productErrors.name && (
+              <span className="rcf__error">{productErrors.name}</span>
+            )}
+          </div>
+
+          <div className="rcf__group">
+            <label className="rcf__label">
+              Unidad de medida <span className="rcf__required">*</span>
+            </label>
+            <select
+              className={`rcf__select ${productErrors.unit_id ? "rcf__input--error" : ""}`}
+              value={productForm.unit_id}
+              onChange={(e) => setProductoField("unit_id", e.target.value)}
+            >
+              <option value="">Selecciona una unidad</option>
+              {units.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.abbreviation})
+                </option>
+              ))}
+            </select>
+            {productErrors.unit_id && (
+              <span className="rcf__error">{productErrors.unit_id}</span>
+            )}
+          </div>
+
+          <div className="rcf__group">
+            <label className="rcf__label">Descripción</label>
+            <textarea
+              className="rcf__textarea"
+              placeholder="Describe brevemente el producto..."
+              rows={2}
+              value={productForm.description}
+              onChange={(e) => setProductoField("description", e.target.value)}
+            />
+          </div>
+
+          <div className="rcf__actions">
+            <Button variant="secondary" type="button" onClick={handleCerrarProducto} disabled={creatingProduct}>
+              Cancelar
+            </Button>
+            <Button variant="primary" type="submit" disabled={creatingProduct}>
+              {creatingProduct ? "Creando..." : "Crear producto"}
             </Button>
           </div>
         </form>

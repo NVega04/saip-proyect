@@ -604,7 +604,7 @@ class RecipeIngredientResponse(BaseModel):
 class RecipeCreate(UppercaseMixin, BaseModel):
     name: str
     description: Optional[str] = None
-    product_id: Optional[int] = None
+    product_id: int
     yield_quantity: float = 1
     yield_unit_id: int
     ingredients: list[RecipeIngredientCreate]
@@ -659,6 +659,7 @@ class DeleteResponseRecipe(BaseModel):
 class RecipeBasic(BaseModel):
     id: int
     name: str
+    product_id: Optional[int] = None
     yield_quantity: float
     yield_unit: UnitBasic
 
@@ -747,6 +748,9 @@ class ProductionCompleteResponse(BaseModel):
     product_quantity_added: Optional[float] = None
     snapshots: list[ProductionSnapshotResponse]
     completed_by: int
+
+    class Config:
+        from_attributes = True
 
 class SaleItemCreate(BaseModel):
     item_type: ItemType
