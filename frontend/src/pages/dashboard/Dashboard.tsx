@@ -766,7 +766,6 @@ export default function Dashboard(): JSX.Element {
                             ))}
                           </Pie>
                           <Tooltip contentStyle={tooltipStyle} />
-                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
                     );
@@ -810,7 +809,7 @@ export default function Dashboard(): JSX.Element {
                         margin={{ left: 10, right: 30 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
-                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Unidades / Órdenes", position: "insideBottom", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} />
                         <YAxis
                           dataKey="nombre"
                           type="category"
@@ -819,8 +818,8 @@ export default function Dashboard(): JSX.Element {
                         />
                         <Tooltip
                           contentStyle={tooltipStyle}
-                          formatter={(value: number, name: string) =>
-                            name === "unidades"
+                          formatter={(value: number, name: string, props: { dataKey?: string | number }) =>
+                            props.dataKey === "unidades"
                               ? [formatQty(value), "Unidades"]
                               : [value, "Órdenes"]
                           }
