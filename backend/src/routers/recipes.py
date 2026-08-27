@@ -4,7 +4,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from src.database import get_session
-from src.models.models import Recipe, RecipeIngredient, Unit, Supply, User
+from src.models.models import Recipe, RecipeIngredient, Unit, Supply, User, RecipeStatus
 from src.schemas.schemas import (
     RecipeCreate,
     RecipeUpdate,

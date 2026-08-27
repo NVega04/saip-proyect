@@ -6,5 +6,15 @@ export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: ['saip.lat']
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          recharts: ['recharts'],
+          react: ['react', 'react-dom', 'react-router-dom']
+        }
+      }
+    }
   }
 })
