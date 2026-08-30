@@ -1,0 +1,2 @@
+{"detail":"Ya existe un proveedor con el NIT '800123456-1'."}
+[HTTP 409]

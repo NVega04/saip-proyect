@@ -1,0 +1,2 @@
+{"id":35,"name":"QA POSTMAN","description":"ROL CREADO DESDE POSTMAN","created_at":"2026-08-27T20:52:12"}
+[HTTP 201]
