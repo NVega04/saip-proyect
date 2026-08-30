@@ -1,0 +1,42 @@
+PRUEBA
+=== CASO 21 POSITIVO: POST /sales/ (venta válida) ===
+ESTADO_PREVIO
+21.1 - stock ANTES de la venta:
+id	name	available_quantity
+3	CROISSANT MANTEQUILLA	200
+VERIFICACION
+21.3 - Venta insertada:
+venta_id	status	user_id	vendedor	sale_date
+4	COMPLETED	1	admin@saip.com	2026-08-28 00:49:48
+VERIFICACION
+21.3 - Items de la venta (relación sale_items -> sales -> products):
+sale_id	item_name	quantity	stock_restante
+4	CROISSANT MANTEQUILLA	5	195
+VERIFICACION
+21.3 - Movimiento de inventario registrado (consistencia stock):
+item_type	item_id	movement_type	quantity	stock_before	stock_after	reference_type	reference_id
+PRODUCT	3	SALE	5	200	195	sale	4
+VERIFICACION
+21.4 - Verificación POST-anulación (venta ANNULLED, stock restaurado):
+id	status	stock_restaurado
+4	ANNULLED	200
+RESULTADO
+21 POSITIVO - ROLLBACK aplicado, sin datos residuales.
+PRUEBA
+=== CASO 22 NEGATIVO: POST /sales/ (stock insuficiente) ===
+ESTADO_PREVIO
+22.1 - stock disponible del producto 3:
+id	name	available_quantity
+3	CROISSANT MANTEQUILLA	200
+CONTROL	stock_disponible	solicitado	decision
+22.2 - control: stock@	200	100000	SUPERA STOCK -> SE DEBE RECHAZAR
+VERIFICACION
+22.3 - No debe existir venta con stock insuficiente persistida:
+ventas_fallidas_persistidas
+0
+VERIFICACION
+22.4 - stock del producto 3 intacto (ROLLBACK correcto):
+id	name	available_quantity
+3	CROISSANT MANTEQUILLA	200
+FIN
+=== FIN EVIDENCIA 04 (VENTAS TRANSACCIONAL) ===
