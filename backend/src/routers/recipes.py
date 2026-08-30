@@ -4,7 +4,17 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from src.database import get_session
-from src.models.models import Recipe, RecipeIngredient, Unit, Supply, User, RecipeStatus
+
+from src.models.models import (
+    Recipe,
+    RecipeIngredient,
+    RecipeStatus,
+    Unit,
+    Supply,
+    User,
+    Product,
+)
+
 from src.schemas.schemas import (
     RecipeCreate,
     RecipeUpdate,
@@ -50,11 +60,11 @@ def create(data: RecipeCreate, session: Session = Depends(get_session), current_
     if not unit or unit.deleted_at is not None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.yield_unit_id}' no existe.")
 
-    if data.product_id is not None:
-        from src.models.models import Product
-        product = session.get(Product, data.product_id)
-        if not product or product.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El producto con id '{data.product_id}' no existe.")
+    # El producto terminado es obligatorio: toda receta produce un producto
+    # que se incrementa al completar la orden de producción.
+    product = session.get(Product, data.product_id)
+    if not product or product.deleted_at is not None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El producto con id '{data.product_id}' no existe.")
 
     for ing in data.ingredients:
         supply = session.get(Supply, ing.supply_id)
@@ -109,10 +119,15 @@ def update(recipe_id: int, data: RecipeUpdate, session: Session = Depends(get_se
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.yield_unit_id}' no existe.")
 
     if data.product_id is not None:
-        from src.models.models import Product
         product = session.get(Product, data.product_id)
         if not product or product.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El producto con id '{data.product_id}' no existe.")
+    elif "product_id" in data.model_dump(exclude_unset=True):
+        # Se envió product_id explícitamente como null: la vinculación es obligatoria.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El producto terminado es obligatorio: no se puede desvincular el producto de la receta.",
+        )
 
     update_fields = data.model_dump(exclude_unset=True, exclude={"ingredients"})
     for field, value in update_fields.items():

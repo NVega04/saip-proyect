@@ -61,3 +61,4 @@ Como encargado de producción, quiero registrar la producción diaria mediante �
 - La finalización con descuento de insumos (CA-013.3) se implementa junto con HU-012 / RF-012.
 
 Detalle completo de endpoints y reglas: ver `_docs/RFs/RF013_Registro_de_Producción_Diaria.md`.
+- Bugfix de robustez en el ciclo de vida: el frontend deshabilita las acciones de una orden mientras su petición está en vuelo (evita dobles clics que terminaban en 409) y re-obtiene la lista desde el servidor tras cada operación, de modo que la tabla siempre refleja el estado real sin recargar manualmente.

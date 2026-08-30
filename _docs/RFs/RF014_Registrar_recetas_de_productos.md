@@ -17,7 +17,7 @@
 
 ## Descripción
 
-El sistema debe permitir registrar recetas de productos con su lista de ingredientes (insumos, cantidades y unidades). Cada receta puede asociarse opcionalmente a un producto terminado y define un rendimiento con su unidad de medida.
+El sistema debe permitir registrar recetas de productos con su lista de ingredientes (insumos, cantidades y unidades). Cada receta se asocia obligatoriamente a un producto terminado y define un rendimiento con su unidad de medida.
 
 ---
 
@@ -27,7 +27,7 @@ El sistema debe permitir registrar recetas de productos con su lista de ingredie
 |-------|------|-------------|--------------|
 | `name` | Texto | Sí | Máximo 150 caracteres |
 | `description` | Texto | No | Máximo 500 caracteres |
-| `product_id` | Entero | No | Debe existir en `products` (opcional) |
+| `product_id` | Entero | Sí | Debe existir en `products` |
 | `yield_quantity` | Decimal | Sí | Por defecto 1 |
 | `yield_unit_id` | Entero | Sí | Debe existir en `units` |
 | `ingredients` | Lista | Sí | Arreglo de `{ supply_id, quantity, unit_id, notes }` |
@@ -71,5 +71,11 @@ El sistema debe permitir registrar recetas de productos con su lista de ingredie
 
 - **RN-043**: La receta debe tener al menos un ingrediente para poder crearse.
 - **RN-044**: Al actualizar una receta, los ingredientes se reemplazan completamente.
-- **RN-045**: La asociación con producto es opcional.
+- **RN-045**: La asociación con producto terminado es obligatoria; no puede desvincularse posteriormente (PATCH con `product_id: null` responde 400).
 - **RN-046**: Toda creación/actualización se registra en auditoría.
+
+---
+
+## Implementación
+
+**Producto terminado obligatorio + creación inline**: el formulario de recetas exige seleccionar el producto terminado (crear y editar) y ofrece un botón "Crear producto" que abre un mini-modal para registrar el producto (nombre, unidad, descripción) sin salir de la página; al crearlo queda autoseleccionado en la receta. El backend valida la existencia del producto en `POST /recipes/` (requerido) y rechaza desvincularlo vía `PATCH`. Al completar una orden de producción, el rendimiento se suma al stock del producto vinculado (ver RF-012).
