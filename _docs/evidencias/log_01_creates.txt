@@ -1,0 +1,122 @@
+PRUEBA
+=== CASO 1: POST /users/ ===
+VERIFICACION
+1.1 POSITIVO - usuario insertado:
+id	first_name	last_name	email	role_id	rol	status
+38	JUAN	PEREZ	qa.juan.perez@saip.com	1	Admin	ACTIVE
+ERROR 1452 (23000) at line 32: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`users`, CONSTRAINT `users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`))
+VERIFICACION
+1.2 NEGATIVO - NO debe existir fila (FK inválida):
+filas_con_fk_invalida
+0
+PRUEBA
+=== CASO 2: POST /roles/ ===
+VERIFICACION
+2.1 POSITIVO - rol insertado:
+id	name	description	status
+30	JEFE DE ALMACEN	ROLE DE PRUEBA QA	ACTIVE
+VERIFICACION
+2.2 NEGATIVO - solo debe existir 1 rol Admin (sin duplicado):
+name	ocurrencias
+Admin	1
+PRUEBA
+=== CASO 3: POST /providers/ ===
+VERIFICACION
+3.1 POSITIVO - proveedor insertado:
+id	company	nit	email	status
+26	PROVEEDOR QA TEST	999888777-1	qa.proveedor@saip.com	ACTIVE
+ERROR 1062 (23000) at line 76: Duplicate entry '800123456-1' for key 'providers.ix_providers_nit'
+VERIFICACION
+3.2 NEGATIVO - sin duplicado de nit:
+nit	ocurrencias
+800123456-1	1
+PRUEBA
+=== CASO 4: POST /providers/{id}/contacts/ ===
+VERIFICACION
+4.1 POSITIVO - contacto insertado con FK correcta:
+id	name	email	proveedor	proveedor_id
+26	CONTACTO QA	contacto.qa@saip.com	HARINERA DEL VALLE S.A.	1
+ERROR 1452 (23000) at line 101: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`provider_contacts`, CONSTRAINT `provider_contacts_ibfk_2` FOREIGN KEY (`provider_id`) REFERENCES `providers` (`id`))
+ERROR 1048 (23000) at line 123: Column 'abbreviation' cannot be null
+VERIFICACION
+4.2 NEGATIVO - sin contacto con FK inválida:
+filas_con_fk_invalida
+0
+PRUEBA
+=== CASO 5: POST /units/ ===
+VERIFICACION
+5.1 POSITIVO - unidad insertada:
+id	name	abbreviation	quantity
+24	QUINTAL	qq	100
+ERROR 1452 (23000) at line 148: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`products`, CONSTRAINT `products_ibfk_3` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`))
+VERIFICACION
+5.2 NEGATIVO - no debe persistir unidad sin abbreviation:
+filas_sin_abrev
+0
+PRUEBA
+=== CASO 6: POST /products/ ===
+VERIFICACION
+6.1 POSITIVO - producto insertado con FK unidad:
+id	name	unit_id	unidad	available_quantity	status
+35	PAN TRADICIONAL QA	9	UNIDAD	500	active
+ERROR 1452 (23000) at line 174: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`supplies`, CONSTRAINT `supplies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `supply_categories` (`id`))
+VERIFICACION
+6.2 NEGATIVO - sin producto con FK inválida:
+filas_con_fk_invalida
+0
+PRUEBA
+=== CASO 7: POST /supplies/ ===
+VERIFICACION
+7.1 POSITIVO - insumo insertado con FKs:
+id	name	category_id	categoria	unit_id	unidad	available_quantity
+25	AZUCAR BLANCA QA	1	HARINAS Y ALMIDONES	1	KILOGRAMO	200
+VERIFICACION
+7.2 NEGATIVO - sin insumo con FK inválida:
+filas_con_fk_invalida
+0
+PRUEBA
+=== CASO 8: POST /supply-categories/ ===
+VERIFICACION
+8.1 POSITIVO - categoria de insumo insertada:
+id	name	status
+25	ADITIVOS DE PRUEBA QA	active
+ERROR 1062 (23000) at line 196: Duplicate entry 'ADITIVOS' for key 'supply_categories.name'
+ERROR 1062 (23000) at line 218: Duplicate entry 'BEBIDAS' for key 'product_categories.name'
+VERIFICACION
+8.2 NEGATIVO - sin duplicado de categoria:
+name	ocurrencias
+ADITIVOS	1
+PRUEBA
+=== CASO 9: POST /product-categories/ ===
+VERIFICACION
+9.1 POSITIVO - categoria de producto insertada:
+id	name	status
+25	PANADERIA QA	active
+VERIFICACION
+9.2 NEGATIVO - sin duplicado de categoria:
+name	ocurrencias
+BEBIDAS	1
+PRUEBA
+=== CASO 10: POST /commercial-products/ ===
+VERIFICACION
+10.1 POSITIVO - producto comercial insertado con FKs:
+id	name	category_id	categoria	unit_id	unidad	sale_price
+25	BEBIDA DE PRUEBA QA	9	ACEITES Y GRASAS	9	UNIDAD	3000
+ERROR 1452 (23000) at line 244: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`commercial_products`, CONSTRAINT `commercial_products_ibfk_4` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`))
+VERIFICACION
+10.2 NEGATIVO - sin producto comercial con FK inválida:
+filas_con_fk_invalida
+0
+PRUEBA
+=== CASO 11: POST /recipes/ ===
+VERIFICACION
+11.1 POSITIVO - receta insertada con FK y su ingrediente:
+id	name	product_id	producto	yield_quantity	supply_id	insumo	cant_insumo
+33	RECETA PAN QA	3	CROISSANT MANTEQUILLA	10	1	HARINA DE TRIGO TODO USO	2
+ERROR 1452 (23000) at line 275: Cannot add or update a child row: a foreign key constraint fails (`db_saip_proyect`.`recipes`, CONSTRAINT `recipes_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`))
+VERIFICACION
+11.2 NEGATIVO - sin receta con FK inválida:
+filas_con_fk_invalida
+0
+FIN
+=== FIN EVIDENCIA 01 (CREATE) ===
