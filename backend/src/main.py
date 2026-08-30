@@ -19,6 +19,7 @@ from src.routers.commercial_products import router as commercial_products_router
 from src.routers.recipes import router as recipes_router
 from src.routers.production import router as production_router
 from src.routers.sales import router as sales_router
+from src.routers.stats import router as stats_router
 
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -62,3 +63,4 @@ app.include_router(commercial_products_router)
 app.include_router(recipes_router)
 app.include_router(production_router)
 app.include_router(sales_router)
+app.include_router(stats_router)
