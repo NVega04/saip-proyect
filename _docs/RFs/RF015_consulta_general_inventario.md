@@ -72,8 +72,8 @@ El sistema debe ofrecer una vista visual consolidada del inventario para consult
 
 ## Reglas de negocio
 
-- **RN-082**: Se considera bajo stock cuando `available_quantity <= min_stock`.
-- **RN-083**: Se considera sobre stock cuando `available_quantity > max_stock`.
-- **RN-084**: Solo se incluyen ítems activos y no eliminados (`deleted_at IS NULL`).
-- **RN-085**: El informe respeta exactamente los filtros aplicados en la consulta.
-- **RN-086**: El acceso al módulo se restringe por módulo `inventory` en los roles.
+- **RN-087**: Se considera bajo stock cuando `available_quantity <= min_stock`.
+- **RN-088**: Se considera sobre stock cuando `available_quantity > max_stock`.
+- **RN-089**: Solo se incluyen ítems activos y no eliminados (`deleted_at IS NULL`).
+- **RN-090**: El informe respeta exactamente los filtros aplicados en la consulta.
+- **RN-091**: El acceso al módulo se restringe por módulo `inventory` en los roles.

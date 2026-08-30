@@ -503,7 +503,30 @@ def _vista_con_boton_crear(driver, vista: str, ruta: str, texto_boton: str):
 
 
 def vista_05_inventario(driver):
-    _vista_en_construccion(driver, "05_Inventario", "/inventario")
+    vista, ruta = "05_Inventario", "/inventario"
+    neg_sin_sesion(driver, vista, ruta)
+    try:
+        restore_session(driver)
+        goto(driver, ruta)
+        WebDriverWait(driver, WAIT_TIMEOUT).until(
+            EC.invisibility_of_element_located((By.CSS_SELECTOR, ".saip-loading"))
+        )
+        filtro_tipo = wait_visible(driver, (By.CSS_SELECTOR, ".inventory__select"))
+        tabla       = wait_visible(driver, (By.CSS_SELECTOR, ".inventory__table"))
+        boton_inf   = wait_visible(driver, (By.XPATH, "//button[contains(., 'Descargar informe')]"))
+        stats       = driver.find_elements(By.CSS_SELECTOR, ".inventory__stat")
+        shot = screenshot(driver, f"{vista}_positivo")
+        ok = (
+            filtro_tipo.is_displayed()
+            and tabla.is_displayed()
+            and boton_inf.is_displayed()
+            and len(stats) == 3
+        )
+        record(vista, ruta, "POSITIVO", ok,
+               "Vista inventario carga: filtros, tabla, informe y resumen visible", shot)
+    except Exception as e:
+        shot = screenshot(driver, f"{vista}_positivo_error")
+        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
 
 
 def vista_06_movimientos(driver):
@@ -512,12 +535,44 @@ def vista_06_movimientos(driver):
 
 
 def vista_07_ventas(driver):
-    _vista_en_construccion(driver, "07_Ventas", "/ventas")
+    vista, ruta = "07_Ventas", "/ventas"
+    neg_sin_sesion(driver, vista, ruta)
+    try:
+        restore_session(driver)
+        goto(driver, ruta)
+        WebDriverWait(driver, WAIT_TIMEOUT).until(
+            EC.invisibility_of_element_located((By.CSS_SELECTOR, ".saip-loading"))
+        )
+        selector  = wait_visible(driver, (By.XPATH, "//h2[contains(., 'Seleccionar producto')]"))
+        historial = wait_visible(driver, (By.XPATH, "//h2[contains(., 'Historial de ventas')]"))
+        shot = screenshot(driver, f"{vista}_positivo")
+        record(vista, ruta, "POSITIVO",
+               selector.is_displayed() and historial.is_displayed(),
+               "Vista Ventas carga: registro de venta e historial visibles", shot)
+    except Exception as e:
+        shot = screenshot(driver, f"{vista}_positivo_error")
+        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
 
 
 def vista_08_nueva_venta(driver):
-    # Ruta original /ventas/nueva no existe -> adaptada a /ventas/historial
-    _vista_en_construccion(driver, "08_NuevaVenta_adaptada_historial", "/ventas/historial")
+    # Ruta original /ventas/nueva no existe -> adaptada a /ventas (seccion carrito)
+    vista, ruta = "08_NuevaVenta_adaptada_ventas", "/ventas"
+    neg_sin_sesion(driver, vista, ruta)
+    try:
+        restore_session(driver)
+        goto(driver, ruta)
+        WebDriverWait(driver, WAIT_TIMEOUT).until(
+            EC.invisibility_of_element_located((By.CSS_SELECTOR, ".saip-loading"))
+        )
+        carrito = wait_visible(driver, (By.XPATH, "//h2[contains(., 'Carrito de venta')]"))
+        btn_reg = wait_visible(driver, (By.XPATH, "//button[contains(., 'Registrar venta')]"))
+        shot = screenshot(driver, f"{vista}_positivo")
+        record(vista, ruta, "POSITIVO",
+               carrito.is_displayed() and btn_reg.is_displayed(),
+               "Vista nueva venta carga: carrito y boton registrar visibles", shot)
+    except Exception as e:
+        shot = screenshot(driver, f"{vista}_positivo_error")
+        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
 
 
 def vista_09_clientes(driver):
