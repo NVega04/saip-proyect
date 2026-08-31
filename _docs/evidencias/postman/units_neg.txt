@@ -1,0 +1,2 @@
+{"detail":[{"type":"missing","loc":["body","abbreviation"],"msg":"Field required","input":{"name":"SIN ABREV QA","quantity":1}}]}
+[HTTP 422]

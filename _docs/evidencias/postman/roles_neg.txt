@@ -1,0 +1,2 @@
+{"detail":"El rol 'ADMIN' ya existe."}
+[HTTP 409]

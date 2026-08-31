@@ -1,0 +1,195 @@
+{
+  "info": {
+    "_postman_id": "9f1c2b3a-4d5e-6f78-9abc-def012345678",
+    "name": "SAIP - Pruebas BD vs App (Punto 3.4)",
+    "description": "Colección de 5 endpoints probados contra la API real de SAIP en http://localhost:8000. Cada endpoint con caso POSITIVO y NEGATIVO. Requiere el header session-token obtenido del login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_token",
+      "value": "REEMPLAZAR_CON_TOKEN_DEL_LOGIN",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "0. Login (obtener token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@saip.com\",\n  \"password\": \"admin123\",\n  \"accepted_terms\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/session/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["session", "login"]
+        }
+      }
+    },
+    {
+      "name": "1. Users - POSITIVO (POST /users/)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"QA\",\n  \"last_name\": \"TEST\",\n  \"email\": \"qa.user01@saip.com\",\n  \"role_id\": 1,\n  \"is_admin\": false\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/users/", "host": ["{{baseUrl}}"], "path": ["users", ""] }
+      }
+    },
+    {
+      "name": "1. Users - NEGATIVO (role inexistente)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"QA\",\n  \"last_name\": \"NEG\",\n  \"email\": \"qa.userneg@saip.com\",\n  \"role_id\": 9999,\n  \"is_admin\": false\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/users/", "host": ["{{baseUrl}}"], "path": ["users", ""] }
+      }
+    },
+    {
+      "name": "2. Roles - POSITIVO (POST /roles/)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"ROL QA POSTMAN\",\n  \"description\": \"ROL CREADO DESDE POSTMAN\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/roles/", "host": ["{{baseUrl}}"], "path": ["roles", ""] }
+      }
+    },
+    {
+      "name": "2. Roles - NEGATIVO (nombre duplicado)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Admin\",\n  \"description\": \"duplicado\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/roles/", "host": ["{{baseUrl}}"], "path": ["roles", ""] }
+      }
+    },
+    {
+      "name": "3. Providers - POSITIVO (POST /providers/)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company\": \"PROVEEDOR QA POSTMAN\",\n  \"nit\": \"777777777-7\",\n  \"email\": \"prov.qa@saip.com\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/providers/", "host": ["{{baseUrl}}"], "path": ["providers", ""] }
+      }
+    },
+    {
+      "name": "3. Providers - NEGATIVO (NIT duplicado)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company\": \"DUP\",\n  \"nit\": \"800123456-1\",\n  \"email\": \"prov.dup@saip.com\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/providers/", "host": ["{{baseUrl}}"], "path": ["providers", ""] }
+      }
+    },
+    {
+      "name": "4. Units - POSITIVO (POST /units/)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QUINTAL QA\",\n  \"abbreviation\": \"qq\",\n  \"description\": \"UNIDAD QA\",\n  \"quantity\": 100\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/units/", "host": ["{{baseUrl}}"], "path": ["units", ""] }
+      }
+    },
+    {
+      "name": "4. Units - NEGATIVO (sin abbreviation)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SIN ABREV\",\n  \"quantity\": 1\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/units/", "host": ["{{baseUrl}}"], "path": ["units", ""] }
+      }
+    },
+    {
+      "name": "5. Sales - POSITIVO (POST /sales/)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    { \"item_type\": \"product\", \"item_id\": 3, \"quantity\": 5 }\n  ],\n  \"notes\": \"VENTA QA POSTMAN\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/sales/", "host": ["{{baseUrl}}"], "path": ["sales", ""] }
+      }
+    },
+    {
+      "name": "5. Sales - ANULACIÓN (PATCH /sales/{id}/annul)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/sales/{{sale_id}}/annul", "host": ["{{baseUrl}}"], "path": ["sales", "{{sale_id}}", "annul"] }
+      }
+    },
+    {
+      "name": "5. Sales - NEGATIVO (stock insuficiente)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "session-token", "value": "{{session_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    { \"item_type\": \"product\", \"item_id\": 3, \"quantity\": 100000 }\n  ],\n  \"notes\": \"VENTA IMPOSIBLE\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/sales/", "host": ["{{baseUrl}}"], "path": ["sales", ""] }
+      }
+    }
+  ]
+}

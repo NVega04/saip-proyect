@@ -94,3 +94,24 @@ for f in 00_estado_inicial.sql 01_creates.sql 02_updates.sql 03_deletes.sql 04_v
   docker exec -i saip_db_container mysql -f -uroot -proot_password db_saip_proyect < "$f"
 done
 ```
+
+---
+
+## Anexo: Pruebas contra la API real (Postman) - 5 endpoints
+
+Complemento de la matriz: los 5 endpoints se probaron contra la **API real** (`http://localhost:8000`) con Postman (ver `postman/SAIP_Pruebas_BD_vs_App.postman_collection.json` y `postman/README.md`). Resultados HTTP reales:
+
+| Endpoint | Método | Caso POSITIVO | Caso NEGATIVO | Verificación en DB |
+|---|---|---|---|---|
+| /users/ | POST | ✅ 201 (usuario id=42) | ✅ 404 (rol 9999 inexistente) | 1 fila / 0 filas |
+| /roles/ | POST | ✅ 201 (rol id=35) | ✅ 409 (nombre 'ADMIN' duplicado) | 1 fila / sin duplicado |
+| /providers/ | POST | ✅ 201 (prov. id=29) | ✅ 409 (NIT duplicado) | 1 fila / sin duplicado |
+| /units/ | POST | ✅ 201 (unidad id=26) | ✅ 422 (abbreviation requerido) | 1 fila / 0 filas |
+| /sales/ | POST/PATCH | ✅ 201 (venta) / ✅ 200 (annul) | ✅ 400 (stock insuficiente) | stock 200→195→200 / sin persistir |
+
+**Caso transaccional (ventas) verificado en la API real:**
+- Venta de 5 uds del producto 3: stock **200 → 195** (HTTP 201).
+- Anulación `PATCH /sales/6/annul`: stock **195 → 200** (HTTP 200).
+- Venta de 100000 uds (stock insuficiente): **HTTP 400** + stock intacto (200) + 0 ventas persistidas → **ROLLBACK** demostrado en el flujo real de la aplicación.
+
+Al finalizar se limpiaron todos los registros de prueba (usuario, rol, proveedor, unidad y venta de prueba con sus movimientos), dejando la BD en su estado original (1 venta real, stock producto 3 = 200).
