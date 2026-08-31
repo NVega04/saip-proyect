@@ -1,0 +1,2 @@
+{"id":26,"token":"13624605-fcfe-42a3-963f-fa602637b00e","name":"QUINTAL POSTMAN","abbreviation":"QQ","description":"UNIDAD QA","quantity":100.0,"created_at":"2026-08-27T20:52:34","created_by":1,"updated_at":null,"updated_by":null,"deleted_at":null,"deleted_by":null}
+[HTTP 201]

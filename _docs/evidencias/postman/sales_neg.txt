@@ -1,0 +1,2 @@
+{"detail":"Stock insuficiente para 'CROISSANT MANTEQUILLA': disponible 200.0, solicitado 100000.0."}
+[HTTP 400]

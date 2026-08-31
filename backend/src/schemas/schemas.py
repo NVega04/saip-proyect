@@ -1035,3 +1035,16 @@ class InventoryPage(BaseModel):
     page: int
     limit: int
     summary: InventorySummary
+
+
+## Esquemas de importación masiva (bulk)
+class BulkRowError(BaseModel):
+    fila: int
+    mensaje: str
+
+
+class BulkImportResult(BaseModel):
+    total: int
+    creados: int
+    actualizados: int = 0
+    errores: list[BulkRowError] = []

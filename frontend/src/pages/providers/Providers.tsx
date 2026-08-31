@@ -4,6 +4,7 @@ import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
+import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import Badge from "../../components/badge/Badge";
 import { apiFetch } from "../../utils/api";
 import "./Providers.css";
@@ -101,6 +102,9 @@ export default function Providers(): JSX.Element {
   const [contactErrors, setContactErrors]       = useState<ContactFormErrors>({});
 
   const { download: downloadReport, loading: reportLoading } = useReportDownload("providers");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkContactsOpen, setBulkContactsOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // ── Cargar proveedores ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -117,7 +121,7 @@ export default function Providers(): JSX.Element {
       }
     };
     fetchProviders();
-  }, []);
+  }, [reloadKey]);
 
   // ── Refrescar un proveedor individual ─────────────────────────────────────
   const refreshProvider = async (id: number): Promise<Provider | null> => {
@@ -370,6 +374,12 @@ export default function Providers(): JSX.Element {
             <>
               <Button variant="primary" onClick={handleCrearProveedor}>
                 Crear proveedor
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+                Cargar proveedores
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkContactsOpen(true)}>
+                Cargar contactos
               </Button>
               <Button
                 variant="secondary"
@@ -702,6 +712,23 @@ export default function Providers(): JSX.Element {
           </div>
         </form>
       </Modal>
+
+      <BulkUploadModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Carga masiva de proveedores"
+        templateUrl="/providers/bulk/template"
+        importUrl="/providers/bulk/import"
+        onImported={() => setReloadKey((k) => k + 1)}
+      />
+      <BulkUploadModal
+        isOpen={bulkContactsOpen}
+        onClose={() => setBulkContactsOpen(false)}
+        title="Carga masiva de contactos"
+        templateUrl="/providers/contacts/bulk/template"
+        importUrl="/providers/contacts/bulk/import"
+        onImported={() => setReloadKey((k) => k + 1)}
+      />
     </Layout>
   );
 }

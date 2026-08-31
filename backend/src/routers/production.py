@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
 from sqlmodel import Session, col, select
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -25,8 +25,20 @@ from src.schemas.schemas import (
     ProductionCompleteResponse,
     SupplyBasic,
     UnitBasic,
+    BulkImportResult,
 )
 from src.dependencies import get_current_user
+from src.bulk.parser import (
+    RowError,
+    name_key,
+    optional_text,
+    parse_datetime,
+    parse_spreadsheet,
+    required,
+    run_bulk,
+    safe_float,
+    template_response,
+)
 
 router = APIRouter(prefix="/production/orders", tags=["Production"])
 
@@ -308,4 +320,62 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
         product_quantity_added=product_quantity_added,
         snapshots=completed_snapshots,
         completed_by=current_user.id,
+    )
+
+
+# ── Carga masiva de órdenes de producción ───────────────────────────────────
+BULK_ORDER_HEADERS = ["receta", "multiplicador", "programada_para", "notas"]
+BULK_ORDER_EXAMPLES = [["Pan frances", 4, "2026-08-31", "Turno manana"]]
+
+
+@router.post(
+    "/bulk/import",
+    response_model=BulkImportResult,
+    status_code=status.HTTP_200_OK,
+    summary="Cargar órdenes de producción por archivo Excel/CSV",
+)
+def bulk_import_orders(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    rows = parse_spreadsheet(file)
+    recipes = {
+        name_key(r.name): r
+        for r in session.exec(select(Recipe)).all()
+        if r.status == RecipeStatus.ACTIVE and r.deleted_at is None
+    }
+
+    def process_row(row):
+        recipe_name = required(row, "receta", "receta")
+        recipe = recipes.get(recipe_name)
+        if recipe is None:
+            raise RowError(f"No existe la receta activa '{row.get('receta')}'.")
+
+        multiplicador = safe_float(row.get("multiplicador"), "multiplicador")
+        if multiplicador <= 0:
+            raise RowError("El multiplicador debe ser mayor a 0.")
+
+        session.add(ProductionOrder(
+            recipe_id=recipe.id,
+            quantity_multiplier=multiplicador,
+            total_yield=recipe.yield_quantity * multiplicador,
+            scheduled_at=parse_datetime(row.get("programada_para"), "programada_para"),
+            notes=optional_text(row, "notas"),
+            status=ProductionOrderStatus.PENDING,
+            created_by=current_user.id,
+        ))
+        return False
+
+    return run_bulk(session, rows, process_row)
+
+
+@router.get(
+    "/bulk/template",
+    status_code=status.HTTP_200_OK,
+    summary="Descargar plantilla de órdenes de producción",
+)
+def bulk_orders_template():
+    return template_response(
+        "plantilla_ordenes_produccion.xlsx", BULK_ORDER_HEADERS, BULK_ORDER_EXAMPLES
     )

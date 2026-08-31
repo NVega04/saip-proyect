@@ -4,6 +4,7 @@ import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
+import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import Badge from "../../components/badge/Badge";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
@@ -159,6 +160,7 @@ export default function Produccion(): JSX.Element {
     null
   );
   const [creating, setCreating] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
@@ -420,9 +422,14 @@ export default function Produccion(): JSX.Element {
         searchPlaceholder="Buscar orden"
         emptyMessage="No hay órdenes de producción registradas."
         headerActions={
-          <Button variant="primary" onClick={handleCrear}>
-            Nueva orden
-          </Button>
+          <>
+            <Button variant="primary" onClick={handleCrear}>
+              Nueva orden
+            </Button>
+            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+              Cargar masivo
+            </Button>
+          </>
         }
         renderActions={(row) => {
           const busy = actionInProgressId === row.id;
@@ -606,6 +613,15 @@ export default function Produccion(): JSX.Element {
           </div>
         </form>
       </Modal>
+
+      <BulkUploadModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Carga masiva de órdenes de producción"
+        templateUrl="/production/orders/bulk/template"
+        importUrl="/production/orders/bulk/import"
+        onImported={() => refetchOrders()}
+      />
     </Layout>
   );
 }

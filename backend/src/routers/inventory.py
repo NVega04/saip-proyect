@@ -1,5 +1,5 @@
-from typing import Optional, List, Literal
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Optional, List, Literal, Dict
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 from io import BytesIO
@@ -10,12 +10,30 @@ from openpyxl.utils import get_column_letter
 
 from src.database import get_session
 from src.dependencies import require_module
-from src.models.models import Product, Supply, CommercialProduct, User
+from src.models.models import (
+    Product,
+    Supply,
+    CommercialProduct,
+    InventoryMovement,
+    ItemType,
+    MovementType,
+    User,
+)
 from src.schemas.schemas import (
     InventoryItem,
     InventoryItemStatus,
     InventoryPage,
     InventorySummary,
+    BulkImportResult,
+    BulkRowError,
+)
+from src.bulk.parser import (
+    RowError,
+    name_key,
+    parse_spreadsheet,
+    run_bulk,
+    safe_float,
+    template_response,
 )
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
@@ -293,4 +311,185 @@ def inventory_report(
         stream,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+# ── Carga masiva de stock (entradas/descuentos) ─────────────────────────────
+BULK_MOVEMENT_HEADERS = ["tipo", "nombre", "cantidad", "nota"]
+BULK_MOVEMENT_EXAMPLES = [
+    ["Insumo", "Harina de trigo", 50, "Compra semanal"],
+    ["Producto", "Pan frances", 10, "Produccion extra"],
+]
+
+_TIPO_ALIAS = {
+    "insumo": "supply",
+    "suministro": "supply",
+    "materia": "supply",
+    "materia_prima": "supply",
+    "supply": "supply",
+    "producto": "product",
+    "terminado": "product",
+    "product": "product",
+    "comercial": "commercial",
+    "commercial": "commercial",
+}
+_TIPO_ORDER = {"supply": 0, "product": 1, "commercial": 2}
+_TIPO_LABEL = {"supply": "insumo", "product": "producto", "commercial": "producto comercial"}
+
+
+def _parse_tipo(value):
+    if value is None:
+        return None
+    return _TIPO_ALIAS.get(str(value).strip().lower())
+
+
+def _lookup_item(session: Session, tipo: str, nombre: str):
+    if tipo == "supply":
+        return session.exec(
+            select(Supply).where(Supply.name == nombre, Supply.deleted_at == None)
+        ).first()
+    if tipo == "product":
+        return session.exec(
+            select(Product).where(Product.name == nombre, Product.deleted_at == None)
+        ).first()
+    return session.exec(
+        select(CommercialProduct).where(
+            CommercialProduct.name == nombre, CommercialProduct.deleted_at == None
+        )
+    ).first()
+
+
+def _inventory_bulk(
+    file: UploadFile,
+    movement_type: MovementType,
+    session: Session,
+    current_user: User,
+) -> BulkImportResult:
+    rows = parse_spreadsheet(file)
+
+    pre_errors: List[BulkRowError] = []
+    aggregated: Dict[tuple, dict] = {}
+    for idx, row in enumerate(rows, start=2):
+        tipo = _parse_tipo(row.get("tipo"))
+        if tipo is None:
+            pre_errors.append(
+                BulkRowError(fila=idx, mensaje=f"Tipo inválido: '{row.get('tipo')}'.")
+            )
+            continue
+        nombre = name_key(row.get("nombre"))
+        try:
+            cantidad = safe_float(row.get("cantidad"), "cantidad")
+        except RowError as exc:
+            pre_errors.append(BulkRowError(fila=idx, mensaje=exc.message))
+            continue
+        key = (tipo, nombre)
+        item = aggregated.setdefault(
+            key,
+            {"tipo": tipo, "nombre": nombre, "cantidad": 0.0, "fila": idx, "nota": None},
+        )
+        item["cantidad"] += cantidad
+        nota = row.get("nota")
+        if nota and item["nota"] is None:
+            item["nota"] = str(nota).strip()
+
+    resolved = []
+    for item in aggregated.values():
+        obj = _lookup_item(session, item["tipo"], item["nombre"])
+        if obj is None:
+            pre_errors.append(
+                BulkRowError(
+                    fila=item["fila"],
+                    mensaje=f"No se encontró {_TIPO_LABEL[item['tipo']]} '{item['nombre']}'.",
+                )
+            )
+            continue
+        item["obj"] = obj
+        item["item_type_enum"] = (
+            ItemType.SUPPLY
+            if item["tipo"] == "supply"
+            else ItemType.PRODUCT
+            if item["tipo"] == "product"
+            else ItemType.COMMERCIAL
+        )
+        resolved.append(item)
+
+    resolved.sort(key=lambda it: (_TIPO_ORDER[it["tipo"]], it["obj"].id))
+
+    def process_row(item):
+        if item["cantidad"] <= 0:
+            raise RowError("La cantidad debe ser mayor a 0.")
+        cls = type(item["obj"])
+        locked = session.exec(
+            select(cls).where(cls.id == item["obj"].id).with_for_update()
+        ).first()
+        if locked is None:
+            raise RowError("El ítem ya no existe en el inventario.")
+
+        stock_before = locked.available_quantity
+        if movement_type == MovementType.ENTRY:
+            locked.available_quantity = stock_before + item["cantidad"]
+        else:
+            if item["cantidad"] > stock_before:
+                raise RowError(
+                    f"Stock insuficiente: disponible {stock_before}, solicitado {item['cantidad']}."
+                )
+            locked.available_quantity = stock_before - item["cantidad"]
+
+        session.add(locked)
+        session.add(InventoryMovement(
+            item_type=item["item_type_enum"],
+            item_id=locked.id,
+            movement_type=movement_type,
+            quantity=item["cantidad"],
+            stock_before=stock_before,
+            stock_after=locked.available_quantity,
+            reference_type="bulk_entry" if movement_type == MovementType.ENTRY else "bulk_adjustment",
+            user_id=current_user.id,
+        ))
+        return False
+
+    result = run_bulk(session, resolved, process_row, file_line=lambda r: r.get("fila"))
+    result.total = len(rows)
+    result.errores = pre_errors + result.errores
+    return result
+
+
+@router.post(
+    "/entries/bulk",
+    response_model=BulkImportResult,
+    status_code=status.HTTP_200_OK,
+    summary="Cargar entradas de stock por archivo Excel/CSV",
+)
+def bulk_inventory_entries(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(require_module("inventory")),
+):
+    return _inventory_bulk(file, MovementType.ENTRY, session, current_user)
+
+
+@router.post(
+    "/adjustments/bulk",
+    response_model=BulkImportResult,
+    status_code=status.HTTP_200_OK,
+    summary="Cargar descuentos/ajustes de stock por archivo Excel/CSV",
+)
+def bulk_inventory_adjustments(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(require_module("inventory")),
+):
+    return _inventory_bulk(file, MovementType.MANUAL, session, current_user)
+
+
+@router.get(
+    "/bulk/template",
+    status_code=status.HTTP_200_OK,
+    summary="Descargar plantilla de movimientos de stock",
+)
+def bulk_movements_template():
+    return template_response(
+        "plantilla_movimientos_inventario.xlsx",
+        BULK_MOVEMENT_HEADERS,
+        BULK_MOVEMENT_EXAMPLES,
     )

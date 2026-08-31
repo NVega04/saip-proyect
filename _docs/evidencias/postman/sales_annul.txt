@@ -1,0 +1,2 @@
+{"message":"Venta anulada y stock restaurado.","id":6,"status":"anulada","changed_at":"2026-08-27T20:53:01","changed_by":1}
+[HTTP 200]

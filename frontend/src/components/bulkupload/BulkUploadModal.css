@@ -1,0 +1,94 @@
+.saip-bulk {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.saip-bulk__hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--bakery-text-muted, #64748b);
+}
+
+.saip-bulk__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.saip-bulk__file {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  border: 1px dashed var(--bakery-border, #cbd5e1);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  background: var(--bakery-card-bg, #ffffff);
+  cursor: pointer;
+}
+
+.saip-bulk__file:hover {
+  border-color: var(--bakery-primary, #16425b);
+}
+
+.saip-bulk__file input {
+  display: none;
+}
+
+.saip-bulk__file-name {
+  font-size: 0.85rem;
+  color: var(--bakery-text-primary, #16425b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saip-bulk__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.saip-bulk__result {
+  border-top: 1px solid var(--bakery-border, #cbd5e1);
+  padding-top: 0.75rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.saip-bulk__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.saip-bulk__summary-item--ok strong {
+  color: #16a34a;
+}
+
+.saip-bulk__summary-item--upd strong {
+  color: #2563eb;
+}
+
+.saip-bulk__summary-item--err strong {
+  color: #dc2626;
+}
+
+.saip-bulk__errors {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.saip-bulk__error {
+  background: var(--bakery-danger-bg, #fef2f2);
+  border: 1px solid var(--bakery-danger, #fca5a5);
+  color: var(--bakery-danger-text, #b91c1c);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
