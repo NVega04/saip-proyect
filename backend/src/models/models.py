@@ -40,6 +40,10 @@ class User(SQLModel, table=True):
     )
     accepted_terms: bool = Field(default=False)
     accepted_terms_at: Optional[datetime] = Field(default=None)
+
+    # Bloqueo temporal por intentos fallidos de inicio de sesión
+    failed_login_attempts: int = Field(default=0)
+    locked_until: Optional[datetime] = Field(default=None)
     # Relación: Permite relacionar las sessiones del usurio
     sessions: List["SessionApp"] = Relationship(back_populates="user")
     password_resets: List["PasswordReset"] = Relationship(back_populates="user")
