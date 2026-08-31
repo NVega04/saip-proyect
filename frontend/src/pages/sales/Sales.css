@@ -225,6 +225,19 @@
   background: var(--white, #f2f2f2);
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .sales-hist__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sales-hist__filters .saip-btn {
+    width: 100%;
+  }
 }
 
 .sales-hist__input:focus,
@@ -239,6 +252,8 @@
   border-radius: 12px;
   padding: 1.25rem;
   box-shadow: 0 2px 10px rgba(22, 66, 91, 0.05);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sales-hist__title {
@@ -251,6 +266,7 @@
 
 .sales-hist__table {
   width: 100%;
+  min-width: 700px;
   border-collapse: collapse;
   font-family: 'Outfit', system-ui, sans-serif;
 }
@@ -334,4 +350,27 @@
   color: #666;
   font-family: 'Outfit', system-ui, sans-serif;
   font-style: italic;
+}
+
+/* ── Móvil (≤ 480px) ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sales__summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .sales__summary .saip-btn {
+    width: 100%;
+  }
+
+  .sales__card,
+  .sales-hist__filters,
+  .sales-hist__table-card {
+    padding: 1rem;
+  }
+
+  .sales-hist__pagination {
+    justify-content: center;
+  }
 }
