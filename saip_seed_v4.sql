@@ -89,30 +89,6 @@ INSERT INTO users (token, first_name, last_name, email, phone, password_hash,
 (UUID(), 'MÓNICA',   'HERRERA',    'm.herrera@saip.com',       '3001110119', '$2b$12$dummyhash00000000000019', NOW(), 'active', 0, 15, 1, NOW()),
 (UUID(), 'GABRIEL',  'MENDOZA',    'g.mendoza@saip.com',       '3001110120', '$2b$12$dummyhash00000000000020', NOW(), 'active', 0, 20, 1, NOW());
 
--- ============================================================
--- 3. MODULES (20)
--- ============================================================
-INSERT INTO modules (token, name, label) VALUES
-(UUID(), 'dashboard',     'PANEL PRINCIPAL'),
-(UUID(), 'users',         'USUARIOS'),
-(UUID(), 'roles',         'ROLES'),
-(UUID(), 'inventory',     'INVENTARIO'),
-(UUID(), 'supplies',      'INSUMOS'),
-(UUID(), 'products',      'PRODUCTOS'),
-(UUID(), 'recipes',       'RECETAS'),
-(UUID(), 'production',    'PRODUCCIÓN'),
-(UUID(), 'providers',     'PROVEEDORES'),
-(UUID(), 'purchases',     'COMPRAS'),
-(UUID(), 'sales',         'VENTAS'),
-(UUID(), 'cash',          'CAJA'),
-(UUID(), 'reports',       'REPORTES'),
-(UUID(), 'quality',       'CONTROL DE CALIDAD'),
-(UUID(), 'delivery',      'DOMICILIOS'),
-(UUID(), 'menu',          'MENÚ / CARTA'),
-(UUID(), 'notifications', 'NOTIFICACIONES'),
-(UUID(), 'audit',         'AUDITORÍA'),
-(UUID(), 'settings',      'CONFIGURACIÓN'),
-(UUID(), 'support',       'SOPORTE');
 
 -- ============================================================
 -- 4. ROLE_MODULES (20)
