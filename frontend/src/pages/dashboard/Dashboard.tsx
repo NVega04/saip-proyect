@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useRef, useState } from "react";
+import React, { JSX, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
@@ -256,6 +256,15 @@ export default function Dashboard(): JSX.Element {
 
   const chartCols = Math.min(cols, 2);
 
+  const topCategorias: CategoryCountPoint[] = useMemo(() => {
+    if (!stats?.productos) return [];
+    const sorted = [...stats.productos.por_categoria].sort((a, b) => b.total - a.total);
+    const top = sorted.slice(0, 6);
+    const otrosTotal = sorted.slice(6).reduce((acc, c) => acc + c.total, 0);
+    if (otrosTotal > 0) top.push({ name: "Otros", total: otrosTotal });
+    return top;
+  }, [stats]);
+
   const statsGridStyle: React.CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${chartCols}, 1fr)`,
@@ -429,7 +438,7 @@ export default function Dashboard(): JSX.Element {
                         tick={{ fontSize: 11, fill: "#647a8a" }}
                       />
                       <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Cantidad (unidades)", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
-                      <Tooltip contentStyle={tooltipStyle} />
+                      <Tooltip contentStyle={tooltipStyle} formatter={(value: number | string) => [Math.round(Number(value)), "Consumido"]} />
                       <Line
                         type="monotone"
                         dataKey="cantidad"
@@ -916,7 +925,7 @@ export default function Dashboard(): JSX.Element {
                         margin={{ left: 10, right: 30 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
-                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Unidades / Órdenes", position: "insideBottom", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} />
                         <YAxis
                           dataKey="nombre"
                           type="category"
@@ -1025,16 +1034,15 @@ export default function Dashboard(): JSX.Element {
                       <ResponsiveContainer width="100%" height={260}>
                         <PieChart>
                           <Pie
-                            data={stats.productos.por_categoria}
+                            data={topCategorias}
                             dataKey="total"
                             nameKey="name"
                             cx="50%"
                             cy="50%"
                             outerRadius={90}
-                            label={({ name, total }: { name: string; total: number }) => `${name}: ${total}`}
                           >
-                            {stats.productos.por_categoria.map((entry) => (
-                              <Cell key={entry.name} fill={COLORS[stats.productos.por_categoria.indexOf(entry) % COLORS.length]} />
+                            {topCategorias.map((entry, index) => (
+                              <Cell key={entry.name} fill={entry.name === "Otros" ? "#8d99ae" : COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip contentStyle={tooltipStyle} />
