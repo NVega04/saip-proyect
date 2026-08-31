@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, ChangeEvent } from "react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../login/login.css";
@@ -9,12 +9,9 @@ import { getPasswordStrength } from "../../utils/passwordStrength";
 import { apiFetch } from "../../utils/api";
 
 export default function RecoverPassword() {
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setToken(params.get("token"));
-  }, []);
+  const [token] = useState<string | null>(
+    () => new URLSearchParams(window.location.search).get("token")
+  );
 
   return (
     <div className="login-root">
@@ -182,6 +179,11 @@ function ResetForm({ token }: { token: string }) {
         showAlert("warning", "La contraseña debe tener al menos 8 caracteres.");
         return;
       }
+      if (!isStrong) {
+        setError("La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
+        showAlert("warning", "La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
+        return;
+      }
         setError(null);
     setIsLoading(true);
     try {
@@ -285,7 +287,7 @@ function ResetForm({ token }: { token: string }) {
           </div>
         </div>
 
-        <button type="submit" className="btn-submit" disabled={isLoading || !isStrong}>
+        <button type="submit" className="btn-submit" disabled={isLoading}>
           {isLoading && <span className="btn-spinner" />}
           {isLoading ? "Actualizando..." : "Actualizar contraseña"}
         </button>
