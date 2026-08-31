@@ -4,6 +4,7 @@ import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
+import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import Badge from "../../components/badge/Badge";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
@@ -159,6 +160,8 @@ export default function CommercialProducts(): JSX.Element {
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("commercial-products");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -193,7 +196,7 @@ export default function CommercialProducts(): JSX.Element {
       }
     };
     fetchData();
-  }, []);
+  }, [reloadKey]);
 
   const handleCrear = () => {
     setEditTarget(null);
@@ -362,6 +365,9 @@ export default function CommercialProducts(): JSX.Element {
             <>
             <Button variant="primary" onClick={handleCrear}>
               Crear producto
+            </Button>
+            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+              Cargar masivo
             </Button>
              <Button
                 variant="secondary"
@@ -578,6 +584,16 @@ export default function CommercialProducts(): JSX.Element {
           </div>
         </form>
       </Modal>
+
+      <BulkUploadModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Carga masiva de productos comerciales"
+        templateUrl="/commercial-products/bulk/template"
+        importUrl="/commercial-products/bulk/import"
+        importQuery="mode=upsert"
+        onImported={() => setReloadKey((k) => k + 1)}
+      />
     </Layout>
   );
 }

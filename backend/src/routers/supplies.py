@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
@@ -9,8 +9,20 @@ from src.schemas.schemas import (
     SupplyResponse,
     SupplyUpdate,
     DeleteResponseSupply,
+    BulkImportResult,
 )
 from src.dependencies import get_current_user
+from src.bulk.parser import (
+    RowError,
+    name_key,
+    optional_text,
+    parse_datetime,
+    parse_spreadsheet,
+    required,
+    run_bulk,
+    safe_float,
+    template_response,
+)
 
 router = APIRouter(prefix="/supplies", tags=["Supplies"])
 
@@ -205,4 +217,94 @@ def delete_supply(
         message=f"Insumo '{supply.name}' eliminado correctamente.",
         deleted_at=now,
         deleted_by=current_user.id,
+    )
+
+
+# ── Carga masiva ────────────────────────────────────────────────────────────
+BULK_SUPPLY_HEADERS = [
+    "nombre",
+    "descripcion",
+    "categoria",
+    "unidad",
+    "stock_disponible",
+    "stock_min",
+    "stock_max",
+    "fecha_vencimiento",
+]
+BULK_SUPPLY_EXAMPLES = [
+    ["Harina de trigo", "Harina panadera tipo 550", "Insumos basicos", "kg", 25, 10, 100, "2026-12-31"],
+]
+
+@router.post(
+    "/bulk/import",
+    response_model=BulkImportResult,
+    status_code=status.HTTP_200_OK,
+    summary="Cargar insumos por archivo Excel/CSV",
+)
+def bulk_import_supplies(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    rows = parse_spreadsheet(file)
+    categories = {
+        name_key(c.name): c
+        for c in session.exec(select(SupplyCategory)).all()
+        if c.status == "active"
+    }
+    units = {
+        name_key(u.name): u
+        for u in session.exec(select(Unit)).all()
+        if u.deleted_at is None
+    }
+    units_abbr = {name_key(u.abbreviation): u for u in units.values()}
+
+    def process_row(row):
+        nombre = required(row, "nombre", "nombre")
+        if len(nombre) > 150:
+            raise RowError("El nombre supera los 150 caracteres.")
+        descripcion = optional_text(row, "descripcion")
+        categoria_name = required(row, "categoria", "categoria")
+        unidad_name = required(row, "unidad", "unidad")
+
+        category = categories.get(categoria_name)
+        if category is None:
+            raise RowError(f"No existe la categoría '{row.get('categoria')}'.")
+
+        unit = units.get(unidad_name) or units_abbr.get(unidad_name)
+        if unit is None:
+            raise RowError(f"No existe la unidad '{row.get('unidad')}'.")
+
+        existing = session.exec(
+            select(Supply).where(Supply.name == nombre, Supply.deleted_at == None)
+        ).first()
+        if existing:
+            raise RowError(f"Ya existe un insumo con el nombre '{row.get('nombre')}'.")
+
+        new_supply = Supply(
+            name=nombre,
+            description=descripcion,
+            category_id=category.id,
+            unit_id=unit.id,
+            available_quantity=safe_float(row.get("stock_disponible"), "stock_disponible"),
+            min_stock=safe_float(row.get("stock_min"), "stock_min"),
+            max_stock=safe_float(row.get("stock_max"), "stock_max"),
+            supplier_id=None,
+            expiration_date=parse_datetime(row.get("fecha_vencimiento"), "fecha_vencimiento"),
+            created_by=current_user.id,
+        )
+        session.add(new_supply)
+        return False
+
+    return run_bulk(session, rows, process_row)
+
+
+@router.get(
+    "/bulk/template",
+    status_code=status.HTTP_200_OK,
+    summary="Descargar plantilla de insumos",
+)
+def bulk_supplies_template():
+    return template_response(
+        "plantilla_insumos.xlsx", BULK_SUPPLY_HEADERS, BULK_SUPPLY_EXAMPLES
     )

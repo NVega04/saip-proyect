@@ -7,11 +7,13 @@ interface ApiFetchOptions extends RequestInit {
 export async function apiFetch(endpoint: string, options?: ApiFetchOptions): Promise<Response> {
   const token = localStorage.getItem("session_token");
 
+  const isFormData = options?.body instanceof FormData;
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
       "session-token": token ?? "",
+      ...(!isFormData ? { "Content-Type": "application/json" } : {}),
       ...options?.headers,
     },
   });

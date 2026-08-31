@@ -1,11 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from sqlmodel import Session, select
 from datetime import datetime, timezone
 
 from src.database import get_session
 from src.models.models import Product, ProductStatus, User, Unit
-from src.schemas.schemas import ProductCreate, ProductUpdate, ProductResponse
+from src.schemas.schemas import ProductCreate, ProductUpdate, ProductResponse, BulkImportResult
 from src.dependencies import get_current_user
+from src.bulk.parser import (
+    RowError,
+    name_key,
+    optional_text,
+    parse_spreadsheet,
+    required,
+    run_bulk,
+    safe_float,
+    template_response,
+)
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -188,3 +200,100 @@ def toggle_product_lock(
     session.refresh(product)
 
     return product
+
+
+# ── Carga masiva ────────────────────────────────────────────────────────────
+BULK_PRODUCT_HEADERS = [
+    "nombre",
+    "descripcion",
+    "unidad",
+    "stock_disponible",
+    "stock_min",
+    "stock_max",
+]
+BULK_PRODUCT_EXAMPLES = [
+    ["Pan frances", "Pan artesanal de 250g", "unidad", 120, 20, 300],
+]
+
+
+@router.post(
+    "/bulk/import",
+    response_model=BulkImportResult,
+    status_code=status.HTTP_200_OK,
+    summary="Cargar productos por archivo Excel/CSV (create o upsert)",
+)
+def bulk_import_products(
+    mode: Literal["create", "upsert"] = Query(default="create"),
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    rows = parse_spreadsheet(file)
+    units = {
+        name_key(u.name): u
+        for u in session.exec(select(Unit)).all()
+        if u.deleted_at is None
+    }
+    units_abbr = {name_key(u.abbreviation): u for u in units.values()}
+
+    def process_row(row):
+        nombre = required(row, "nombre", "nombre")
+        if len(nombre) > 150:
+            raise RowError("El nombre supera los 150 caracteres.")
+        descripcion = optional_text(row, "descripcion")
+        unidad_name = required(row, "unidad", "unidad")
+
+        unit = units.get(unidad_name) or units_abbr.get(unidad_name)
+        if unit is None:
+            raise RowError(f"No existe la unidad '{row.get('unidad')}'.")
+
+        existing = session.exec(
+            select(Product).where(Product.name == nombre, Product.deleted_at == None)
+        ).first()
+
+        min_stock = safe_float(row.get("stock_min"), "stock_min")
+        max_stock = safe_float(row.get("stock_max"), "stock_max")
+
+        if mode == "upsert" and existing:
+            if existing.is_locked:
+                raise RowError(
+                    f"El producto '{row.get('nombre')}' esta bloqueado y no puede ser modificado."
+                )
+            if descripcion is not None:
+                existing.description = descripcion
+            existing.min_stock = min_stock
+            existing.max_stock = max_stock
+            existing.updated_at = datetime.now(timezone.utc)
+            existing.updated_by = current_user.id
+            session.add(existing)
+            return True
+
+        if existing:
+            raise RowError(f"Ya existe un producto con el nombre '{row.get('nombre')}'.")
+
+        new_product = Product(
+            name=nombre,
+            description=descripcion,
+            unit_id=unit.id,
+            available_quantity=safe_float(row.get("stock_disponible"), "stock_disponible"),
+            min_stock=min_stock,
+            max_stock=max_stock,
+            is_locked=False,
+            status="active",
+            created_by=current_user.id,
+        )
+        session.add(new_product)
+        return False
+
+    return run_bulk(session, rows, process_row)
+
+
+@router.get(
+    "/bulk/template",
+    status_code=status.HTTP_200_OK,
+    summary="Descargar plantilla de productos",
+)
+def bulk_products_template():
+    return template_response(
+        "plantilla_productos.xlsx", BULK_PRODUCT_HEADERS, BULK_PRODUCT_EXAMPLES
+    )
