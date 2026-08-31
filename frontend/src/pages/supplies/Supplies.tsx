@@ -4,6 +4,7 @@ import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
+import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
@@ -105,7 +106,9 @@ export default function Supplies(): JSX.Element {
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("supplies"); 
+  const { download: downloadReport, loading: reportLoading } = useReportDownload("supplies");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const fetchSupplies = async () => {
@@ -121,7 +124,7 @@ export default function Supplies(): JSX.Element {
       }
     };
     fetchSupplies();
-  }, []);
+  }, [reloadKey]);
 
   const loadFormData = async () => {
     try {
@@ -307,6 +310,9 @@ export default function Supplies(): JSX.Element {
             <>
             <Button variant="primary" onClick={handleCrear}>
               Crear insumo
+            </Button>
+            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+              Cargar masivo
             </Button>
              <Button
                 variant="secondary"
@@ -527,6 +533,15 @@ export default function Supplies(): JSX.Element {
           </div>
         </form>
       </Modal>
+
+      <BulkUploadModal
+        isOpen={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        title="Carga masiva de insumos"
+        templateUrl="/supplies/bulk/template"
+        importUrl="/supplies/bulk/import"
+        onImported={() => setReloadKey((k) => k + 1)}
+      />
     </Layout>
   );
 }

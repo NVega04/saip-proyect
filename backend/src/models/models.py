@@ -644,10 +644,13 @@ class SaleStatus(str, Enum):
 class ItemType(str, Enum):
     PRODUCT = "product"
     COMMERCIAL = "commercial"
+    SUPPLY = "supply"
 
 class MovementType(str, Enum):
     SALE = "sale"
     SALE_ANNULMENT = "sale_annulment"
+    ENTRY = "entry"
+    MANUAL = "manual"
 
 class Sale(SQLModel, table=True):
     __tablename__ = "sales"
