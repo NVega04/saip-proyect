@@ -22,6 +22,9 @@ from zoneinfo import ZoneInfo
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
 
+MAX_LOGIN_ATTEMPTS = 3
+LOCK_DURATION_MINUTES = 3
+
 router = APIRouter(prefix="/session", tags=["Session"])
 
 limiter = Limiter(key_func=get_remote_address)
@@ -40,25 +43,70 @@ def login(
     # 1. Buscar usuario por email
     user = db.exec(select(User).where(User.email == credentials.email)).first()
 
+    now = datetime.now(BOGOTA_TZ)
+
+    # 2. Verificar bloqueo temporal por intentos fallidos (solo si el usuario existe)
+    if user is not None:
+        if user.locked_until is not None:
+            locked_until = user.locked_until
+            if locked_until.tzinfo is None:
+                locked_until = locked_until.replace(tzinfo=BOGOTA_TZ)
+            if now < locked_until:
+                remaining = int((locked_until - now).total_seconds() // 60) + 1
+                raise HTTPException(
+                    status_code=status.HTTP_423_LOCKED,
+                    detail=(
+                        f"Cuenta bloqueada temporalmente por intentos fallidos. "
+                        f"Inténtalo de nuevo en aproximadamente {remaining} min."
+                    ),
+                )
+            # Bloqueo expirado: reiniciar contador
+            user.failed_login_attempts = 0
+            user.locked_until = None
+            db.add(user)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas.",
         )
 
-    # 2. Verificar que el usuario esté activo
+    # 3. Verificar que el usuario esté activo
     if user.status.value != "active":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="El usuario está inactivo. Contacte al administrador.",
         )
 
-    # 3. Verificar password
+    # 4. Verificar password
     if not verify_password(credentials.password, user.password_hash):
+        user.failed_login_attempts += 1
+        if user.failed_login_attempts >= MAX_LOGIN_ATTEMPTS:
+            user.failed_login_attempts = 0
+            user.locked_until = datetime.now(BOGOTA_TZ) + timedelta(
+                minutes=LOCK_DURATION_MINUTES
+            )
+        db.add(user)
+        db.commit()
+        attempts_left = max(MAX_LOGIN_ATTEMPTS - user.failed_login_attempts, 0)
+        detail = "Credenciales inválidas."
+        if user.locked_until is not None:
+            detail = (
+                "Credenciales inválidas. La cuenta fue bloqueada temporalmente "
+                "por 3 minutos por exceder el número de intentos permitidos."
+            )
+        elif attempts_left > 0:
+            detail = f"Credenciales inválidas. Te quedan {attempts_left} intento(s)."
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales inválidas.",
+            detail=detail,
         )
+
+    # Login exitoso: reiniciar contador de intentos fallidos y bloqueo
+    if user.failed_login_attempts != 0 or user.locked_until is not None:
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.add(user)
 
     # 4. Verificar aceptación de términos
     if not user.accepted_terms:

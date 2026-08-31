@@ -64,6 +64,15 @@ export default function Login() {
         return;
       }
 
+      if (response.status === 423) {
+        const error = await response.json();
+        setAlertType("warning");
+        setAlertMessage(error.detail || "Cuenta bloqueada temporalmente por intentos fallidos.");
+        setShowAlert(true);
+        setIsLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         const error = await response.json();
         setAlertType("error");
