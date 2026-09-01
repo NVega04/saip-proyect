@@ -1,7 +1,6 @@
 import { JSX, useState, useEffect, useCallback } from "react";
 import Layout from "../../components/layout/Layout";
 import Button from "../../components/button/Button";
-import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import Badge from "../../components/badge/Badge";
 import Pagination from "../../components/pagination/Pagination";
 import { useAlert } from "../../context/AlertContext";
@@ -69,8 +68,6 @@ export default function Inventario(): JSX.Element {
   const [statusFilter, setStatusFilter] = useState("active");
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const [bulkEntriesOpen, setBulkEntriesOpen] = useState(false);
-  const [bulkAdjustOpen, setBulkAdjustOpen] = useState(false);
 
   const { showAlert } = useAlert();
 
@@ -240,12 +237,6 @@ export default function Inventario(): JSX.Element {
           <Button variant="secondary" onClick={handleDownload} disabled={downloading}>
             {downloading ? "Generando..." : "Descargar informe"}
           </Button>
-          <Button variant="secondary" onClick={() => setBulkEntriesOpen(true)}>
-            Entradas masivas
-          </Button>
-          <Button variant="secondary" onClick={() => setBulkAdjustOpen(true)}>
-            Descuentos masivos
-          </Button>
         </div>
 
         {/* Tabla */}
@@ -326,23 +317,6 @@ export default function Inventario(): JSX.Element {
           )}
         </div>
       </div>
-
-      <BulkUploadModal
-        isOpen={bulkEntriesOpen}
-        onClose={() => setBulkEntriesOpen(false)}
-        title="Entradas masivas a inventario"
-        templateUrl="/inventory/bulk/template"
-        importUrl="/inventory/entries/bulk"
-        onImported={() => fetchSummary()}
-      />
-      <BulkUploadModal
-        isOpen={bulkAdjustOpen}
-        onClose={() => setBulkAdjustOpen(false)}
-        title="Descuentos / ajustes masivos a inventario"
-        templateUrl="/inventory/bulk/template"
-        importUrl="/inventory/adjustments/bulk"
-        onImported={() => fetchSummary()}
-      />
     </Layout>
   );
 }
