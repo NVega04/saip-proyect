@@ -1,0 +1,984 @@
+{
+  "info": {
+    "_postman_id": "d2c59267-a305-484c-ab04-1cc06ce6481c",
+    "name": "SAIP API Tests",
+    "description": "Suite automatizada de pruebas API para SAIP. Encadena autenticación con flujos CRUD reales del dominio panadero usando variables dinámicas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login responde 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Token de sesion capturado en variable authToken\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"session_token\");",
+                  "    pm.expect(body.session_token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.environment.set(\"authToken\", body.session_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{adminEmail}}\",\n    \"password\": \"{{adminPassword}}\",\n    \"accepted_terms\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/session/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["session", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Obtener usuario autenticado (me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Me responde 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene id y email como string\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body).to.have.property(\"email\").and.to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creacion de usuario - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Estructura JSON valida y captura de userId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body.email).to.be.a(\"string\");",
+                  "    pm.environment.set(\"userId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"first_name\": \"Maria\",\n    \"last_name\": \"Prueba\",\n    \"email\": \"test{{$timestamp}}@saip.com\",\n    \"phone\": \"3001234567\",\n    \"role_id\": 2,\n    \"is_admin\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualizacion de usuario - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene updated_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.updated_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"3001112233\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Listado de usuarios - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminacion de usuario - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta de borrado con message y deleted_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.message).to.be.a(\"string\");",
+                  "    pm.expect(body.deleted_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Units",
+      "item": [
+        {
+          "name": "Crear unidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creacion de unidad - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Estructura JSON valida y captura de unitId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body).to.have.property(\"name\").and.to.be.a(\"string\");",
+                  "    pm.environment.set(\"unitId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"UNIDAD {{$timestamp}}\",\n    \"abbreviation\": \"UN{{$timestamp}}\",\n    \"description\": \"Creada por suite\",\n    \"quantity\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/units",
+              "host": ["{{baseUrl}}"],
+              "path": ["units"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener unidad por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Unidad por id - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"El id coincide con la variable unitId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.environment.get(\"unitId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar unidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualizacion de unidad - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene updated_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.updated_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Unidad actualizada por suite\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar unidades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Listado de unidades - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/units",
+              "host": ["{{baseUrl}}"],
+              "path": ["units"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "SupplyCategories",
+      "item": [
+        {
+          "name": "Crear categoria de insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creacion de categoria - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Estructura JSON valida y captura de categoryId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body).to.have.property(\"name\").and.to.be.a(\"string\");",
+                  "    pm.environment.set(\"categoryId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"CAT {{$timestamp}}\",\n    \"description\": \"Creada por suite\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/supply-categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["supply-categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener categoria por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Categoria por id - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"El id coincide con la variable categoryId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.environment.get(\"categoryId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supply-categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supply-categories", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar categoria de insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualizacion de categoria - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene updated_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.updated_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Categoria actualizada por suite\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/supply-categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supply-categories", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar categorias de insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Listado de categorias - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supply-categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["supply-categories"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creacion de producto - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Estructura JSON valida y captura de productId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body.unit.id).to.eql(Number(pm.environment.get(\"unitId\")));",
+                  "    pm.environment.set(\"productId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PRODUCTO {{$timestamp}}\",\n    \"description\": \"Creado por suite\",\n    \"unit_id\": {{unitId}},\n    \"available_quantity\": 10,\n    \"min_stock\": 2,\n    \"max_stock\": 50,\n    \"is_locked\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Producto por id - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"El id coincide con la variable productId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.environment.get(\"productId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualizacion de producto - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene updated_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.updated_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Producto actualizado por suite\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Listado de productos - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Supplies",
+      "item": [
+        {
+          "name": "Crear insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creacion de insumo - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Estructura JSON valida y captura de supplyId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"id\");",
+                  "    pm.expect(body.category.id).to.eql(Number(pm.environment.get(\"categoryId\")));",
+                  "    pm.environment.set(\"supplyId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"INSUMO {{$timestamp}}\",\n    \"description\": \"Creado por suite\",\n    \"category_id\": {{categoryId}},\n    \"unit_id\": {{unitId}},\n    \"available_quantity\": 20,\n    \"min_stock\": 5,\n    \"max_stock\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/supplies",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener insumo por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Insumo por id - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"El id coincide con la variable supplyId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(Number(pm.environment.get(\"supplyId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supplies/{{supplyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplies", "{{supplyId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualización de insumo - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta contiene updated_at\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.updated_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Insumo actualizado por suite\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/supplies/{{supplyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplies", "{{supplyId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar insumos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Listado de insumos - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supplies",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplies"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Eliminar Insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminacion de insumo - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta de borrado con message\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.message).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supplies/{{supplyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplies", "{{supplyId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminacion de producto - 204 No Content\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test(\"El cuerpo de la respuesta esta vacio\", function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar categoria de insumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminacion de categoria - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta de borrado con message\", function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.message).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/supply-categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["supply-categories", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar unidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminacion de unidad - 204 No Content\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test(\"El cuerpo de la respuesta esta vacio\", function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "session-token", "value": "{{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/units/{{unitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["units", "{{unitId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
