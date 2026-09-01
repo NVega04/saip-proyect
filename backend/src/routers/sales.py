@@ -1,8 +1,11 @@
 from typing import Optional, Dict, Tuple
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select, func
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
+from io import BytesIO
+from openpyxl import Workbook
 
 from src.database import get_session
 from src.models.models import (
@@ -26,8 +29,46 @@ from src.schemas.schemas import (
     StockWarning,
 )
 from src.dependencies import get_current_user
+from src.utils.excel import (
+    apply_header_row, apply_data_row, auto_width, add_title_row, fmt_dt,
+)
 
 router = APIRouter(prefix="/sales", tags=["Sales"])
+
+
+def _sales_base_query(
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    status_filter: Optional[SaleStatus] = None,
+    item_type: Optional[ItemType] = None,
+    item_id: Optional[int] = None,
+):
+    """Construye la query base de ventas con los filtros comunes.
+
+    Compartida entre GET /sales/ (listado) y GET /sales/export para evitar
+    duplicar la lógica de filtrado.
+    """
+    base = select(Sale).where(Sale.deleted_at == None)
+    if date_from is not None:
+        base = base.where(
+            Sale.sale_date
+            >= datetime.combine(date_from, datetime.min.time(), tzinfo=BOGOTA_TZ)
+        )
+    if date_to is not None:
+        base = base.where(
+            Sale.sale_date
+            <= datetime.combine(date_to, datetime.max.time(), tzinfo=BOGOTA_TZ)
+        )
+    if status_filter is not None:
+        base = base.where(Sale.status == status_filter)
+    if item_type is not None or item_id is not None:
+        item_query = select(SaleItem.sale_id)
+        if item_type is not None:
+            item_query = item_query.where(SaleItem.item_type == item_type)
+        if item_id is not None:
+            item_query = item_query.where(SaleItem.item_id == item_id)
+        base = base.where(Sale.id.in_(item_query))
+    return base
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
 
@@ -158,20 +199,13 @@ def get_sales(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    base = select(Sale).where(Sale.deleted_at == None)
-    if date_from is not None:
-        base = base.where(Sale.sale_date >= datetime.combine(date_from, datetime.min.time(), tzinfo=BOGOTA_TZ))
-    if date_to is not None:
-        base = base.where(Sale.sale_date <= datetime.combine(date_to, datetime.max.time(), tzinfo=BOGOTA_TZ))
-    if status_filter is not None:
-        base = base.where(Sale.status == status_filter)
-    if item_type is not None or item_id is not None:
-        item_query = select(SaleItem.sale_id)
-        if item_type is not None:
-            item_query = item_query.where(SaleItem.item_type == item_type)
-        if item_id is not None:
-            item_query = item_query.where(SaleItem.item_id == item_id)
-        base = base.where(Sale.id.in_(item_query))
+    base = _sales_base_query(
+        date_from=date_from,
+        date_to=date_to,
+        status_filter=status_filter,
+        item_type=item_type,
+        item_id=item_id,
+    )
 
     total = len(session.exec(base).all())
     base = base.order_by(Sale.sale_date.desc()).offset((page - 1) * limit).limit(limit)
@@ -209,6 +243,75 @@ def get_sales(
         )
 
     return SaleListPage(items=items, total=total, page=page, limit=limit)
+
+
+@router.get(
+    "/export",
+    summary="Exportar ventas a Excel (con los filtros de la vista)",
+)
+def export_sales(
+    date_from: Optional[date] = Query(default=None),
+    date_to: Optional[date] = Query(default=None),
+    status_filter: Optional[SaleStatus] = Query(default=None, alias="status"),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    base = (
+        _sales_base_query(
+            date_from=date_from, date_to=date_to, status_filter=status_filter
+        )
+        .order_by(Sale.sale_date.desc())
+    )
+    sales = session.exec(base).all()
+
+    headers = [
+        "ID", "Fecha", "Vendedor", "Estado", "Notas",
+        "Nro. Items", "Cantidad Total",
+    ]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Ventas"
+    ws.freeze_panes = "A3"
+
+    apply_header_row(ws, headers)
+
+    for i, sale in enumerate(sales, start=2):
+        item_count = 0
+        total_qty = 0.0
+        if sale.items:
+            for it in sale.items:
+                item_count += 1
+                total_qty += it.quantity
+        seller = f"{sale.user.first_name} {sale.user.last_name}".strip() if sale.user else "—"
+        apply_data_row(ws, i, [
+            sale.id,
+            fmt_dt(sale.sale_date),
+            seller,
+            sale.status.value,
+            sale.notes or "—",
+            item_count,
+            total_qty,
+        ])
+
+    col_count = len(headers)
+    add_title_row(
+        ws,
+        f"Reporte de Ventas — {datetime.now(BOGOTA_TZ).strftime('%Y-%m-%d %H:%M')}",
+        col_count,
+    )
+    auto_width(ws, headers)
+
+    stream = BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+
+    filename = f"ventas_{datetime.now(BOGOTA_TZ).strftime('%Y%m%d_%H%M%S')}.xlsx"
+    return StreamingResponse(
+        stream,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 @router.get(

@@ -171,6 +171,38 @@ export default function Ventas(): JSX.Element {
     fetchSales();
   }, [fetchSales]);
 
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+      if (dateFrom) params.set("date_from", dateFrom);
+      if (dateTo) params.set("date_to", dateTo);
+      if (statusFilter) params.set("status", statusFilter);
+
+      const response = await apiFetch(`/sales/export?${params.toString()}`);
+      if (!response.ok) {
+        const err = await response.json();
+        showAlert("error", err.detail || "Error al generar el reporte.");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ventas_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showAlert("success", "Reporte de ventas descargado.");
+    } catch {
+      showAlert("error", "No se pudo conectar con el servidor.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const source = tab === "product" ? products : commercial;
   const selected = source.find((p) => p.id === selectedId);
 
@@ -558,6 +590,9 @@ export default function Ventas(): JSX.Element {
             </Button>
             <Button variant="secondary" onClick={handleReset}>
               Limpiar
+            </Button>
+            <Button variant="secondary" onClick={handleExportExcel} disabled={exporting}>
+              {exporting ? "Generando..." : "Exportar excel"}
             </Button>
           </div>
 
