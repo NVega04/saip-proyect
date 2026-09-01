@@ -18,3 +18,9 @@ dependencies = [
     "openpyxl",
     "pyjwt>=2.10.0",
 ]
+
+[dependency-groups]
+dev = [
+    "selenium>=4.48.0",
+    "webdriver-manager>=4.1.2",
+]
