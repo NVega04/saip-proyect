@@ -3,7 +3,7 @@ FROM node:20-slim AS builder
 RUN npm install -g pnpm
 WORKDIR /src
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --no-ignored-builds
 COPY . .
 ARG VITE_API_URL="http://localhost:8000"
 ENV VITE_API_URL=$VITE_API_URL
