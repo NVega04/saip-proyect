@@ -1,8 +1,11 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, col, select
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from io import BytesIO
+from openpyxl import Workbook
 
 from src.database import get_session
 from src.models.models import (
@@ -38,6 +41,9 @@ from src.bulk.parser import (
     run_bulk,
     safe_float,
     template_response,
+)
+from src.utils.excel import (
+    apply_header_row, apply_data_row, auto_width, add_title_row, fmt_dt,
 )
 
 router = APIRouter(prefix="/production/orders", tags=["Production"])
@@ -88,6 +94,73 @@ def get_all(
     if status_filter is not None:
         query = query.where(ProductionOrder.status == status_filter)
     return session.exec(query).all()
+
+
+@router.get(
+    "/export",
+    summary="Exportar órdenes de producción a Excel",
+)
+def export_orders(
+    status_filter: Optional[ProductionOrderStatus] = Query(
+        default=None, alias="status"
+    ),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    query = (
+        select(ProductionOrder)
+        .where(ProductionOrder.deleted_at == None)
+        .order_by(ProductionOrder.created_at.desc())
+    )
+    if status_filter is not None:
+        query = query.where(ProductionOrder.status == status_filter)
+    orders = session.exec(query).all()
+
+    headers = [
+        "ID", "Receta", "Multiplicador", "Rendimiento Total", "Estado",
+        "Programada", "Iniciada", "Completada", "Notas", "Creada",
+    ]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Ordenes Produccion"
+    ws.freeze_panes = "A3"
+
+    apply_header_row(ws, headers)
+
+    for i, order in enumerate(orders, start=2):
+        recipe = order.recipe.name if order.recipe else "—"
+        apply_data_row(ws, i, [
+            order.id,
+            recipe,
+            order.quantity_multiplier,
+            order.total_yield,
+            order.status.value,
+            fmt_dt(order.scheduled_at),
+            fmt_dt(order.started_at),
+            fmt_dt(order.completed_at),
+            order.notes or "—",
+            fmt_dt(order.created_at),
+        ])
+
+    col_count = len(headers)
+    add_title_row(
+        ws,
+        f"Reporte de Órdenes de Producción — {datetime.now(BOGOTA_TZ).strftime('%Y-%m-%d %H:%M')}",
+        col_count,
+    )
+    auto_width(ws, headers)
+
+    stream = BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+
+    filename = f"ordenes_produccion_{datetime.now(BOGOTA_TZ).strftime('%Y%m%d_%H%M%S')}.xlsx"
+    return StreamingResponse(
+        stream,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 @router.get("/{order_id}", response_model=ProductionOrderResponse, status_code=status.HTTP_200_OK)

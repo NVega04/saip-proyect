@@ -61,11 +61,6 @@ const Icon = {
       <path d="M19 8l2 2-6 6"/><path d="M21 10l-2 2"/>
     </svg>
   ),
-  roles: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-    </svg>
-  ),
   about: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
@@ -129,7 +124,6 @@ const menuItems: MenuItem[] = [
   ]},
   { id: "users",         label: "Gestión de usuarios",path: "/usuarios",   icon: Icon.users,      group: "administracion" },
   { id: "roles",            label: "Gestión de roles",   path: "/roles",      icon: Icon.users,      group: "administracion" },
-  { id: "reports",         label: "Reportes",           path: "/reportes",   icon: Icon.roles,      group: "administracion" },
   { id: "acerca",           label: "Acerca de SAIP",     path: "/acerca",     icon: Icon.about,      group: "soporte" },
 ];
 

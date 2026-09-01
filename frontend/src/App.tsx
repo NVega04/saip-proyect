@@ -22,7 +22,6 @@ import RecoverPassword from "./pages/recoverpassword/RecoverPassword";
 import Landing from "./pages/landing/Landing";
 import { AlertProvider } from "./context/AlertContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
-import Reports from "./pages/reports/Reports";
 import ProductCategories from "./pages/productcategories/ProductCategories";
 import CommercialProducts from "./pages/commercialproducts/CommercialProducts";
 
@@ -57,7 +56,6 @@ function App() {
             <Route path="/roles"       element={<ProtectedRoute module="roles">      <Roles />       </ProtectedRoute>} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/reset-password" element={<RecoverPassword />} />
-            <Route path="/reportes" element={<ProtectedRoute><Reports /></ProtectedRoute>}/>
             <Route path="/acerca" element={<ProtectedRoute><AcercaDe /></ProtectedRoute>}/>
           </Routes>
         </ConfirmProvider>

@@ -161,9 +161,37 @@ export default function Produccion(): JSX.Element {
   );
   const [creating, setCreating] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const response = await apiFetch("/production/orders/export");
+      if (!response.ok) {
+        const err = await response.json();
+        showAlert("error", err.detail || "Error al generar el reporte.");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ordenes_produccion_${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showAlert("success", "Reporte de órdenes de producción descargado.");
+    } catch {
+      showAlert("error", "No se pudo conectar con el servidor.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const refetchOrders = async (): Promise<boolean> => {
     try {
@@ -428,6 +456,9 @@ export default function Produccion(): JSX.Element {
             </Button>
             <Button variant="secondary" onClick={() => setBulkOpen(true)}>
               Cargar masivo
+            </Button>
+            <Button variant="secondary" onClick={handleExportExcel} disabled={exporting}>
+              {exporting ? "Generando..." : "Exportar excel"}
             </Button>
           </>
         }
