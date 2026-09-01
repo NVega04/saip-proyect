@@ -4,8 +4,8 @@ services:
     container_name: saip_db_container
     restart: always
     environment:
-      MYSQL_DATABASE: db_saip_proyect
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "127.0.0.1:3307:3306"
     volumes:
@@ -14,7 +14,7 @@ services:
       - app
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_password"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
       interval: 10s
       timeout: 5s
       retries: 5
