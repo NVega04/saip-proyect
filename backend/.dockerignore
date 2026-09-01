@@ -1,0 +1,21 @@
+# Entornos y artefactos Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos del sistema/editor
+.~lock.*
+*.swp
+
+# Directorio legacy no usado por src/main.py
+app/
+
+# Datos y pruebas
+seed_data.py
+src/tests/
+*.xlsx
+
+# Entorno y control de versiones
+.env
+.git/

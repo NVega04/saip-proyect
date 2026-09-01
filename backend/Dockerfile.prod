@@ -1,0 +1,29 @@
+# ---- Stage 1: build de dependencias ----
+FROM ghcr.io/astral-sh/uv:python3.14-alpine AS builder
+WORKDIR /app
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+# ---- Stage 2: imagen final ----
+FROM python:3.14-alpine
+WORKDIR /app
+
+RUN addgroup -S app && adduser -S app -G app
+
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
+COPY --chown=app:app src/ ./src/
+COPY --chown=app:app alembic/ ./alembic/
+COPY --chown=app:app alembic.ini entrypoint.prod.sh ./
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+
+USER app
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://localhost:8000/docs >/dev/null || exit 1
+
+ENTRYPOINT ["./entrypoint.prod.sh"]
