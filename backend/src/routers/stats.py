@@ -216,7 +216,7 @@ def get_dashboard(
             id=s.id,
             name=s.name,
             expiration_date=exp_aware,
-            days_remaining=(exp_aware - now).days,
+            days_remaining=(exp_aware.date() - now.date()).days,
             available_quantity=s.available_quantity,
         )
 
