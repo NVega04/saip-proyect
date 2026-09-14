@@ -1,0 +1,24 @@
+{
+  "name": "saip-proyect",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.py": [
+      "uv run --project backend black --config backend/pyproject.toml",
+      "uv run --project backend ruff check --config backend/pyproject.toml --fix"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "pnpm exec prettier --write",
+      "pnpm exec eslint --fix --config frontend/eslint.config.js"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.3",
+    "prettier": "3.9.6"
+  }
+}
