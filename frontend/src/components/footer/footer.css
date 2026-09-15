@@ -1,29 +1,23 @@
-.app-footer{
+.app-footer {
+  margin-top: 40px;
 
-  margin-top:40px;
+  border-top: 1px solid var(--pale);
+  background: var(--white);
 
-  border-top:1px solid var(--pale);
-  background:var(--white);
-
-  padding:12px 20px;
-
+  padding: 12px 20px;
 }
 
-.footer-content{
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  font-size:.85rem;
-  color:var(--medium);
-
+  font-size: 0.85rem;
+  color: var(--medium);
 }
 
-.footer-version{
-
-  background:var(--bg);
-  padding:4px 8px;
-  border-radius:6px;
-
+.footer-version {
+  background: var(--bg);
+  padding: 4px 8px;
+  border-radius: 6px;
 }

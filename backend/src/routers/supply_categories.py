@@ -1,16 +1,16 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from datetime import datetime, timezone
-
 from src.database import get_session
-from src.models.models import User, SupplyCategory
+from src.dependencies import get_current_user
+from src.models.models import SupplyCategory, User
 from src.schemas.schemas import (
+    DeleteResponseSupplyCategory,
     SupplyCategoryCreate,
     SupplyCategoryResponse,
     SupplyCategoryUpdate,
-    DeleteResponseSupplyCategory,
 )
-from src.dependencies import get_current_user
 
 router = APIRouter(prefix="/supply-categories", tags=["SupplyCategories"])
 
@@ -115,7 +115,7 @@ def update_supply_category(
     for field, value in update_data.items():
         setattr(category, field, value)
 
-    category.updated_at = datetime.now(timezone.utc)
+    category.updated_at = datetime.now(UTC)
     category.updated_by = current_user.id
 
     session.add(category)
@@ -149,7 +149,7 @@ def delete_supply_category(
             detail=f"La categoría con id '{category_id}' ya fue eliminada.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     category.deleted_at = now
     category.deleted_by = current_user.id
     category.status = "inactive"
@@ -160,5 +160,5 @@ def delete_supply_category(
     return DeleteResponseSupplyCategory(
         message=f"Categoría '{category.name}' eliminada correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )

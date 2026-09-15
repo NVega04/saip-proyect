@@ -1,15 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlmodel import Session, select
-import logging
-from src.database import get_session
-from src.models.models import User, Provider, ProviderContact, ProviderStatus
-from src.schemas.schemas import (
-    ProviderCreate, ProviderResponse, ProviderUpdate,
-    ProviderDeleteResponse, ProviderContactCreate,
-    ProviderContactResponse, ProviderContactUpdate,
-    BulkImportResult,
-)
-from src.dependencies import get_current_user
 from src.bulk.parser import (
     RowError,
     name_key,
@@ -19,9 +11,22 @@ from src.bulk.parser import (
     run_bulk,
     template_response,
 )
-from datetime import datetime, timezone
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import Provider, ProviderContact, ProviderStatus, User
+from src.schemas.schemas import (
+    BulkImportResult,
+    ProviderContactCreate,
+    ProviderContactResponse,
+    ProviderContactUpdate,
+    ProviderCreate,
+    ProviderDeleteResponse,
+    ProviderResponse,
+    ProviderUpdate,
+)
 
 router = APIRouter(prefix="/providers", tags=["Providers"])
+
 
 # ── POST /providers/ ────────────────────────────────────────────────────────
 @router.post(
@@ -148,7 +153,7 @@ def update_provider(
     for field, value in update_data.items():
         setattr(provider, field, value)
 
-    provider.updated_at = datetime.now(timezone.utc)
+    provider.updated_at = datetime.now(UTC)
     provider.updated_by = current_user.id
 
     session.add(provider)
@@ -181,7 +186,7 @@ def delete_provider(
             detail=f"El proveedor con id '{provider_id}' ya fue eliminado.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     provider.deleted_at = now
     provider.deleted_by = current_user.id
     provider.status = ProviderStatus.INACTIVE
@@ -192,13 +197,14 @@ def delete_provider(
     return ProviderDeleteResponse(
         message=f"Proveedor '{provider.company}' eliminado correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
 # ════════════════════════════════════════════════════════════════════════════
 # CONTACTS
 # ════════════════════════════════════════════════════════════════════════════
+
 
 # ── POST /providers/{provider_id}/contacts/ ──────────────────────────────────
 @router.post(
@@ -273,7 +279,7 @@ def update_contact(
     for field, value in update_data.items():
         setattr(contact, field, value)
 
-    contact.updated_at = datetime.now(timezone.utc)
+    contact.updated_at = datetime.now(UTC)
     contact.updated_by = current_user.id
 
     session.add(contact)
@@ -314,7 +320,7 @@ def delete_contact(
             detail=f"El contacto con id '{contact_id}' ya fue eliminado.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     contact.deleted_at = now
     contact.deleted_by = current_user.id
 
@@ -324,7 +330,7 @@ def delete_contact(
     return ProviderDeleteResponse(
         message=f"Contacto '{contact.name}' eliminado correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
@@ -333,10 +339,20 @@ def delete_contact(
 # ════════════════════════════════════════════════════════════════════════════
 
 BULK_PROVIDER_HEADERS = ["empresa", "nit", "email"]
-BULK_PROVIDER_EXAMPLES = [["Distribuidora del Campo SAS", "900123456-7", "ventas@distribuidoracampo.com"]]
+BULK_PROVIDER_EXAMPLES = [
+    ["Distribuidora del Campo SAS", "900123456-7", "ventas@distribuidoracampo.com"]
+]
 
 BULK_CONTACT_HEADERS = ["empresa_proveedor", "nombre", "email", "telefono", "notas"]
-BULK_CONTACT_EXAMPLES = [["Distribuidora del Campo SAS", "Carlos Martinez", "carlos@distribuidoracampo.com", "3001234567", "Contacto principal"]]
+BULK_CONTACT_EXAMPLES = [
+    [
+        "Distribuidora del Campo SAS",
+        "Carlos Martinez",
+        "carlos@distribuidoracampo.com",
+        "3001234567",
+        "Contacto principal",
+    ]
+]
 
 
 def _valid_email(value: str) -> str:
@@ -370,25 +386,34 @@ def bulk_import_providers(
         email = _valid_email(str(row.get("email") or "").strip().lower())
 
         if nit in seen_nit:
-            raise RowError(f"El NIT '{row.get('nit')}' ya aparece en otra fila del archivo.")
+            raise RowError(
+                f"El NIT '{row.get('nit')}' ya aparece en otra fila del archivo."
+            )
         if email and email in seen_email:
-            raise RowError(f"El email '{row.get('email')}' ya aparece en otra fila del archivo.")
+            raise RowError(
+                f"El email '{row.get('email')}' ya aparece en otra fila del archivo."
+            )
 
         if session.exec(select(Provider).where(Provider.nit == nit)).first():
             raise RowError(f"Ya existe un proveedor con el NIT '{row.get('nit')}'.")
-        if email and session.exec(select(Provider).where(Provider.email == email)).first():
+        if (
+            email
+            and session.exec(select(Provider).where(Provider.email == email)).first()
+        ):
             raise RowError(f"Ya existe un proveedor con el email '{row.get('email')}'.")
 
         seen_nit.add(nit)
         if email:
             seen_email.add(email)
 
-        session.add(Provider(
-            company=empresa,
-            nit=nit,
-            email=email,
-            created_by=current_user.id,
-        ))
+        session.add(
+            Provider(
+                company=empresa,
+                nit=nit,
+                email=email,
+                created_by=current_user.id,
+            )
+        )
         return False
 
     return run_bulk(session, rows, process_row)
@@ -441,14 +466,20 @@ def bulk_import_provider_contacts(
         if telefono is not None and len(str(telefono).strip()) > 20:
             raise RowError("El teléfono supera los 20 caracteres.")
 
-        session.add(ProviderContact(
-            provider_id=provider.id,
-            name=nombre,
-            email=email or None,
-            phone=str(telefono).strip() if telefono is not None and str(telefono).strip() else None,
-            notes=optional_text(row, "notas"),
-            created_by=current_user.id,
-        ))
+        session.add(
+            ProviderContact(
+                provider_id=provider.id,
+                name=nombre,
+                email=email or None,
+                phone=(
+                    str(telefono).strip()
+                    if telefono is not None and str(telefono).strip()
+                    else None
+                ),
+                notes=optional_text(row, "notas"),
+                created_by=current_user.id,
+            )
+        )
         return False
 
     return run_bulk(session, rows, process_row)
@@ -461,5 +492,7 @@ def bulk_import_provider_contacts(
 )
 def bulk_provider_contacts_template():
     return template_response(
-        "plantilla_contactos_proveedores.xlsx", BULK_CONTACT_HEADERS, BULK_CONTACT_EXAMPLES
+        "plantilla_contactos_proveedores.xlsx",
+        BULK_CONTACT_HEADERS,
+        BULK_CONTACT_EXAMPLES,
     )

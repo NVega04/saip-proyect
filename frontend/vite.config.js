@@ -1,20 +1,20 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ['saip.lat']
+    allowedHosts: ["saip.lat"],
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          recharts: ['recharts'],
-          react: ['react', 'react-dom', 'react-router-dom']
-        }
-      }
-    }
-  }
-})
+          recharts: ["recharts"],
+          react: ["react", "react-dom", "react-router-dom"],
+        },
+      },
+    },
+  },
+});

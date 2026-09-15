@@ -18,7 +18,7 @@
   font-size: 0.82rem;
   font-weight: 500;
   color: #16425b;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .crf__required {
@@ -28,7 +28,7 @@
 
 .crf__input,
 .crf__textarea {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 0.85rem;
   color: #16425b;
   background: #f2f2f2;
@@ -36,7 +36,9 @@
   border-radius: 7px;
   padding: 0.55rem 0.85rem;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
@@ -51,7 +53,7 @@
 .crf__input:focus,
 .crf__textarea:focus {
   border-color: #647a8a;
-  box-shadow: 0 0 0 2px rgba(184,160,138,0.2);
+  box-shadow: 0 0 0 2px rgba(184, 160, 138, 0.2);
 }
 
 .crf__input--error {
@@ -61,7 +63,7 @@
 .crf__error {
   font-size: 0.74rem;
   color: #b94a3a;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .crf__actions {

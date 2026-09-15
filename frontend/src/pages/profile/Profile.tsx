@@ -25,11 +25,18 @@ function getInitials(first: string, last: string) {
 export default function Perfil() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [form, setForm] = useState<FormState>({ first_name: "", last_name: "", phone: "", email: "" });
+  const [form, setForm] = useState<FormState>({
+    first_name: "",
+    last_name: "",
+    phone: "",
+    email: "",
+  });
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(
+    null,
+  );
 
   useEffect(() => {
     getMe().then((data) => {
@@ -72,7 +79,7 @@ export default function Perfil() {
       });
       if (!res.ok) throw new Error();
       const updated = await res.json();
-      setUser((prev) => prev ? { ...prev, ...updated } : prev);
+      setUser((prev) => (prev ? { ...prev, ...updated } : prev));
       setEditing(false);
       setToast({ msg: "Perfil actualizado con éxito", type: "success" });
     } catch {
@@ -111,7 +118,6 @@ export default function Perfil() {
 
   return (
     <div className="perfil-page">
-
       {/* Toast */}
       {toast && (
         <div className={`perfil-toast perfil-toast--${toast.type}`}>
@@ -123,23 +129,33 @@ export default function Perfil() {
       {/* Botón volver */}
       <div className="perfil-topbar">
         <button className="perfil-back-btn" onClick={() => navigate(-1)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5"/>
-            <path d="M12 19l-7-7 7-7"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
           </svg>
           Volver
         </button>
       </div>
 
       <div className="perfil-card">
-
         {/* Header */}
         <div className="perfil-header">
           <div className="perfil-avatar">
             {getInitials(user.first_name, user.last_name)}
           </div>
           <div className="perfil-header-info">
-            <h1 className="perfil-fullname">{user.first_name} {user.last_name}</h1>
+            <h1 className="perfil-fullname">
+              {user.first_name} {user.last_name}
+            </h1>
             <div className="perfil-badges">
               <span className="perfil-badge">{user.role.name}</span>
               {user.is_admin && (
@@ -149,9 +165,16 @@ export default function Perfil() {
           </div>
           {!editing && (
             <button className="perfil-edit-btn" onClick={() => setEditing(true)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
               Editar perfil
             </button>
@@ -164,11 +187,16 @@ export default function Perfil() {
         <div className="perfil-section">
           <h2 className="perfil-section-title">Informacion personal</h2>
           <div className="perfil-grid">
-
             <div className="perfil-field">
               <label className="perfil-label">Nombre</label>
               {editing ? (
-                <input className="perfil-input" name="first_name" value={form.first_name} onChange={handleChange} placeholder="Tu nombre" />
+                <input
+                  className="perfil-input"
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  placeholder="Tu nombre"
+                />
               ) : (
                 <p className="perfil-value">{user.first_name}</p>
               )}
@@ -177,7 +205,13 @@ export default function Perfil() {
             <div className="perfil-field">
               <label className="perfil-label">Apellido</label>
               {editing ? (
-                <input className="perfil-input" name="last_name" value={form.last_name} onChange={handleChange} placeholder="Tu apellido" />
+                <input
+                  className="perfil-input"
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  placeholder="Tu apellido"
+                />
               ) : (
                 <p className="perfil-value">{user.last_name}</p>
               )}
@@ -186,7 +220,13 @@ export default function Perfil() {
             <div className="perfil-field">
               <label className="perfil-label">Telefono</label>
               {editing ? (
-                <input className="perfil-input" name="phone" value={form.phone} onChange={handleChange} placeholder="Ej. +57 300 000 0000" />
+                <input
+                  className="perfil-input"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="Ej. +57 300 000 0000"
+                />
               ) : (
                 <p className="perfil-value">{user.phone ?? "—"}</p>
               )}
@@ -196,12 +236,18 @@ export default function Perfil() {
             <div className="perfil-field">
               <label className="perfil-label">Correo electronico</label>
               {editing ? (
-                <input className="perfil-input" name="email" type="email" value={form.email} onChange={handleChange} placeholder="tucorreo@ejemplo.com" />
+                <input
+                  className="perfil-input"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="tucorreo@ejemplo.com"
+                />
               ) : (
                 <p className="perfil-value">{user.email}</p>
               )}
             </div>
-
           </div>
         </div>
 
@@ -214,7 +260,6 @@ export default function Perfil() {
             <span className="perfil-readonly-tag">Solo lectura</span>
           </h2>
           <div className="perfil-grid">
-
             <div className="perfil-readonly-field">
               <span className="perfil-readonly-icon">ROL</span>
               <div>
@@ -230,14 +275,17 @@ export default function Perfil() {
                 <p className="perfil-value">{formatDate(user.created_at)}</p>
               </div>
             </div>
-
           </div>
         </div>
 
         {/* Acciones */}
         {editing && (
           <div className="perfil-actions">
-            <button className="perfil-btn-cancel" onClick={handleCancel} disabled={saving}>
+            <button
+              className="perfil-btn-cancel"
+              onClick={handleCancel}
+              disabled={saving}
+            >
               Cancelar
             </button>
             <button className="perfil-btn-save" onClick={handleSave} disabled={saving}>
@@ -252,7 +300,6 @@ export default function Perfil() {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );

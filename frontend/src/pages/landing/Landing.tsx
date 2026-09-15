@@ -6,27 +6,26 @@ import { FaGithub } from "react-icons/fa";
 export default function Landing() {
   const navigate = useNavigate();
   useEffect(() => {
-  const logo = document.getElementById("heroLogo");
+    const logo = document.getElementById("heroLogo");
 
-  const handleScroll = () => {
-    if (!logo) return;
+    const handleScroll = () => {
+      if (!logo) return;
 
-    const scrollY = window.scrollY;
+      const scrollY = window.scrollY;
 
-    const opacity = Math.max(0, 1 - scrollY / 300);
-    const scale = Math.max(0.7, 1 - scrollY / 600);
+      const opacity = Math.max(0, 1 - scrollY / 300);
+      const scale = Math.max(0.7, 1 - scrollY / 600);
 
-    logo.style.opacity = opacity.toString();
-    logo.style.transform = `scale(${scale})`;
-  };
+      logo.style.opacity = opacity.toString();
+      logo.style.transform = `scale(${scale})`;
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="landing">
-
       {/* ── NAVBAR ─────────────────────────────────────────────── */}
       <nav className="landing-nav">
         <div className="landing-nav__brand">
@@ -34,109 +33,242 @@ export default function Landing() {
             <img src="/images/logo.png" alt="SAIP" />
           </div>
           <span className="landing-nav__name">SAIP</span>
-          <span className="landing-nav__sub">Sistema de administración integral de productos</span>
+          <span className="landing-nav__sub">
+            Sistema de administración integral de productos
+          </span>
         </div>
         <button className="landing-nav__btn" onClick={() => navigate("/login")}>
           Iniciar sesión
         </button>
       </nav>
-      
+
       <div className="landing-intro">
         <div className="landing-hero-logo" id="heroLogo">
           <img src="/images/logo.png" alt="SAIP Logo" />
         </div>
 
-      {/* ── HERO ───────────────────────────────────────────────── */}
+        {/* ── HERO ───────────────────────────────────────────────── */}
         <section className="landing-hero">
           {/* Olas animadas de fondo */}
           <div className="landing-hero__waves">
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path className="wave wave--1" d="M0,160 C360,240 1080,80 1440,160 L1440,320 L0,320 Z"/>
-              <path className="wave wave--2" d="M0,192 C480,100 960,260 1440,192 L1440,320 L0,320 Z"/>
-              <path className="wave wave--3" d="M0,224 C400,160 1040,280 1440,224 L1440,320 L0,320 Z"/>
+            <svg
+              viewBox="0 0 1440 320"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                className="wave wave--1"
+                d="M0,160 C360,240 1080,80 1440,160 L1440,320 L0,320 Z"
+              />
+              <path
+                className="wave wave--2"
+                d="M0,192 C480,100 960,260 1440,192 L1440,320 L0,320 Z"
+              />
+              <path
+                className="wave wave--3"
+                d="M0,224 C400,160 1040,280 1440,224 L1440,320 L0,320 Z"
+              />
             </svg>
           </div>
 
           <div className="landing-hero__content">
             <span className="landing-hero__tag">Gestión para negocios</span>
             <h1 className="landing-hero__title">
-              Administra tu negocio<br />
+              Administra tu negocio
+              <br />
               <span className="landing-hero__title--accent">de forma inteligente</span>
             </h1>
             <p className="landing-hero__desc">
-              SAIP centraliza el inventario, las ventas, las recetas y los roles de tu negocio
-              en un solo lugar. Menos papeles, más control.
+              SAIP centraliza el inventario, las ventas, las recetas y los roles de tu
+              negocio en un solo lugar. Menos papeles, más control.
             </p>
             <div className="landing-hero__actions">
-              <button className="landing-btn-primary" onClick={() => navigate("/login")}>
+              <button
+                className="landing-btn-primary"
+                onClick={() => navigate("/login")}
+              >
                 Comenzar ahora
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
-              <a href="#features" className="landing-btn-ghost">Ver características</a>
+              <a href="#features" className="landing-btn-ghost">
+                Ver características
+              </a>
             </div>
           </div>
 
           {/* Ilustración SVG animada */}
           <div className="landing-hero__visual">
-            <svg className="landing-hero__svg" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
-
+            <svg
+              className="landing-hero__svg"
+              viewBox="0 0 320 280"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               {/* Fondo tarjeta */}
-              <rect x="20" y="20" width="280" height="240" rx="18" fill="#f2f2f2" stroke="#d1d7db" strokeWidth="1.5"/>
+              <rect
+                x="20"
+                y="20"
+                width="280"
+                height="240"
+                rx="18"
+                fill="#f2f2f2"
+                stroke="#d1d7db"
+                strokeWidth="1.5"
+              />
 
               {/* Header tarjeta */}
-              <rect x="20" y="20" width="280" height="48" rx="18" fill="#d9dcd6"/>
-              <rect x="20" y="50" width="280" height="18" fill="#d9dcd6"/>
-              <circle cx="48" cy="44" r="10" fill="#bcc7d0"/>
-              <rect x="64" y="38" width="80" height="8" rx="4" fill="#bcc7d0"/>
-              <rect x="64" y="50" width="50" height="6" rx="3" fill="#d1d7db"/>
+              <rect x="20" y="20" width="280" height="48" rx="18" fill="#d9dcd6" />
+              <rect x="20" y="50" width="280" height="18" fill="#d9dcd6" />
+              <circle cx="48" cy="44" r="10" fill="#bcc7d0" />
+              <rect x="64" y="38" width="80" height="8" rx="4" fill="#bcc7d0" />
+              <rect x="64" y="50" width="50" height="6" rx="3" fill="#d1d7db" />
 
               {/* Barras de gráfica animadas */}
               <rect x="50" y="180" width="28" height="50" rx="6" fill="#bcc7d0">
-                <animate attributeName="height" values="50;70;50" dur="2.5s" repeatCount="indefinite"/>
-                <animate attributeName="y" values="180;160;180" dur="2.5s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="height"
+                  values="50;70;50"
+                  dur="2.5s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="180;160;180"
+                  dur="2.5s"
+                  repeatCount="indefinite"
+                />
               </rect>
               <rect x="90" y="160" width="28" height="70" rx="6" fill="#647a8a">
-                <animate attributeName="height" values="70;50;70" dur="2s" repeatCount="indefinite"/>
-                <animate attributeName="y" values="160;180;160" dur="2s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="height"
+                  values="70;50;70"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="160;180;160"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
               </rect>
               <rect x="130" y="150" width="28" height="80" rx="6" fill="#3a7ca5">
-                <animate attributeName="height" values="80;95;80" dur="3s" repeatCount="indefinite"/>
-                <animate attributeName="y" values="150;135;150" dur="3s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="height"
+                  values="80;95;80"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="150;135;150"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
               </rect>
               <rect x="170" y="165" width="28" height="65" rx="6" fill="#647a8a">
-                <animate attributeName="height" values="65;80;65" dur="2.2s" repeatCount="indefinite"/>
-                <animate attributeName="y" values="165;150;165" dur="2.2s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="height"
+                  values="65;80;65"
+                  dur="2.2s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="165;150;165"
+                  dur="2.2s"
+                  repeatCount="indefinite"
+                />
               </rect>
               <rect x="210" y="145" width="28" height="85" rx="6" fill="#16425b">
-                <animate attributeName="height" values="85;65;85" dur="2.8s" repeatCount="indefinite"/>
-                <animate attributeName="y" values="145;165;145" dur="2.8s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="height"
+                  values="85;65;85"
+                  dur="2.8s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="y"
+                  values="145;165;145"
+                  dur="2.8s"
+                  repeatCount="indefinite"
+                />
               </rect>
 
               {/* Línea base */}
-              <line x1="40" y1="232" x2="280" y2="232" stroke="#d1d7db" strokeWidth="1.5"/>
+              <line
+                x1="40"
+                y1="232"
+                x2="280"
+                y2="232"
+                stroke="#d1d7db"
+                strokeWidth="1.5"
+              />
 
               {/* Etiquetas eje X */}
-              <text x="64"  y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">Lun</text>
-              <text x="104" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">Mar</text>
-              <text x="144" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">Mié</text>
-              <text x="184" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">Jue</text>
-              <text x="224" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">Vie</text>
+              <text x="64" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">
+                Lun
+              </text>
+              <text x="104" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">
+                Mar
+              </text>
+              <text x="144" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">
+                Mié
+              </text>
+              <text x="184" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">
+                Jue
+              </text>
+              <text x="224" y="248" fontSize="8" fill="#8fa4b2" textAnchor="middle">
+                Vie
+              </text>
 
               {/* Badge flotante animado */}
               <g>
-                <animateTransform attributeName="transform" type="translate"
-                  values="0,0; 0,-6; 0,0" dur="3s" repeatCount="indefinite"/>
-                <rect x="195" y="88" width="90" height="36" rx="10" fill="#16425b"/>
-                <text x="240" y="103" fontSize="9" fill="#d9dcd6" textAnchor="middle">Ventas hoy</text>
-                <text x="240" y="116" fontSize="11" fontWeight="bold" fill="#f2f2f2" textAnchor="middle">+12.4%</text>
+                <animateTransform
+                  attributeName="transform"
+                  type="translate"
+                  values="0,0; 0,-6; 0,0"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+                <rect x="195" y="88" width="90" height="36" rx="10" fill="#16425b" />
+                <text x="240" y="103" fontSize="9" fill="#d9dcd6" textAnchor="middle">
+                  Ventas hoy
+                </text>
+                <text
+                  x="240"
+                  y="116"
+                  fontSize="11"
+                  fontWeight="bold"
+                  fill="#f2f2f2"
+                  textAnchor="middle"
+                >
+                  +12.4%
+                </text>
               </g>
 
               {/* Punto de datos animado */}
               <circle cx="224" cy="145" r="5" fill="#16425b">
-                <animate attributeName="r" values="5;7;5" dur="2.8s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="1;0.6;1" dur="2.8s" repeatCount="indefinite"/>
+                <animate
+                  attributeName="r"
+                  values="5;7;5"
+                  dur="2.8s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="1;0.6;1"
+                  dur="2.8s"
+                  repeatCount="indefinite"
+                />
               </circle>
             </svg>
           </div>
@@ -168,47 +300,62 @@ export default function Landing() {
           <div className="landing-about__text">
             <span className="landing-hero__tag">📖 Nuestra historia</span>
             <h2 className="landing-section-title" style={{ marginTop: "0.75rem" }}>
-              Nació en las aulas,<br />pensado para la vida real
+              Nació en las aulas,
+              <br />
+              pensado para la vida real
             </h2>
             <p className="landing-about__p">
-              SAIP comenzó como un proyecto académico con una pregunta simple:
-              ¿por qué tantos negocios locales siguen gestionando sus productos en cuadernos
-              o en hojas de cálculo desconectadas?
+              SAIP comenzó como un proyecto académico con una pregunta simple: ¿por qué
+              tantos negocios locales siguen gestionando sus productos en cuadernos o en
+              hojas de cálculo desconectadas?
             </p>
 
             <p className="landing-about__p">
-              A medida que avanzábamos, entendimos que el problema no era solo la falta de herramientas,
-              sino la falta de soluciones diseñadas realmente para el día a día de un negocio. Por eso,
-              decidimos construir SAIP con un enfoque práctico, pensando en la operación real.
+              A medida que avanzábamos, entendimos que el problema no era solo la falta
+              de herramientas, sino la falta de soluciones diseñadas realmente para el
+              día a día de un negocio. Por eso, decidimos construir SAIP con un enfoque
+              práctico, pensando en la operación real.
             </p>
 
             <p className="landing-about__p">
-              El sistema fue desarrollado utilizando <strong>Python y FastAPI</strong> para el backend,
-              permitiendo una arquitectura robusta, escalable y segura. Implementamos autenticación,
-              manejo de sesiones, control de usuarios y una estructura modular orientada a servicios.
+              El sistema fue desarrollado utilizando <strong>Python y FastAPI</strong>{" "}
+              para el backend, permitiendo una arquitectura robusta, escalable y segura.
+              Implementamos autenticación, manejo de sesiones, control de usuarios y una
+              estructura modular orientada a servicios.
             </p>
 
             <p className="landing-about__p">
-              En el frontend utilizamos <strong>React con TypeScript</strong>, construyendo una interfaz
-              moderna, intuitiva y dinámica. Diseñamos componentes reutilizables, navegación fluida
-              y una experiencia centrada en la usabilidad para facilitar la gestión diaria.
+              En el frontend utilizamos <strong>React con TypeScript</strong>,
+              construyendo una interfaz moderna, intuitiva y dinámica. Diseñamos
+              componentes reutilizables, navegación fluida y una experiencia centrada en
+              la usabilidad para facilitar la gestión diaria.
             </p>
 
             <p className="landing-about__p">
-              Durante el desarrollo integramos funcionalidades clave como control de inventario,
-              registro de ventas, gestión de roles y manejo de proveedores, conectando todo mediante
-              APIs eficientes y bien estructuradas.
+              Durante el desarrollo integramos funcionalidades clave como control de
+              inventario, registro de ventas, gestión de roles y manejo de proveedores,
+              conectando todo mediante APIs eficientes y bien estructuradas.
             </p>
 
             <p className="landing-about__p">
-              Hoy SAIP no es solo un proyecto académico, sino una solución real en evolución,
-              construida con tecnologías modernas y con la visión de escalar hacia un sistema
-              completo para la administración de negocios.
+              Hoy SAIP no es solo un proyecto académico, sino una solución real en
+              evolución, construida con tecnologías modernas y con la visión de escalar
+              hacia un sistema completo para la administración de negocios.
             </p>
           </div>
           <div className="landing-about__pills">
-            {["Proyecto académico", "Código abierto", "Hecho con 🤎", "React + Typescript", "Python + FastAPI", "Dockerfile", "Para negocios"].map((p) => (
-              <span key={p} className="landing-about__pill">{p}</span>
+            {[
+              "Proyecto académico",
+              "Código abierto",
+              "Hecho con 🤎",
+              "React + Typescript",
+              "Python + FastAPI",
+              "Dockerfile",
+              "Para negocios",
+            ].map((p) => (
+              <span key={p} className="landing-about__pill">
+                {p}
+              </span>
             ))}
             {/* 🔥 GITHUB */}
             <a
@@ -227,35 +374,49 @@ export default function Landing() {
                 <div className="timeline-dot" />
                 <div>
                   <strong>Inicio académico</strong>
-                  <p>Idea inicial planteada en el entorno formativo con enfoque en problemas reales.</p>
+                  <p>
+                    Idea inicial planteada en el entorno formativo con enfoque en
+                    problemas reales.
+                  </p>
                 </div>
               </div>
               <div className="timeline-item">
                 <div className="timeline-dot" />
                 <div>
                   <strong>Diseño del sistema</strong>
-                  <p>Definición de arquitectura, modelos de datos y flujo de usuarios.</p>
+                  <p>
+                    Definición de arquitectura, modelos de datos y flujo de usuarios.
+                  </p>
                 </div>
               </div>
               <div className="timeline-item">
                 <div className="timeline-dot" />
                 <div>
                   <strong>Backend</strong>
-                  <p>Desarrollo con Python y FastAPI, implementación de autenticación, sesiones y API REST.</p>
+                  <p>
+                    Desarrollo con Python y FastAPI, implementación de autenticación,
+                    sesiones y API REST.
+                  </p>
                 </div>
               </div>
               <div className="timeline-item">
                 <div className="timeline-dot" />
                 <div>
                   <strong>Frontend</strong>
-                  <p>Construcción con React y TypeScript, enfoque en UX y componentes reutilizables.</p>
+                  <p>
+                    Construcción con React y TypeScript, enfoque en UX y componentes
+                    reutilizables.
+                  </p>
                 </div>
               </div>
               <div className="timeline-item">
                 <div className="timeline-dot" />
                 <div>
                   <strong>Versión actual</strong>
-                  <p>Sistema funcional con módulos de gestión de usuarios, gestión de roles, recetas, inventario, etc</p>
+                  <p>
+                    Sistema funcional con módulos de gestión de usuarios, gestión de
+                    roles, recetas, inventario, etc
+                  </p>
                 </div>
               </div>
             </div>
@@ -266,11 +427,20 @@ export default function Landing() {
       {/* ── CTA FINAL ──────────────────────────────────────────── */}
       <section className="landing-cta">
         <h2 className="landing-cta__title">¿Listo para tomar el control?</h2>
-        <p className="landing-cta__desc">Ingresa a SAIP y empieza a gestionar tu negocio hoy.</p>
+        <p className="landing-cta__desc">
+          Ingresa a SAIP y empieza a gestionar tu negocio hoy.
+        </p>
         <button className="landing-btn-primary" onClick={() => navigate("/login")}>
           Iniciar sesión
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
       </section>
@@ -293,7 +463,6 @@ export default function Landing() {
           </a>
         </div>
       </footer>
-
     </div>
   );
 }
@@ -303,8 +472,15 @@ const features = [
     title: "Inventario",
     desc: "Controla el stock de materias primas y productos terminados en tiempo real. Nunca te quedes sin ingredientes.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
       </svg>
     ),
   },
@@ -312,9 +488,16 @@ const features = [
     title: "Registro de ventas",
     desc: "Registra cada venta del día de forma rápida y consulta el historial cuando lo necesites.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <line x1="12" y1="1" x2="12" y2="23"/>
-        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <line x1="12" y1="1" x2="12" y2="23" />
+        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
       </svg>
     ),
   },
@@ -322,11 +505,18 @@ const features = [
     title: "Recetas y producción",
     desc: "Gestiona tus recetas, calcula costos y lleva el control de lo que produces cada día.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <rect x="2" y="7" width="20" height="14" rx="1"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-        <line x1="12" y1="12" x2="12" y2="16"/>
-        <line x1="10" y1="14" x2="14" y2="14"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <rect x="2" y="7" width="20" height="14" rx="1" />
+        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+        <line x1="12" y1="12" x2="12" y2="16" />
+        <line x1="10" y1="14" x2="14" y2="14" />
       </svg>
     ),
   },
@@ -334,11 +524,18 @@ const features = [
     title: "Gestión de usuarios",
     desc: "Asigna roles y permisos a tu equipo. Cada persona accede solo a lo que necesita.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-        <path d="M16 3.13a4 4 0 010 7.75"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
       </svg>
     ),
   },
@@ -346,11 +543,18 @@ const features = [
     title: "Proveedores",
     desc: "Mantén un registro de tus proveedores y sus condiciones para tomar mejores decisiones de compra.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <rect x="1" y="3" width="15" height="13" rx="1"/>
-        <path d="M16 8h4l3 3v5h-7V8z"/>
-        <circle cx="5.5" cy="18.5" r="2.5"/>
-        <circle cx="18.5" cy="18.5" r="2.5"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <rect x="1" y="3" width="15" height="13" rx="1" />
+        <path d="M16 8h4l3 3v5h-7V8z" />
+        <circle cx="5.5" cy="18.5" r="2.5" />
+        <circle cx="18.5" cy="18.5" r="2.5" />
       </svg>
     ),
   },
@@ -358,9 +562,16 @@ const features = [
     title: "Roles y permisos",
     desc: "Define qué puede hacer cada usuario dentro del sistema con un control granular de accesos.",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="1.6">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3a7ca5"
+        strokeWidth="1.6"
+      >
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0110 0v4" />
       </svg>
     ),
   },

@@ -14,7 +14,7 @@
   font-size: 0.82rem;
   font-weight: 500;
   color: #16425b;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .crf__required {
@@ -24,7 +24,7 @@
 
 .crf__input,
 .crf__textarea {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 0.85rem;
   color: #16425b;
   background: #f2f2f2;
@@ -32,7 +32,9 @@
   border-radius: 7px;
   padding: 0.55rem 0.85rem;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
@@ -57,7 +59,7 @@
 .crf__error {
   font-size: 0.74rem;
   color: #b94a3a;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .crf__actions {
@@ -112,13 +114,13 @@
   color: #647a8a;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .prd__info-value {
   font-size: 0.85rem;
   color: #16425b;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 /* ─── Cabecera de la sección contactos ──────────────────────────────────────── */
@@ -133,7 +135,7 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #16425b;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   display: flex;
   align-items: center;
   gap: 0.45rem;
@@ -150,7 +152,7 @@
   border-radius: 50px;
   padding: 0.05rem 0.55rem;
   min-width: 1.4rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .prd__add-contact-btn {
@@ -165,8 +167,10 @@
   border-radius: 6px;
   padding: 0.35rem 0.75rem;
   cursor: pointer;
-  transition: background 0.14s ease, border-color 0.14s ease;
-  font-family: 'Roboto', sans-serif;
+  transition:
+    background 0.14s ease,
+    border-color 0.14s ease;
+  font-family: "Roboto", sans-serif;
 }
 
 .prd__add-contact-btn:hover {
@@ -179,7 +183,7 @@
 .prd__contacts-empty {
   font-size: 0.82rem;
   color: #647a8a;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   padding: 0.75rem 0;
 }
 
@@ -212,7 +216,7 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: #16425b;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .prd__contact-actions {
@@ -232,7 +236,7 @@
   gap: 0.3rem;
   font-size: 0.78rem;
   color: #3a5a68;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .prd__contact-meta-item svg {
@@ -243,7 +247,7 @@
 .prd__contact-notes {
   font-size: 0.76rem;
   color: #647a8a;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: italic;
   width: 100%;
   margin-top: 0.15rem;

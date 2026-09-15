@@ -100,7 +100,7 @@ const formatErrorDetail = (detail: unknown): string => {
       .map((item) =>
         item && typeof item === "object" && "msg" in item
           ? String((item as { msg: unknown }).msg)
-          : JSON.stringify(item)
+          : JSON.stringify(item),
       )
       .join("; ");
   }
@@ -127,8 +127,7 @@ const columns: ColumnDef<ProductionOrder>[] = [
     key: "total_yield",
     header: "Rendimiento total",
     width: "16%",
-    render: (row) =>
-      `${row.total_yield} ${row.recipe?.yield_unit?.abbreviation ?? ""}`,
+    render: (row) => `${row.total_yield} ${row.recipe?.yield_unit?.abbreviation ?? ""}`,
   },
   {
     key: "status",
@@ -156,9 +155,7 @@ export default function Produccion(): JSX.Element {
   const [errors, setErrors] = useState<FormErrors>({});
   // Id de la orden con acción en vuelo: bloquea reintentos (doble clic) y
   // deshabilita los botones de esa fila hasta que la petición termine.
-  const [actionInProgressId, setActionInProgressId] = useState<number | null>(
-    null
-  );
+  const [actionInProgressId, setActionInProgressId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -180,9 +177,7 @@ export default function Produccion(): JSX.Element {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ordenes_produccion_${new Date()
-        .toISOString()
-        .slice(0, 10)}.xlsx`;
+      a.download = `ordenes_produccion_${new Date().toISOString().slice(0, 10)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
       showAlert("success", "Reporte de órdenes de producción descargado.");
@@ -228,9 +223,7 @@ export default function Produccion(): JSX.Element {
 
   const activeRecipes = recipes.filter((r) => r.status === "active");
 
-  const selectedRecipe = recipes.find(
-    (r) => String(r.id) === form.recipe_id
-  );
+  const selectedRecipe = recipes.find((r) => String(r.id) === form.recipe_id);
 
   const expectedYield =
     selectedRecipe && Number(form.quantity_multiplier) > 0
@@ -260,8 +253,7 @@ export default function Produccion(): JSX.Element {
     const multiplier = Number(form.quantity_multiplier);
     if (!form.quantity_multiplier || Number.isNaN(multiplier) || multiplier <= 0)
       e.quantity_multiplier = "El multiplicador debe ser mayor a 0";
-    if (form.notes.length > 500)
-      e.notes = "Las notas no pueden superar 500 caracteres";
+    if (form.notes.length > 500) e.notes = "Las notas no pueden superar 500 caracteres";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -291,8 +283,7 @@ export default function Produccion(): JSX.Element {
         const err = await response.json();
         showAlert(
           "error",
-          formatErrorDetail(err.detail) ||
-            "Error al registrar la orden de producción"
+          formatErrorDetail(err.detail) || "Error al registrar la orden de producción",
         );
         return;
       }
@@ -324,7 +315,7 @@ export default function Produccion(): JSX.Element {
             const err = await response.json();
             showAlert(
               "error",
-              formatErrorDetail(err.detail) || "Error al iniciar la orden"
+              formatErrorDetail(err.detail) || "Error al iniciar la orden",
             );
             return;
           }
@@ -362,23 +353,25 @@ export default function Produccion(): JSX.Element {
       onConfirm: async () => {
         setActionInProgressId(order.id);
         try {
-          const response = await apiFetch(
-            `/production/orders/${order.id}/complete`,
-            { method: "POST" }
-          );
+          const response = await apiFetch(`/production/orders/${order.id}/complete`, {
+            method: "POST",
+          });
 
           if (!response.ok) {
             const err = await response.json();
             showAlert(
               "error",
-              formatErrorDetail(err.detail) || "Error al completar la producción"
+              formatErrorDetail(err.detail) || "Error al completar la producción",
             );
             return;
           }
 
           const result = await response.json();
           await refetchOrders();
-          showAlert("success", result.message || "Producción completada correctamente.");
+          showAlert(
+            "success",
+            result.message || "Producción completada correctamente.",
+          );
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
         } finally {
@@ -406,7 +399,7 @@ export default function Produccion(): JSX.Element {
             const err = await response.json();
             showAlert(
               "error",
-              formatErrorDetail(err.detail) || "Error al cancelar la orden"
+              formatErrorDetail(err.detail) || "Error al cancelar la orden",
             );
             return;
           }
@@ -438,10 +431,7 @@ export default function Produccion(): JSX.Element {
 
   return (
     <Layout
-      breadcrumbs={[
-        { label: "Dashboard", to: "/dashboard" },
-        { label: "Producción" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", to: "/dashboard" }, { label: "Producción" }]}
     >
       <Table
         title="Gestión de órdenes de producción"
@@ -457,7 +447,11 @@ export default function Produccion(): JSX.Element {
             <Button variant="secondary" onClick={() => setBulkOpen(true)}>
               Cargar masivo
             </Button>
-            <Button variant="secondary" onClick={handleExportExcel} disabled={exporting}>
+            <Button
+              variant="secondary"
+              onClick={handleExportExcel}
+              disabled={exporting}
+            >
               {exporting ? "Generando..." : "Exportar excel"}
             </Button>
           </>
@@ -466,86 +460,86 @@ export default function Produccion(): JSX.Element {
           const busy = actionInProgressId === row.id;
           return (
             <div className="saip-table__actions">
-            {row.status === "pending" && (
-              <>
-                <button
-                  className="saip-table__action-btn"
-                  title="Iniciar producción"
-                  disabled={busy}
-                  onClick={() => handleIniciar(row)}
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+              {row.status === "pending" && (
+                <>
+                  <button
+                    className="saip-table__action-btn"
+                    title="Iniciar producción"
+                    disabled={busy}
+                    onClick={() => handleIniciar(row)}
                   >
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                </button>
-                <button
-                  className="saip-table__action-btn saip-table__action-btn--danger"
-                  title="Cancelar orden"
-                  disabled={busy}
-                  onClick={() => handleCancelar(row)}
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </button>
+                  <button
+                    className="saip-table__action-btn saip-table__action-btn--danger"
+                    title="Cancelar orden"
+                    disabled={busy}
+                    onClick={() => handleCancelar(row)}
                   >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
-                  </svg>
-                </button>
-              </>
-            )}
-            {row.status === "in_progress" && (
-              <>
-                <button
-                  className="saip-table__action-btn"
-                  title="Confirmar producción"
-                  disabled={busy}
-                  onClick={() => handleConfirmar(row)}
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </button>
+                </>
+              )}
+              {row.status === "in_progress" && (
+                <>
+                  <button
+                    className="saip-table__action-btn"
+                    title="Confirmar producción"
+                    disabled={busy}
+                    onClick={() => handleConfirmar(row)}
                   >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </button>
-                <button
-                  className="saip-table__action-btn saip-table__action-btn--danger"
-                  title="Cancelar orden"
-                  disabled={busy}
-                  onClick={() => handleCancelar(row)}
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </button>
+                  <button
+                    className="saip-table__action-btn saip-table__action-btn--danger"
+                    title="Cancelar orden"
+                    disabled={busy}
+                    onClick={() => handleCancelar(row)}
                   >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
-                  </svg>
-                </button>
-              </>
-            )}
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
           );
         }}
@@ -591,9 +585,7 @@ export default function Produccion(): JSX.Element {
                 step={0.01}
                 placeholder="Ej: 2"
                 value={form.quantity_multiplier}
-                onChange={(e) =>
-                  setField("quantity_multiplier", e.target.value)
-                }
+                onChange={(e) => setField("quantity_multiplier", e.target.value)}
               />
               {errors.quantity_multiplier && (
                 <span className="prd__error">{errors.quantity_multiplier}</span>
@@ -635,7 +627,12 @@ export default function Produccion(): JSX.Element {
           </div>
 
           <div className="prd__actions">
-            <Button variant="secondary" type="button" onClick={handleCerrar} disabled={creating}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={handleCerrar}
+              disabled={creating}
+            >
               Cancelar
             </Button>
             <Button variant="primary" type="submit" disabled={creating}>

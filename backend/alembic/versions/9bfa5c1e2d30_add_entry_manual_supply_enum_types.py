@@ -7,6 +7,7 @@ Create Date: 2026-08-30
 Agrega MovementType.ENTRY y MovementType.MANUAL al enum movement_type, y
 ItemType.SUPPLY al enum item_type, para soportar cargas masivas de stock.
 """
+
 from alembic import op
 
 revision = "9bfa5c1e2d30"

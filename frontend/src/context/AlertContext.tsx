@@ -11,7 +11,7 @@ interface AlertState {
 }
 
 interface AlertContextType {
-  showAlert: (type: AlertType, message: string, duration?: number) => void;
+  showAlert: (_type: AlertType, _message: string, _duration?: number) => void;
   hideAlert: () => void;
 }
 

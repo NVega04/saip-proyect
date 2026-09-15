@@ -1,17 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from sqlmodel import Session, select
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from src.database import get_session
-from src.models.models import Supply, SupplyCategory, Unit, User
-from src.schemas.schemas import (
-    SupplyCreate,
-    SupplyResponse,
-    SupplyUpdate,
-    DeleteResponseSupply,
-    BulkImportResult,
-)
-from src.dependencies import get_current_user
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlmodel import Session, select
 from src.bulk.parser import (
     RowError,
     name_key,
@@ -22,6 +12,16 @@ from src.bulk.parser import (
     run_bulk,
     safe_float,
     template_response,
+)
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import Supply, SupplyCategory, Unit, User
+from src.schemas.schemas import (
+    BulkImportResult,
+    DeleteResponseSupply,
+    SupplyCreate,
+    SupplyResponse,
+    SupplyUpdate,
 )
 
 router = APIRouter(prefix="/supplies", tags=["Supplies"])
@@ -171,7 +171,7 @@ def update_supply(
     for field, value in update_data.items():
         setattr(supply, field, value)
 
-    supply.updated_at = datetime.now(timezone.utc)
+    supply.updated_at = datetime.now(UTC)
     supply.updated_by = current_user.id
 
     session.add(supply)
@@ -205,7 +205,7 @@ def delete_supply(
             detail=f"El insumo con id '{supply_id}' ya fue eliminado.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     supply.deleted_at = now
     supply.deleted_by = current_user.id
     supply.status = "inactive"
@@ -216,7 +216,7 @@ def delete_supply(
     return DeleteResponseSupply(
         message=f"Insumo '{supply.name}' eliminado correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
@@ -232,8 +232,18 @@ BULK_SUPPLY_HEADERS = [
     "fecha_vencimiento",
 ]
 BULK_SUPPLY_EXAMPLES = [
-    ["Harina de trigo", "Harina panadera tipo 550", "Insumos basicos", "kg", 25, 10, 100, "2026-12-31"],
+    [
+        "Harina de trigo",
+        "Harina panadera tipo 550",
+        "Insumos basicos",
+        "kg",
+        25,
+        10,
+        100,
+        "2026-12-31",
+    ],
 ]
+
 
 @router.post(
     "/bulk/import",
@@ -286,11 +296,15 @@ def bulk_import_supplies(
             description=descripcion,
             category_id=category.id,
             unit_id=unit.id,
-            available_quantity=safe_float(row.get("stock_disponible"), "stock_disponible"),
+            available_quantity=safe_float(
+                row.get("stock_disponible"), "stock_disponible"
+            ),
             min_stock=safe_float(row.get("stock_min"), "stock_min"),
             max_stock=safe_float(row.get("stock_max"), "stock_max"),
             supplier_id=None,
-            expiration_date=parse_datetime(row.get("fecha_vencimiento"), "fecha_vencimiento"),
+            expiration_date=parse_datetime(
+                row.get("fecha_vencimiento"), "fecha_vencimiento"
+            ),
             created_by=current_user.id,
         )
         session.add(new_supply)

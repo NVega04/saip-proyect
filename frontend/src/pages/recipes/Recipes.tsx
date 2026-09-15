@@ -124,9 +124,7 @@ const columns: ColumnDef<Recipe>[] = [
     key: "ingredients",
     header: "# Ingredientes",
     width: "12%",
-    render: (row) => (
-      <span className="rcf__badge-count">{row.ingredients.length}</span>
-    ),
+    render: (row) => <span className="rcf__badge-count">{row.ingredients.length}</span>,
   },
   {
     key: "status",
@@ -166,7 +164,8 @@ export default function Recetas(): JSX.Element {
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("recipes");
+  const { download: downloadReport, loading: reportLoading } =
+    useReportDownload("recipes");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -240,7 +239,7 @@ export default function Recetas(): JSX.Element {
   const setIngredienteField = (
     index: number,
     field: keyof IngredienteForm,
-    value: string
+    value: string,
   ) => {
     setForm((prev) => {
       const updated = [...prev.ingredients];
@@ -277,7 +276,7 @@ export default function Recetas(): JSX.Element {
     if (!form.product_id) e.product_id = "Selecciona un producto terminado";
     if (!form.yield_unit_id) e.yield_unit_id = "Selecciona una unidad";
     const ingValidos = form.ingredients.every(
-      (ing) => ing.supply_id && ing.quantity && Number(ing.quantity) > 0 && ing.unit_id
+      (ing) => ing.supply_id && ing.quantity && Number(ing.quantity) > 0 && ing.unit_id,
     );
     if (form.ingredients.length === 0 || !ingValidos)
       e.ingredientes_list = "Agrega al menos un ingrediente con cantidad valida";
@@ -383,10 +382,7 @@ export default function Recetas(): JSX.Element {
     setProductModalOpen(false);
   };
 
-  const setProductoField = (
-    field: keyof ProductMiniForm,
-    value: string
-  ) => {
+  const setProductoField = (field: keyof ProductMiniForm, value: string) => {
     setProductForm((prev) => ({ ...prev, [field]: value }));
     setProductErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -425,10 +421,7 @@ export default function Recetas(): JSX.Element {
       const created: ProductLite = await response.json();
       setProducts((prev) => [...prev, created]);
       setField("product_id", String(created.id));
-      showAlert(
-        "success",
-        `Producto "${created.name}" creado y seleccionado.`
-      );
+      showAlert("success", `Producto "${created.name}" creado y seleccionado.`);
       setProductModalOpen(false);
     } catch {
       showAlert("error", "Error de conexion con el servidor.");
@@ -467,24 +460,32 @@ export default function Recetas(): JSX.Element {
         searchPlaceholder="Buscar receta"
         headerActions={
           <>
-          <Button variant="primary" onClick={handleCrear}>
-            Crear receta
-          </Button>
-           <Button
-                variant="secondary"
-                onClick={downloadReport}
-                disabled={reportLoading}
-                icon={
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  }
-                >
-                {reportLoading ? "Generando..." : "Exportar excel"}
+            <Button variant="primary" onClick={handleCrear}>
+              Crear receta
             </Button>
-            </>
+            <Button
+              variant="secondary"
+              onClick={downloadReport}
+              disabled={reportLoading}
+              icon={
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              }
+            >
+              {reportLoading ? "Generando..." : "Exportar excel"}
+            </Button>
+          </>
         }
         renderActions={(row) => (
           <div className="saip-table__actions">
@@ -493,8 +494,14 @@ export default function Recetas(): JSX.Element {
               title="Ver detalle"
               onClick={() => handleVerDetalle(row)}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
@@ -504,8 +511,14 @@ export default function Recetas(): JSX.Element {
               title="Editar"
               onClick={() => handleEditar(row)}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
@@ -515,8 +528,14 @@ export default function Recetas(): JSX.Element {
               title="Eliminar"
               onClick={() => handleEliminar(row.id)}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.8">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                 <path d="M10 11v6M14 11v6" />
@@ -587,7 +606,9 @@ export default function Recetas(): JSX.Element {
                   </option>
                 ))}
               </select>
-              {errors.yield_unit_id && <span className="rcf__error">{errors.yield_unit_id}</span>}
+              {errors.yield_unit_id && (
+                <span className="rcf__error">{errors.yield_unit_id}</span>
+              )}
             </div>
           </div>
 
@@ -601,8 +622,14 @@ export default function Recetas(): JSX.Element {
                 className="rcf__add-ing-btn"
                 onClick={handleAbrirProducto}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -621,11 +648,12 @@ export default function Recetas(): JSX.Element {
                 </option>
               ))}
             </select>
-            {errors.product_id && <span className="rcf__error">{errors.product_id}</span>}
+            {errors.product_id && (
+              <span className="rcf__error">{errors.product_id}</span>
+            )}
             <span className="rcf__hint">
-              Obligatorio: al completar una orden de producción de esta receta,
-              el rendimiento se suma al stock de este producto en Productos
-              terminados.
+              Obligatorio: al completar una orden de producción de esta receta, el
+              rendimiento se suma al stock de este producto en Productos terminados.
             </span>
           </div>
 
@@ -653,8 +681,14 @@ export default function Recetas(): JSX.Element {
                 className="rcf__add-ing-btn"
                 onClick={addIngrediente}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -717,8 +751,14 @@ export default function Recetas(): JSX.Element {
                       disabled={form.ingredients.length === 1}
                       title="Eliminar ingrediente"
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2.5">
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
@@ -799,7 +839,12 @@ export default function Recetas(): JSX.Element {
           </div>
 
           <div className="rcf__actions">
-            <Button variant="secondary" type="button" onClick={handleCerrarProducto} disabled={creatingProduct}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={handleCerrarProducto}
+              disabled={creatingProduct}
+            >
               Cancelar
             </Button>
             <Button variant="primary" type="submit" disabled={creatingProduct}>

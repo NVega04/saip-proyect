@@ -224,15 +224,13 @@ export default function Ventas(): JSX.Element {
       return;
     }
 
-    const existing = cart.find(
-      (c) => c.item_type === tab && c.item_id === selected.id
-    );
+    const existing = cart.find((c) => c.item_type === tab && c.item_id === selected.id);
     const total = qty + (existing?.quantity ?? 0);
 
     if (total > selected.available_quantity) {
       showAlert(
         "error",
-        `Stock insuficiente para '${selected.name}': disponible ${selected.available_quantity}.`
+        `Stock insuficiente para '${selected.name}': disponible ${selected.available_quantity}.`,
       );
       return;
     }
@@ -242,8 +240,8 @@ export default function Ventas(): JSX.Element {
         prev.map((c) =>
           c.item_type === tab && c.item_id === selected.id
             ? { ...c, quantity: total }
-            : c
-        )
+            : c,
+        ),
       );
     } else {
       setCart((prev) => [
@@ -300,7 +298,7 @@ export default function Ventas(): JSX.Element {
         const msgs = data.warnings
           .map(
             (w) =>
-              `'${w.item_name}' quedó con ${w.available_quantity} (mínimo ${w.min_stock})`
+              `'${w.item_name}' quedó con ${w.available_quantity} (mínimo ${w.min_stock})`,
           )
           .join("; ");
         showAlert("warning", `Venta registrada. Stock bajo en: ${msgs}`);
@@ -438,8 +436,7 @@ export default function Ventas(): JSX.Element {
                   }`}
                 >
                   Stock disponible: {selected.available_quantity}{" "}
-                  {selected.unit?.abbreviation ?? ""} · Mínimo:{" "}
-                  {selected.min_stock}
+                  {selected.unit?.abbreviation ?? ""} · Mínimo: {selected.min_stock}
                 </div>
               )}
 
@@ -468,9 +465,7 @@ export default function Ventas(): JSX.Element {
               <h2 className="sales__card-title">Carrito de venta</h2>
 
               {cart.length === 0 ? (
-                <p className="sales__cart-empty">
-                  No hay productos agregados.
-                </p>
+                <p className="sales__cart-empty">No hay productos agregados.</p>
               ) : (
                 <table className="sales__cart">
                   <thead>
@@ -488,14 +483,10 @@ export default function Ventas(): JSX.Element {
                         <td>
                           <Badge
                             label={
-                              item.item_type === "product"
-                                ? "Terminado"
-                                : "Comercial"
+                              item.item_type === "product" ? "Terminado" : "Comercial"
                             }
                             variant={
-                              item.item_type === "product"
-                                ? "access"
-                                : "warning"
+                              item.item_type === "product" ? "access" : "warning"
                             }
                           />
                         </td>
@@ -591,7 +582,11 @@ export default function Ventas(): JSX.Element {
             <Button variant="secondary" onClick={handleReset}>
               Limpiar
             </Button>
-            <Button variant="secondary" onClick={handleExportExcel} disabled={exporting}>
+            <Button
+              variant="secondary"
+              onClick={handleExportExcel}
+              disabled={exporting}
+            >
               {exporting ? "Generando..." : "Exportar excel"}
             </Button>
           </div>
@@ -632,14 +627,10 @@ export default function Ventas(): JSX.Element {
                         <td>
                           <Badge
                             label={
-                              sale.status === "completada"
-                                ? "Completada"
-                                : "Anulada"
+                              sale.status === "completada" ? "Completada" : "Anulada"
                             }
                             variant={
-                              sale.status === "completada"
-                                ? "active"
-                                : "inactive"
+                              sale.status === "completada" ? "active" : "inactive"
                             }
                           />
                         </td>
@@ -750,9 +741,7 @@ export default function Ventas(): JSX.Element {
               </div>
             ))}
 
-            {detail.notes && (
-              <p className="sales-hist__notes">Notas: {detail.notes}</p>
-            )}
+            {detail.notes && <p className="sales-hist__notes">Notas: {detail.notes}</p>}
           </div>
         ) : null}
       </Modal>

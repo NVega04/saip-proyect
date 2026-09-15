@@ -8,9 +8,5 @@ interface BadgeProps {
 }
 
 export default function Badge({ label, variant = "access" }: BadgeProps) {
-  return (
-    <span className={`saip-badge saip-badge--${variant}`}>
-      {label}
-    </span>
-  );
+  return <span className={`saip-badge saip-badge--${variant}`}>{label}</span>;
 }

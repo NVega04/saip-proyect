@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from src.database import get_session
-from src.models.models import RoleModule, Role, Module, User
 from src.dependencies import get_current_user, require_admin
-from src.schemas.schemas import RoleModuleAssign, RoleModuleResponse, ModuleResponse
+from src.models.models import Module, Role, RoleModule, User
+from src.schemas.schemas import ModuleResponse, RoleModuleAssign, RoleModuleResponse
 
 router = APIRouter(prefix="/role-modules", tags=["Role Modules"])
 

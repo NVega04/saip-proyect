@@ -1,6 +1,7 @@
 import os
+
 from dotenv import load_dotenv
-from sqlmodel import create_engine, SQLModel, Session
+from sqlmodel import Session, SQLModel, create_engine
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -16,8 +17,10 @@ mysql_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NA
 
 engine = create_engine(mysql_url, echo=True)
 
+
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+
 
 def get_session():
     with Session(engine) as session:

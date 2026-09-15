@@ -1,36 +1,11 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
-from fastapi.responses import StreamingResponse
-from sqlmodel import Session, col, select
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from io import BytesIO
-from openpyxl import Workbook
+from zoneinfo import ZoneInfo
 
-from src.database import get_session
-from src.models.models import (
-    ProductionOrder,
-    ProductionOrderSnapshot,
-    ProductionOrderStatus,
-    Product,
-    Recipe,
-    RecipeIngredient,
-    RecipeStatus,
-    Supply,
-    User,
-)
-from src.schemas.schemas import (
-    ProductionOrderCreate,
-    ProductionOrderCancelRequest,
-    ProductionOrderResponse,
-    ProductionOrderStatusChangeResponse,
-    ProductionSnapshotResponse,
-    ProductionCompleteResponse,
-    SupplyBasic,
-    UnitBasic,
-    BulkImportResult,
-)
-from src.dependencies import get_current_user
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from sqlmodel import Session, col, select
 from src.bulk.parser import (
     RowError,
     name_key,
@@ -42,8 +17,36 @@ from src.bulk.parser import (
     safe_float,
     template_response,
 )
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import (
+    Product,
+    ProductionOrder,
+    ProductionOrderSnapshot,
+    ProductionOrderStatus,
+    Recipe,
+    RecipeIngredient,
+    RecipeStatus,
+    Supply,
+    User,
+)
+from src.schemas.schemas import (
+    BulkImportResult,
+    ProductionCompleteResponse,
+    ProductionOrderCancelRequest,
+    ProductionOrderCreate,
+    ProductionOrderResponse,
+    ProductionOrderStatusChangeResponse,
+    ProductionSnapshotResponse,
+    SupplyBasic,
+    UnitBasic,
+)
 from src.utils.excel import (
-    apply_header_row, apply_data_row, auto_width, add_title_row, fmt_dt,
+    add_title_row,
+    apply_data_row,
+    apply_header_row,
+    auto_width,
+    fmt_dt,
 )
 
 router = APIRouter(prefix="/production/orders", tags=["Production"])
@@ -61,13 +64,25 @@ def _get_order_or_404(order_id: int, session: Session) -> ProductionOrder:
     return order
 
 
-@router.post("/", response_model=ProductionOrderResponse, status_code=status.HTTP_201_CREATED)
-def create(data: ProductionOrderCreate, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.post(
+    "/", response_model=ProductionOrderResponse, status_code=status.HTTP_201_CREATED
+)
+def create(
+    data: ProductionOrderCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     recipe = session.get(Recipe, data.recipe_id)
     if not recipe or recipe.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La receta con id '{data.recipe_id}' no existe.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"La receta con id '{data.recipe_id}' no existe.",
+        )
     if recipe.status != RecipeStatus.ACTIVE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"La receta '{recipe.name}' no está activa.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"La receta '{recipe.name}' no está activa.",
+        )
 
     order = ProductionOrder(
         recipe_id=data.recipe_id,
@@ -84,9 +99,11 @@ def create(data: ProductionOrderCreate, session: Session = Depends(get_session),
     return order
 
 
-@router.get("/", response_model=list[ProductionOrderResponse], status_code=status.HTTP_200_OK)
+@router.get(
+    "/", response_model=list[ProductionOrderResponse], status_code=status.HTTP_200_OK
+)
 def get_all(
-    status_filter: Optional[ProductionOrderStatus] = Query(default=None, alias="status"),
+    status_filter: ProductionOrderStatus | None = Query(default=None, alias="status"),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
@@ -101,24 +118,30 @@ def get_all(
     summary="Exportar órdenes de producción a Excel",
 )
 def export_orders(
-    status_filter: Optional[ProductionOrderStatus] = Query(
-        default=None, alias="status"
-    ),
+    status_filter: ProductionOrderStatus | None = Query(default=None, alias="status"),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
     query = (
         select(ProductionOrder)
         .where(ProductionOrder.deleted_at == None)
-        .order_by(ProductionOrder.created_at.desc())
+        .order_by(ProductionOrder.created_at.desc())  # type: ignore[attr-defined]
     )
     if status_filter is not None:
         query = query.where(ProductionOrder.status == status_filter)
     orders = session.exec(query).all()
 
     headers = [
-        "ID", "Receta", "Multiplicador", "Rendimiento Total", "Estado",
-        "Programada", "Iniciada", "Completada", "Notas", "Creada",
+        "ID",
+        "Receta",
+        "Multiplicador",
+        "Rendimiento Total",
+        "Estado",
+        "Programada",
+        "Iniciada",
+        "Completada",
+        "Notas",
+        "Creada",
     ]
 
     wb = Workbook()
@@ -130,18 +153,22 @@ def export_orders(
 
     for i, order in enumerate(orders, start=2):
         recipe = order.recipe.name if order.recipe else "—"
-        apply_data_row(ws, i, [
-            order.id,
-            recipe,
-            order.quantity_multiplier,
-            order.total_yield,
-            order.status.value,
-            fmt_dt(order.scheduled_at),
-            fmt_dt(order.started_at),
-            fmt_dt(order.completed_at),
-            order.notes or "—",
-            fmt_dt(order.created_at),
-        ])
+        apply_data_row(
+            ws,
+            i,
+            [
+                order.id,
+                recipe,
+                order.quantity_multiplier,
+                order.total_yield,
+                order.status.value,
+                fmt_dt(order.scheduled_at),
+                fmt_dt(order.started_at),
+                fmt_dt(order.completed_at),
+                order.notes or "—",
+                fmt_dt(order.created_at),
+            ],
+        )
 
     col_count = len(headers)
     add_title_row(
@@ -155,7 +182,9 @@ def export_orders(
     wb.save(stream)
     stream.seek(0)
 
-    filename = f"ordenes_produccion_{datetime.now(BOGOTA_TZ).strftime('%Y%m%d_%H%M%S')}.xlsx"
+    filename = (
+        f"ordenes_produccion_{datetime.now(BOGOTA_TZ).strftime('%Y%m%d_%H%M%S')}.xlsx"
+    )
     return StreamingResponse(
         stream,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -163,13 +192,29 @@ def export_orders(
     )
 
 
-@router.get("/{order_id}", response_model=ProductionOrderResponse, status_code=status.HTTP_200_OK)
-def get_one(order_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.get(
+    "/{order_id}",
+    response_model=ProductionOrderResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_one(
+    order_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     return _get_order_or_404(order_id, session)
 
 
-@router.patch("/{order_id}/start", response_model=ProductionOrderStatusChangeResponse, status_code=status.HTTP_200_OK)
-def start(order_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.patch(
+    "/{order_id}/start",
+    response_model=ProductionOrderStatusChangeResponse,
+    status_code=status.HTTP_200_OK,
+)
+def start(
+    order_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     order = _get_order_or_404(order_id, session)
     if order.status != ProductionOrderStatus.PENDING:
         raise HTTPException(
@@ -187,14 +232,18 @@ def start(order_id: int, session: Session = Depends(get_session), current_user: 
 
     return ProductionOrderStatusChangeResponse(
         message=f"Orden de producción #{order.id} iniciada correctamente.",
-        id=order.id,
+        id=order.id,  # type: ignore[arg-type]
         status=order.status,
         changed_at=now,
-        changed_by=current_user.id,
+        changed_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
-@router.patch("/{order_id}/cancel", response_model=ProductionOrderStatusChangeResponse, status_code=status.HTTP_200_OK)
+@router.patch(
+    "/{order_id}/cancel",
+    response_model=ProductionOrderStatusChangeResponse,
+    status_code=status.HTTP_200_OK,
+)
 def cancel(
     order_id: int,
     data: ProductionOrderCancelRequest,
@@ -202,7 +251,10 @@ def cancel(
     current_user: User = Depends(get_current_user),
 ):
     order = _get_order_or_404(order_id, session)
-    if order.status not in (ProductionOrderStatus.PENDING, ProductionOrderStatus.IN_PROGRESS):
+    if order.status not in (
+        ProductionOrderStatus.PENDING,
+        ProductionOrderStatus.IN_PROGRESS,
+    ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Solo se pueden cancelar órdenes en estado 'pending' o 'in_progress' (estado actual: '{order.status.value}').",
@@ -221,15 +273,23 @@ def cancel(
 
     return ProductionOrderStatusChangeResponse(
         message=f"Orden de producción #{order.id} cancelada correctamente.",
-        id=order.id,
+        id=order.id,  # type: ignore[arg-type]
         status=order.status,
         changed_at=now,
-        changed_by=current_user.id,
+        changed_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
-@router.post("/{order_id}/complete", response_model=ProductionCompleteResponse, status_code=status.HTTP_200_OK)
-def complete(order_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.post(
+    "/{order_id}/complete",
+    response_model=ProductionCompleteResponse,
+    status_code=status.HTTP_200_OK,
+)
+def complete(
+    order_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     order = _get_order_or_404(order_id, session)
 
     # RN-067: solo se ejecuta con orden previamente confirmada (in_progress).
@@ -242,9 +302,15 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     # RN-068: la receta debe existir, no estar eliminada y estar activa.
     recipe = session.get(Recipe, order.recipe_id)
     if not recipe or recipe.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La receta con id '{order.recipe_id}' no existe.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"La receta con id '{order.recipe_id}' no existe.",
+        )
     if recipe.status != RecipeStatus.ACTIVE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"La receta '{recipe.name}' no está activa.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"La receta '{recipe.name}' no está activa.",
+        )
 
     if order.quantity_multiplier <= 0:
         raise HTTPException(
@@ -267,13 +333,19 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     for ing in ingredients:
         ing_supply = session.get(Supply, ing.supply_id)
         if not ing_supply or ing_supply.deleted_at is not None:
-            unit_mismatches.append(f"{ing_supply.name if ing_supply else f'Insumo #{ing.supply_id}'} (insumo inexistente o eliminado)")
+            unit_mismatches.append(
+                f"{ing_supply.name if ing_supply else f'Insumo #{ing.supply_id}'} (insumo inexistente o eliminado)"
+            )
         elif ing.unit_id != ing_supply.unit_id:
-            unit_mismatches.append(f"{ing_supply.name} (receta en unidad id {ing.unit_id}, inventario en unidad id {ing_supply.unit_id})")
+            unit_mismatches.append(
+                f"{ing_supply.name} (receta en unidad id {ing.unit_id}, inventario en unidad id {ing_supply.unit_id})"
+            )
     if unit_mismatches:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unidades inconsistentes entre la receta y el inventario: " + "; ".join(unit_mismatches) + ". Corrige las unidades antes de completar la producción.",
+            detail="Unidades inconsistentes entre la receta y el inventario: "
+            + "; ".join(unit_mismatches)
+            + ". Corrige las unidades antes de completar la producción.",
         )
 
     # Bloqueo pesimista de filas (SELECT ... FOR UPDATE) sobre los insumos
@@ -282,7 +354,10 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     # ventana entre la validación de stock y el descuento (RN-069/RN-070).
     supply_ids = sorted({ing.supply_id for ing in ingredients})
     locked_supplies = session.exec(
-        select(Supply).where(col(Supply.id).in_(supply_ids)).with_for_update().order_by(col(Supply.id))
+        select(Supply)
+        .where(col(Supply.id).in_(supply_ids))
+        .with_for_update()
+        .order_by(col(Supply.id))
     ).all()
     supply_by_id = {s.id: s for s in locked_supplies}
 
@@ -293,9 +368,9 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     for s in locked_supplies:
         # La unidad del insumo ya fue validada como consistente arriba.
         assert s.unit is not None
-        supply_info_by_id[s.id] = (
-            SupplyBasic(id=s.id, token=s.token, name=s.name, status=s.status),
-            UnitBasic(id=s.unit.id, name=s.unit.name, abbreviation=s.unit.abbreviation),
+        supply_info_by_id[s.id] = (  # type: ignore[index]
+            SupplyBasic(id=s.id, token=s.token, name=s.name, status=s.status),  # type: ignore[arg-type]
+            UnitBasic(id=s.unit.id, name=s.unit.name, abbreviation=s.unit.abbreviation),  # type: ignore[arg-type]
         )
 
     # Validación completa de stock ANTES de mutar nada: si falta cualquier
@@ -305,16 +380,20 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     for ing in ingredients:
         supply = supply_by_id[ing.supply_id]
         required = ing.quantity * order.quantity_multiplier
-        required_by_supply[supply.id] = required_by_supply.get(supply.id, 0) + required
+        required_by_supply[supply.id] = required_by_supply.get(supply.id, 0) + required  # type: ignore[index, arg-type]
     for supply_id in supply_ids:
         supply = supply_by_id[supply_id]
         required = required_by_supply[supply_id]
         if required > supply.available_quantity:
-            insufficient.append(f"{supply.name} (requiere {required} {supply.unit.abbreviation if supply.unit else ''}, disponible {supply.available_quantity} {supply.unit.abbreviation if supply.unit else ''})".strip())
+            insufficient.append(
+                f"{supply.name} (requiere {required} {supply.unit.abbreviation if supply.unit else ''}, disponible {supply.available_quantity} {supply.unit.abbreviation if supply.unit else ''})".strip()
+            )
     if insufficient:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Stock insuficiente para completar la producción. Faltantes: " + "; ".join(insufficient) + ".",
+            detail="Stock insuficiente para completar la producción. Faltantes: "
+            + "; ".join(insufficient)
+            + ".",
         )
 
     # Descuento + snapshot por cada insumo (RN-071).
@@ -322,7 +401,7 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
     now = datetime.now(BOGOTA_TZ)
     for ing in ingredients:
         supply = supply_by_id[ing.supply_id]
-        required = required_by_supply[supply.id]
+        required = required_by_supply[supply.id]  # type: ignore[index]
         stock_before = supply.available_quantity
         supply.available_quantity -= required
         snapshots.append(
@@ -338,9 +417,9 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
         session.add(supply)
 
     # Incremento del producto terminado asociado a la receta (si existe).
-    product_name: Optional[str] = None
-    product_quantity_added: Optional[float] = None
-    product: Optional[Product] = None
+    product_name: str | None = None
+    product_quantity_added: float | None = None
+    product: Product | None = None
     if recipe.product_id is not None:
         candidate = session.get(Product, recipe.product_id)
         # Solo se incrementa si el producto existe y no está eliminado; el
@@ -370,7 +449,7 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
 
     completed_snapshots = [
         ProductionSnapshotResponse(
-            id=sn.id,
+            id=sn.id,  # type: ignore[arg-type]
             supply_id=sn.supply_id,
             supply=supply_info_by_id[sn.supply_id][0],
             quantity_used=sn.quantity_used,
@@ -384,7 +463,7 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
 
     return ProductionCompleteResponse(
         message=f"Orden de producción #{order.id} completada correctamente. Se descontaron {len(completed_snapshots)} insumo(s).",
-        id=order.id,
+        id=order.id,  # type: ignore[arg-type]
         status=order.status,
         total_yield=order.total_yield,
         completed_at=now,
@@ -392,7 +471,7 @@ def complete(order_id: int, session: Session = Depends(get_session), current_use
         product_name=product_name,
         product_quantity_added=product_quantity_added,
         snapshots=completed_snapshots,
-        completed_by=current_user.id,
+        completed_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
@@ -429,15 +508,19 @@ def bulk_import_orders(
         if multiplicador <= 0:
             raise RowError("El multiplicador debe ser mayor a 0.")
 
-        session.add(ProductionOrder(
-            recipe_id=recipe.id,
-            quantity_multiplier=multiplicador,
-            total_yield=recipe.yield_quantity * multiplicador,
-            scheduled_at=parse_datetime(row.get("programada_para"), "programada_para"),
-            notes=optional_text(row, "notas"),
-            status=ProductionOrderStatus.PENDING,
-            created_by=current_user.id,
-        ))
+        session.add(
+            ProductionOrder(
+                recipe_id=recipe.id,
+                quantity_multiplier=multiplicador,
+                total_yield=recipe.yield_quantity * multiplicador,
+                scheduled_at=parse_datetime(
+                    row.get("programada_para"), "programada_para"
+                ),
+                notes=optional_text(row, "notas"),
+                status=ProductionOrderStatus.PENDING,
+                created_by=current_user.id,
+            )
+        )
         return False
 
     return run_bulk(session, rows, process_row)

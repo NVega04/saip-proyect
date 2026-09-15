@@ -22,15 +22,15 @@ import traceback
 from datetime import datetime
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import (
-    TimeoutException,
     NoSuchElementException,
+    TimeoutException,
     WebDriverException,
 )
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
@@ -80,8 +80,8 @@ def build_driver():
         return webdriver.Chrome(service=service, options=opts)
 
     print("Chrome no encontrado -> usando Firefox.")
-    from selenium.webdriver.firefox.service import Service as FirefoxService
     from selenium.webdriver.firefox.options import Options as FirefoxOptions
+    from selenium.webdriver.firefox.service import Service as FirefoxService
 
     fopts = FirefoxOptions()
     if HEADLESS:
@@ -92,10 +92,16 @@ def build_driver():
 
 def _chrome_binary_available() -> bool:
     from shutil import which
+
     return any(
         which(b)
-        for b in ("google-chrome", "google-chrome-stable", "chrome", "chromium",
-                  "chromium-browser")
+        for b in (
+            "google-chrome",
+            "google-chrome-stable",
+            "chrome",
+            "chromium",
+            "chromium-browser",
+        )
     )
 
 
@@ -123,7 +129,9 @@ def goto(driver, path: str):
 
 
 def wait_visible(driver, locator, timeout=WAIT_TIMEOUT):
-    return WebDriverWait(driver, timeout).until(EC.visibility_of_element_located(locator))
+    return WebDriverWait(driver, timeout).until(
+        EC.visibility_of_element_located(locator)
+    )
 
 
 def wait_clickable(driver, locator, timeout=WAIT_TIMEOUT):
@@ -219,6 +227,7 @@ def api_request(method: str, path: str, body=None):
     (urllib de stdlib; no requiere dependencias extra)."""
     import json as _json
     import urllib.request as _ur
+
     token = (SESSION.get("session_token") or "").encode()
     req = _ur.Request(
         f"{API_BASE}{path}",
@@ -245,10 +254,12 @@ def ensure_unit_available() -> bool:
         if status != 200:
             return False
         import json as _json
+
         if _json.loads(raw or "[]"):
             return True
         status, raw = api_request(
-            "POST", "/units/",
+            "POST",
+            "/units/",
             {"name": "Kilogramo", "abbreviation": "kg", "quantity": 1},
         )
         return status == 201
@@ -299,9 +310,7 @@ def xpath_ci(texto: str) -> str:
     may = "ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÜÑ"
     minu = "abcdefghijklmnopqrstuvwxyzáéíóúüñ"
     t = texto.translate(str.maketrans(may, minu))
-    return (
-        f"contains(translate(normalize-space(.), '{may}', '{minu}'), '{t}')"
-    )
+    return f"contains(translate(normalize-space(.), '{may}', '{minu}'), '{t}')"
 
 
 def is_redirected_away(driver, route: str) -> bool:
@@ -347,7 +356,9 @@ def vista_01_login(driver):
         # (la alerta de error normalmente no llega a mostrarse)
         texto_alerta = ""
         for _ in range(16):
-            alertas = driver.find_elements(By.CSS_SELECTOR, ".saip-alerta[role='alert']")
+            alertas = driver.find_elements(
+                By.CSS_SELECTOR, ".saip-alerta[role='alert']"
+            )
             if alertas and alertas[0].is_displayed():
                 texto_alerta = alertas[0].text
                 break
@@ -365,8 +376,7 @@ def vista_01_login(driver):
         record(vista, ruta, "NEGATIVO", ok, detalle, shot)
     except Exception as e:
         shot = screenshot(driver, f"{vista}_negativo_error")
-        record(vista, ruta, "NEGATIVO", False,
-               f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "NEGATIVO", False, f"{type(e).__name__}: {e}", shot)
 
     # POSITIVO: credenciales correctas
     try:
@@ -375,12 +385,21 @@ def vista_01_login(driver):
         if ok_login:
             capture_session(driver)  # sesion canonica para las demas vistas
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", ok_login,
-               f"Login admin exitoso -> {driver.current_url}" if ok_login
-               else "No se llego a /dashboard con credenciales validas", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            ok_login,
+            (
+                f"Login admin exitoso -> {driver.current_url}"
+                if ok_login
+                else "No se llego a /dashboard con credenciales validas"
+            ),
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def vista_02_dashboard(driver):
@@ -392,13 +411,21 @@ def vista_02_dashboard(driver):
         # El dashboard no usa .saip-loading: carga stats asincronos. La seccion
         # "Productos terminados" vive en la pestana Productos; validamos el
         # primer bloque real que se renderiza por defecto.
-        h3 = wait_visible(driver, (By.XPATH, "//h3[contains(text(),'Consumo diario de insumos')]"))
+        h3 = wait_visible(
+            driver, (By.XPATH, "//h3[contains(text(),'Consumo diario de insumos')]")
+        )
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", h3.is_displayed(),
-               "Dashboard carga con KPIs y grafico 'Consumo diario de insumos'", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            h3.is_displayed(),
+            "Dashboard carga con KPIs y grafico 'Consumo diario de insumos'",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def vista_03_productos(driver):
@@ -411,20 +438,30 @@ def vista_03_productos(driver):
         WebDriverWait(driver, WAIT_TIMEOUT).until(
             EC.invisibility_of_element_located((By.CSS_SELECTOR, ".saip-loading"))
         )
-        btn = wait_visible(driver, (By.XPATH, "//button[contains(., 'Crear producto')]"))
+        btn = wait_visible(
+            driver, (By.XPATH, "//button[contains(., 'Crear producto')]")
+        )
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", btn.is_displayed(),
-               "Listado de productos cargado con boton 'Crear producto'", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            btn.is_displayed(),
+            "Listado de productos cargado con boton 'Crear producto'",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def vista_04_crear_producto(driver):
     vista, ruta = "04_CrearProducto", "/products (modal)"
 
     def abrir_modal():
-        wait_clickable(driver, (By.XPATH, "//button[contains(., 'Crear producto')]")).click()
+        wait_clickable(
+            driver, (By.XPATH, "//button[contains(., 'Crear producto')]")
+        ).click()
         return wait_visible(driver, (By.CSS_SELECTOR, ".saip-modal__box form.pf"))
 
     # NEGATIVO: enviar formulario vacio -> errores de validacion
@@ -438,8 +475,14 @@ def vista_04_crear_producto(driver):
         form.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         error = wait_visible(driver, (By.CSS_SELECTOR, ".pf__error"))
         shot = screenshot(driver, f"{vista}_negativo")
-        record(vista, ruta, "NEGATIVO", error.is_displayed(),
-               f"Formulario vacio rechazado: '{error.text[:50]}'", shot)
+        record(
+            vista,
+            ruta,
+            "NEGATIVO",
+            error.is_displayed(),
+            f"Formulario vacio rechazado: '{error.text[:50]}'",
+            shot,
+        )
         # cerrar modal
         try:
             driver.find_element(By.CSS_SELECTOR, ".saip-modal__close").click()
@@ -448,7 +491,7 @@ def vista_04_crear_producto(driver):
             pass
     except Exception as e:
         shot = screenshot(driver, f"{vista}_negativo_error")
-        record(vista, ruta, "NEGATIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "NEGATIVO", False, f"{type(e).__name__}: {e}", shot)
 
     # POSITIVO: crear producto con datos validos
     nombre_prod = f"Prod Selenium {STAMP}"
@@ -461,9 +504,10 @@ def vista_04_crear_producto(driver):
         form = abrir_modal()
         inputs = form.find_elements(By.CSS_SELECTOR, "input.pf__input")
         inputs[0].clear()
-        inputs[0].send_keys(nombre_prod)          # Nombre *
+        inputs[0].send_keys(nombre_prod)  # Nombre *
         selects = form.find_elements(By.CSS_SELECTOR, "select.pf__select")
-        sel_el = selects[0]                        # Unidad de medida *
+        sel_el = selects[0]  # Unidad de medida *
+
         # Espera a que las unidades (fetch async) carguen en el select.
         # El placeholder es <option value={0}>, se excluyen valores "0"/vacios.
         def hay_unidades(_):
@@ -471,6 +515,7 @@ def vista_04_crear_producto(driver):
                 (v or "").strip() not in ("", "0")
                 for v in (o.get_attribute("value") for o in Select(sel_el).options)
             )
+
         WebDriverWait(driver, 8).until(hay_unidades)
         opciones = [
             o.get_attribute("value")
@@ -492,8 +537,14 @@ def vista_04_crear_producto(driver):
         errores = driver.find_elements(By.CSS_SELECTOR, ".pf__error")
         if errores:
             shot = screenshot(driver, f"{vista}_positivo_error")
-            record(vista, ruta, "POSITIVO", False,
-                   f"El backend/form rechazo el producto: '{errores[0].text[:60]}'", shot)
+            record(
+                vista,
+                ruta,
+                "POSITIVO",
+                False,
+                f"El backend/form rechazo el producto: '{errores[0].text[:60]}'",
+                shot,
+            )
             return
         fila = None
         try:
@@ -516,10 +567,17 @@ def vista_04_crear_producto(driver):
             pass
         shot = screenshot(driver, f"{vista}_positivo")
         ok = fila is not None
-        record(vista, ruta, "POSITIVO", ok,
-               f"Producto '{nombre_prod}' creado"
-               + (" y visible en la tabla" if ok else " (modal cerro; fila no verificada)"),
-               shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            ok,
+            f"Producto '{nombre_prod}' creado"
+            + (
+                " y visible en la tabla" if ok else " (modal cerro; fila no verificada)"
+            ),
+            shot,
+        )
         # Limpieza best-effort del dato creado
         try:
             fila.find_element(
@@ -538,7 +596,7 @@ def vista_04_crear_producto(driver):
             pass
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def _vista_con_titulo(driver, vista: str, ruta: str, xpath_titulo: str, titulo: str):
@@ -552,11 +610,17 @@ def _vista_con_titulo(driver, vista: str, ruta: str, xpath_titulo: str, titulo: 
         )
         el = wait_visible(driver, (By.XPATH, xpath_titulo))
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", el.is_displayed(),
-               f"Vista carga con titulo '{titulo}'", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            el.is_displayed(),
+            f"Vista carga con titulo '{titulo}'",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def _vista_con_boton_crear(driver, vista: str, ruta: str, texto_boton: str):
@@ -568,25 +632,38 @@ def _vista_con_boton_crear(driver, vista: str, ruta: str, texto_boton: str):
         WebDriverWait(driver, WAIT_TIMEOUT).until(
             EC.invisibility_of_element_located((By.CSS_SELECTOR, ".saip-loading"))
         )
-        btn = wait_visible(driver, (By.XPATH, f"//button[contains(., '{texto_boton}')]"))
+        btn = wait_visible(
+            driver, (By.XPATH, f"//button[contains(., '{texto_boton}')]")
+        )
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", btn.is_displayed(),
-               f"Vista cargada con boton '{texto_boton}' visible", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            btn.is_displayed(),
+            f"Vista cargada con boton '{texto_boton}' visible",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def vista_05_inventario(driver):
-    _vista_con_titulo(driver, "05_Inventario", "/inventario",
-                      "//h2[contains(@class,'inventory__title')]",
-                      "Consolidado de inventario")
+    _vista_con_titulo(
+        driver,
+        "05_Inventario",
+        "/inventario",
+        "//h2[contains(@class,'inventory__title')]",
+        "Consolidado de inventario",
+    )
 
 
 def vista_06_movimientos(driver):
     # Ruta original /inventario/movimientos no existe -> adaptada a /produccion
-    _vista_con_boton_crear(driver, "06_Movimientos_adaptada_produccion", "/produccion",
-                           "Nueva orden")
+    _vista_con_boton_crear(
+        driver, "06_Movimientos_adaptada_produccion", "/produccion", "Nueva orden"
+    )
 
 
 def vista_07_ventas(driver):
@@ -595,15 +672,20 @@ def vista_07_ventas(driver):
 
 def vista_08_nueva_venta(driver):
     # Ruta original /ventas/nueva no existe -> adaptada a /ventas (seccion historial)
-    _vista_con_titulo(driver, "08_NuevaVenta_adaptada_historial", "/ventas",
-                      "//h2[contains(@class,'sales-hist__title')]",
-                      "Historial de ventas")
+    _vista_con_titulo(
+        driver,
+        "08_NuevaVenta_adaptada_historial",
+        "/ventas",
+        "//h2[contains(@class,'sales-hist__title')]",
+        "Historial de ventas",
+    )
 
 
 def vista_09_clientes(driver):
     # Ruta original /clientes no existe -> adaptada a /supplies (insumos)
-    _vista_con_boton_crear(driver, "09_Clientes_adaptada_supplies", "/supplies",
-                           "Crear insumo")
+    _vista_con_boton_crear(
+        driver, "09_Clientes_adaptada_supplies", "/supplies", "Crear insumo"
+    )
 
 
 def vista_10_proveedores(driver):
@@ -612,7 +694,9 @@ def vista_10_proveedores(driver):
 
 def vista_11_compras(driver):
     # Ruta original /compras no existe -> adaptada a /units (unidades de medida)
-    _vista_con_boton_crear(driver, "11_Compras_adaptada_units", "/units", "Crear unidad")
+    _vista_con_boton_crear(
+        driver, "11_Compras_adaptada_units", "/units", "Crear unidad"
+    )
 
 
 def vista_12_usuarios(driver):
@@ -631,11 +715,17 @@ def vista_14_reportes(driver):
         goto(driver, ruta)
         h1 = wait_visible(driver, (By.XPATH, "//h1[contains(text(),'Reportes')]"))
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", h1.is_displayed(),
-               "Vista Reportes carga con su titulo", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            h1.is_displayed(),
+            "Vista Reportes carga con su titulo",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 def vista_15_configuracion(driver):
@@ -649,13 +739,22 @@ def vista_15_configuracion(driver):
         time.sleep(1.5)
         fullname = driver.find_elements(By.CSS_SELECTOR, ".perfil-fullname")
         shot = screenshot(driver, f"{vista}_negativo")
-        ok = len(fullname) == 0 or not fullname[0].is_displayed() \
+        ok = (
+            len(fullname) == 0
+            or not fullname[0].is_displayed()
             or not fullname[0].text.strip()
-        record(vista, ruta, "NEGATIVO", ok,
-               "Sin sesion no se muestran datos personales del perfil", shot)
+        )
+        record(
+            vista,
+            ruta,
+            "NEGATIVO",
+            ok,
+            "Sin sesion no se muestran datos personales del perfil",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_negativo_error")
-        record(vista, ruta, "NEGATIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "NEGATIVO", False, f"{type(e).__name__}: {e}", shot)
 
     # POSITIVO: con sesion muestra nombre del usuario
     try:
@@ -663,11 +762,17 @@ def vista_15_configuracion(driver):
         goto(driver, ruta)
         fullname = wait_visible(driver, (By.CSS_SELECTOR, ".perfil-fullname"))
         shot = screenshot(driver, f"{vista}_positivo")
-        record(vista, ruta, "POSITIVO", bool(fullname.text.strip()),
-               f"Perfil carga datos del usuario: '{fullname.text.strip()[:40]}'", shot)
+        record(
+            vista,
+            ruta,
+            "POSITIVO",
+            bool(fullname.text.strip()),
+            f"Perfil carga datos del usuario: '{fullname.text.strip()[:40]}'",
+            shot,
+        )
     except Exception as e:
         shot = screenshot(driver, f"{vista}_positivo_error")
-        record(vista, ruta, "POSITIVO", False,                f"{type(e).__name__}: {e}", shot)
+        record(vista, ruta, "POSITIVO", False, f"{type(e).__name__}: {e}", shot)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -711,10 +816,22 @@ def main() -> int:
             vista_01_login(driver)
         except Exception:
             traceback.print_exc()
-            record("vista_01_login", "/login", "NEGATIVO", False,
-                   "Fallo no controlado en la vista", "")
-            record("vista_01_login", "/login", "POSITIVO", False,
-                   "Fallo no controlado en la vista", "")
+            record(
+                "vista_01_login",
+                "/login",
+                "NEGATIVO",
+                False,
+                "Fallo no controlado en la vista",
+                "",
+            )
+            record(
+                "vista_01_login",
+                "/login",
+                "POSITIVO",
+                False,
+                "Fallo no controlado en la vista",
+                "",
+            )
 
         if not SESSION:
             capture_session(driver)
@@ -737,17 +854,31 @@ def main() -> int:
             except WebDriverException as e:
                 # Chrome colapso (tab crashed): reinicia el navegador y continua
                 traceback.print_exc()
-                record(fn.__name__, "-", "NEGATIVO", False,
-                       f"Navegador colapsado: {e}", "")
-                record(fn.__name__, "-", "POSITIVO", False,
-                       f"Navegador colapsado: {e}", "")
+                record(
+                    fn.__name__, "-", "NEGATIVO", False, f"Navegador colapsado: {e}", ""
+                )
+                record(
+                    fn.__name__, "-", "POSITIVO", False, f"Navegador colapsado: {e}", ""
+                )
                 driver = restart_driver_with_session(driver)
             except Exception:
                 traceback.print_exc()
-                record(fn.__name__, "-", "NEGATIVO", False,
-                       "Fallo no controlado en la vista", "")
-                record(fn.__name__, "-", "POSITIVO", False,
-                       "Fallo no controlado en la vista", "")
+                record(
+                    fn.__name__,
+                    "-",
+                    "NEGATIVO",
+                    False,
+                    "Fallo no controlado en la vista",
+                    "",
+                )
+                record(
+                    fn.__name__,
+                    "-",
+                    "POSITIVO",
+                    False,
+                    "Fallo no controlado en la vista",
+                    "",
+                )
     except Exception as e:
         print(f"\nERROR FATAL preparando el navegador: {e}")
         exit_code = 2

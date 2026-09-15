@@ -1,51 +1,49 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlmodel import Session, select, func
-
+from sqlmodel import Session, func, select
 from src.database import get_session
+from src.dependencies import get_current_user
 from src.models.models import (
-    Supply,
-    Unit,
+    CommercialProduct,
+    Product,
+    ProductCategory,
     ProductionOrder,
     ProductionOrderSnapshot,
     ProductionOrderStatus,
-    Product,
-    CommercialProduct,
-    ProductCategory,
     Recipe,
     Sale,
     SaleItem,
     SaleStatus,
+    Supply,
+    Unit,
     User,
 )
 from src.schemas.schemas import (
-    DashboardStatsResponse,
-    DashboardKpis,
-    ConsumptionPoint,
-    StockLevelPoint,
-    LowStockSupplyItem,
-    ExpiringSupplyItem,
-    SalesKpis,
-    DailySalesPoint,
-    TopSaleItem,
-    SalesSection,
-    ProductionByStatusPoint,
-    DailyProductionPoint,
-    TopRecipePoint,
-    ProductionSection,
-    ProductsKpis,
-    ProductStockPoint,
-    LowStockProduct,
-    ProductProductionPoint,
-    CommercialStockPoint,
     CategoryCountPoint,
-    StockHealthPoint,
+    CommercialStockPoint,
+    ConsumptionPoint,
+    DailyProductionPoint,
+    DailySalesPoint,
+    DashboardKpis,
+    DashboardStatsResponse,
+    ExpiringSupplyItem,
+    LowStockProduct,
+    LowStockSupplyItem,
+    ProductionByStatusPoint,
+    ProductionSection,
+    ProductProductionPoint,
+    ProductsKpis,
     ProductsSection,
+    ProductStockPoint,
+    SalesKpis,
+    SalesSection,
+    StockHealthPoint,
+    StockLevelPoint,
+    TopRecipePoint,
+    TopSaleItem,
 )
-from src.dependencies import get_current_user
 
 router = APIRouter(prefix="/stats", tags=["Stats"])
 
@@ -78,9 +76,7 @@ def get_dashboard(
         select(Supply).where(Supply.deleted_at == None, Supply.status == "active")
     ).all()
 
-    low_stock_supplies = [
-        s for s in supplies if s.available_quantity <= s.min_stock
-    ]
+    low_stock_supplies = [s for s in supplies if s.available_quantity <= s.min_stock]
     low_stock_supplies.sort(key=lambda s: s.available_quantity - s.min_stock)
 
     expiration_limit = now + timedelta(days=EXPIRATION_WINDOW_DAYS)
@@ -89,14 +85,14 @@ def get_dashboard(
         for s in supplies
         if s.expiration_date is not None and _aware(s.expiration_date) < now
     ]
-    expired_supplies.sort(key=lambda s: s.expiration_date)
+    expired_supplies.sort(key=lambda s: s.expiration_date or now)
     expiring_soon_supplies = [
         s
         for s in supplies
         if s.expiration_date is not None
         and now <= _aware(s.expiration_date) <= expiration_limit
     ]
-    expiring_soon_supplies.sort(key=lambda s: s.expiration_date)
+    expiring_soon_supplies.sort(key=lambda s: s.expiration_date or now)
 
     # ── 2. Consumo por día (snapshots de órdenes completadas) ────────────────
     period_start = now - timedelta(days=days)
@@ -107,23 +103,21 @@ def get_dashboard(
         )
         .join(
             ProductionOrder,
-            ProductionOrder.id == ProductionOrderSnapshot.production_order_id,
+            ProductionOrder.id == ProductionOrderSnapshot.production_order_id,  # type: ignore[arg-type]
         )
         .where(
             ProductionOrder.deleted_at == None,
             ProductionOrder.status == ProductionOrderStatus.COMPLETED,
-            ProductionOrder.completed_at >= period_start,
+            ProductionOrder.completed_at >= period_start,  # type: ignore[operator]
         )
         .group_by(func.date(ProductionOrder.completed_at))
         .order_by(func.date(ProductionOrder.completed_at))
     ).all()
 
-    consumption_by_date: dict[str, float] = {
-        str(row[0]): float(row[1]) for row in rows
-    }
+    consumption_by_date: dict[str, float] = {str(row[0]): float(row[1]) for row in rows}
 
-    def _date_keys() -> List[str]:
-        keys: List[str] = []
+    def _date_keys() -> list[str]:
+        keys: list[str] = []
         cursor = (now - timedelta(days=days)).date()
         end = now.date()
         while cursor <= end:
@@ -133,7 +127,7 @@ def get_dashboard(
 
     date_keys = _date_keys()
 
-    tendencia: List[ConsumptionPoint] = [
+    tendencia: list[ConsumptionPoint] = [
         ConsumptionPoint(fecha=k, cantidad=consumption_by_date.get(k, 0.0))
         for k in date_keys
     ]
@@ -146,16 +140,16 @@ def get_dashboard(
         )
         .join(
             ProductionOrder,
-            ProductionOrder.id == ProductionOrderSnapshot.production_order_id,
+            ProductionOrder.id == ProductionOrderSnapshot.production_order_id,  # type: ignore[arg-type]
         )
         .join(
             Unit,
-            Unit.id == ProductionOrderSnapshot.unit_id,
+            Unit.id == ProductionOrderSnapshot.unit_id,  # type: ignore[arg-type]
         )
         .where(
             ProductionOrder.deleted_at == None,
             ProductionOrder.status == ProductionOrderStatus.COMPLETED,
-            ProductionOrder.completed_at >= period_start,
+            ProductionOrder.completed_at >= period_start,  # type: ignore[operator]
         )
         .group_by(Unit.abbreviation)
     ).all()
@@ -187,10 +181,10 @@ def get_dashboard(
         consumo_por_unidad=consumo_por_unidad,
     )
 
-    stock_bajo: List[LowStockSupplyItem] = []
+    stock_bajo: list[LowStockSupplyItem] = []
     for s in low_stock_supplies:
-        category_name: Optional[str] = None
-        unit_abbr: Optional[str] = None
+        category_name: str | None = None
+        unit_abbr: str | None = None
         try:
             category_name = s.category.name if s.category else None
         except Exception:
@@ -201,7 +195,7 @@ def get_dashboard(
             unit_abbr = None
         stock_bajo.append(
             LowStockSupplyItem(
-                id=s.id,
+                id=s.id,  # type: ignore[arg-type]
                 name=s.name,
                 category=category_name,
                 unit=unit_abbr,
@@ -213,17 +207,17 @@ def get_dashboard(
     def _to_expiring_item(s: Supply) -> ExpiringSupplyItem:
         exp_aware = _aware(s.expiration_date) if s.expiration_date else now
         return ExpiringSupplyItem(
-            id=s.id,
+            id=s.id,  # type: ignore[arg-type]
             name=s.name,
             expiration_date=exp_aware,
             days_remaining=(exp_aware.date() - now.date()).days,
             available_quantity=s.available_quantity,
         )
 
-    vencidos: List[ExpiringSupplyItem] = [
+    vencidos: list[ExpiringSupplyItem] = [
         _to_expiring_item(s) for s in expired_supplies
     ]
-    por_vencer: List[ExpiringSupplyItem] = [
+    por_vencer: list[ExpiringSupplyItem] = [
         _to_expiring_item(s) for s in expiring_soon_supplies
     ]
 
@@ -233,16 +227,18 @@ def get_dashboard(
     deleted_sale_filter = Sale.deleted_at == None
 
     sales_count_rows = session.exec(
-        select(func.date(Sale.sale_date), func.count(Sale.id))
+        select(func.date(Sale.sale_date), func.count(Sale.id))  # type: ignore[arg-type]
         .where(deleted_sale_filter, completed_filter, sale_period_filter)
         .group_by(func.date(Sale.sale_date))
         .order_by(func.date(Sale.sale_date))
     ).all()
 
     sales_qty_rows = session.exec(
-        select(func.date(Sale.sale_date), func.coalesce(func.sum(SaleItem.quantity), 0.0))
+        select(
+            func.date(Sale.sale_date), func.coalesce(func.sum(SaleItem.quantity), 0.0)
+        )
         .select_from(Sale)
-        .join(SaleItem, SaleItem.sale_id == Sale.id)
+        .join(SaleItem, SaleItem.sale_id == Sale.id)  # type: ignore[arg-type]
         .where(deleted_sale_filter, completed_filter, sale_period_filter)
         .group_by(func.date(Sale.sale_date))
         .order_by(func.date(Sale.sale_date))
@@ -251,7 +247,7 @@ def get_dashboard(
     sales_count_map: dict[str, int] = {str(r[0]): int(r[1]) for r in sales_count_rows}
     sales_qty_map: dict[str, float] = {str(r[0]): float(r[1]) for r in sales_qty_rows}
 
-    tendencia_ventas: List[DailySalesPoint] = [
+    tendencia_ventas: list[DailySalesPoint] = [
         DailySalesPoint(
             fecha=k,
             num_ventas=sales_count_map.get(k, 0),
@@ -266,8 +262,7 @@ def get_dashboard(
     unidades_periodo = sum(p.cantidad for p in tendencia_ventas)
 
     anuladas_periodo = session.exec(
-        select(func.count(Sale.id))
-        .where(
+        select(func.count(Sale.id)).where(  # type: ignore[arg-type]
             deleted_sale_filter,
             Sale.status == SaleStatus.ANNULLED,
             sale_period_filter,
@@ -277,7 +272,7 @@ def get_dashboard(
     top_item_rows = session.exec(
         select(SaleItem.item_name, func.coalesce(func.sum(SaleItem.quantity), 0.0))
         .select_from(SaleItem)
-        .join(Sale, Sale.id == SaleItem.sale_id)
+        .join(Sale, Sale.id == SaleItem.sale_id)  # type: ignore[arg-type]
         .where(deleted_sale_filter, completed_filter, sale_period_filter)
         .group_by(SaleItem.item_name)
         .order_by(func.sum(SaleItem.quantity).desc())
@@ -292,19 +287,23 @@ def get_dashboard(
             anuladas_periodo=int(anuladas_periodo or 0),
         ),
         tendencia=tendencia_ventas,
-        top_items=[TopSaleItem(name=str(r[0]), cantidad=float(r[1])) for r in top_item_rows],
+        top_items=[
+            TopSaleItem(name=str(r[0]), cantidad=float(r[1])) for r in top_item_rows
+        ],
     )
 
     # ── 6. Producción ────────────────────────────────────────────────────────
     status_rows = session.exec(
-        select(ProductionOrder.status, func.count(ProductionOrder.id))
+        select(ProductionOrder.status, func.count(ProductionOrder.id))  # type: ignore[arg-type]
         .where(ProductionOrder.deleted_at == None)
         .group_by(ProductionOrder.status)
     ).all()
 
     status_map: dict[str, int] = {}
     for s_val, count in status_rows:
-        status_map[str(s_val.value) if hasattr(s_val, "value") else str(s_val)] = int(count)
+        status_map[str(s_val.value) if hasattr(s_val, "value") else str(s_val)] = int(
+            count
+        )
 
     por_estado = [
         ProductionByStatusPoint(estado=s, total=status_map.get(s, 0))
@@ -319,7 +318,7 @@ def get_dashboard(
         .where(
             ProductionOrder.deleted_at == None,
             ProductionOrder.status == ProductionOrderStatus.COMPLETED,
-            ProductionOrder.completed_at >= period_start,
+            ProductionOrder.completed_at >= period_start,  # type: ignore[operator]
             ProductionOrder.completed_at != None,
         )
         .group_by(func.date(ProductionOrder.completed_at))
@@ -328,26 +327,25 @@ def get_dashboard(
 
     yield_map: dict[str, float] = {str(r[0]): float(r[1]) for r in yield_rows}
 
-    rendimiento_diario: List[DailyProductionPoint] = [
-        DailyProductionPoint(fecha=k, unidades=yield_map.get(k, 0.0))
-        for k in date_keys
+    rendimiento_diario: list[DailyProductionPoint] = [
+        DailyProductionPoint(fecha=k, unidades=yield_map.get(k, 0.0)) for k in date_keys
     ]
 
     recipe_rows = session.exec(
         select(
             Recipe.name,
-            func.count(ProductionOrder.id),
+            func.count(ProductionOrder.id),  # type: ignore[arg-type]
             func.coalesce(func.sum(ProductionOrder.total_yield), 0.0),
         )
         .select_from(ProductionOrder)
-        .join(Recipe, Recipe.id == ProductionOrder.recipe_id)
+        .join(Recipe, Recipe.id == ProductionOrder.recipe_id)  # type: ignore[arg-type]
         .where(
             ProductionOrder.deleted_at == None,
             ProductionOrder.status == ProductionOrderStatus.COMPLETED,
-            ProductionOrder.completed_at >= period_start,
+            ProductionOrder.completed_at >= period_start,  # type: ignore[operator]
         )
         .group_by(Recipe.name)
-        .order_by(func.count(ProductionOrder.id).desc())
+        .order_by(func.count(ProductionOrder.id).desc())  # type: ignore[arg-type]
         .limit(5)
     ).all()
 
@@ -365,9 +363,7 @@ def get_dashboard(
         select(Product).where(Product.deleted_at == None, Product.status == "active")
     ).all()
 
-    products_low_stock = [
-        p for p in products if p.available_quantity <= p.min_stock
-    ]
+    products_low_stock = [p for p in products if p.available_quantity <= p.min_stock]
     products_low_stock.sort(key=lambda p: p.available_quantity - p.min_stock)
 
     products_stock = [
@@ -386,38 +382,36 @@ def get_dashboard(
     produccion_por_producto_rows = session.exec(
         select(
             Recipe.name,
-            func.count(ProductionOrder.id),
+            func.count(ProductionOrder.id),  # type: ignore[arg-type]
             func.coalesce(func.sum(ProductionOrder.total_yield), 0.0),
         )
         .select_from(ProductionOrder)
-        .join(Recipe, Recipe.id == ProductionOrder.recipe_id)
-        .join(Product, Product.id == Recipe.product_id)
+        .join(Recipe, Recipe.id == ProductionOrder.recipe_id)  # type: ignore[arg-type]
+        .join(Product, Product.id == Recipe.product_id)  # type: ignore[arg-type]
         .where(
             ProductionOrder.deleted_at == None,
             ProductionOrder.status == ProductionOrderStatus.COMPLETED,
-            ProductionOrder.completed_at >= period_start,
+            ProductionOrder.completed_at >= period_start,  # type: ignore[operator]
             Product.deleted_at == None,
         )
         .group_by(Recipe.name)
-        .order_by(func.count(ProductionOrder.id).desc())
+        .order_by(func.count(ProductionOrder.id).desc())  # type: ignore[arg-type]
         .limit(10)
     ).all()
 
     produccion_por_producto = [
-        ProductProductionPoint(
-            nombre=str(r[0]), total=int(r[1]), unidades=float(r[2])
-        )
+        ProductProductionPoint(nombre=str(r[0]), total=int(r[1]), unidades=float(r[2]))
         for r in produccion_por_producto_rows
     ]
 
     def _to_low_product(p: Product) -> LowStockProduct:
-        unit_name: Optional[str] = None
+        unit_name: str | None = None
         try:
             unit_name = p.unit.abbreviation if p.unit else None
         except Exception:
             unit_name = None
         return LowStockProduct(
-            id=p.id,
+            id=p.id,  # type: ignore[arg-type]
             name=p.name,
             unit=unit_name,
             available_quantity=p.available_quantity,
@@ -425,7 +419,7 @@ def get_dashboard(
             max_stock=p.max_stock,
         )
 
-    productos_stock_bajo: List[LowStockProduct] = [
+    productos_stock_bajo: list[LowStockProduct] = [
         _to_low_product(p) for p in products_low_stock
     ]
 
@@ -455,13 +449,13 @@ def get_dashboard(
     ]
 
     def _to_low_commercial(c: CommercialProduct) -> LowStockProduct:
-        unit_name: Optional[str] = None
+        unit_name: str | None = None
         try:
             unit_name = c.unit.abbreviation if c.unit else None
         except Exception:
             unit_name = None
         return LowStockProduct(
-            id=c.id,
+            id=c.id,  # type: ignore[arg-type]
             name=c.name,
             unit=unit_name,
             available_quantity=c.available_quantity,
@@ -469,20 +463,20 @@ def get_dashboard(
             max_stock=c.max_stock,
         )
 
-    comerciales_stock_bajo: List[LowStockProduct] = [
+    comerciales_stock_bajo: list[LowStockProduct] = [
         _to_low_commercial(c) for c in commercials_low_stock
     ]
 
     cat_rows = session.exec(
-        select(ProductCategory.name, func.count(CommercialProduct.id))
+        select(ProductCategory.name, func.count(CommercialProduct.id))  # type: ignore[arg-type]
         .select_from(CommercialProduct)
-        .join(ProductCategory, ProductCategory.id == CommercialProduct.category_id)
+        .join(ProductCategory, ProductCategory.id == CommercialProduct.category_id)  # type: ignore[arg-type]
         .where(
             CommercialProduct.deleted_at == None,
             CommercialProduct.status == "active",
         )
         .group_by(ProductCategory.name)
-        .order_by(func.count(CommercialProduct.id).desc())
+        .order_by(func.count(CommercialProduct.id).desc())  # type: ignore[arg-type]
     ).all()
 
     por_categoria = [

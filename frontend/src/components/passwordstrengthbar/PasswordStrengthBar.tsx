@@ -6,8 +6,8 @@ interface Props {
 }
 
 const icons = {
-  debil:  "✕",
-  media:  "◐",
+  debil: "✕",
+  media: "◐",
   fuerte: "✓",
 };
 

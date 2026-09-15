@@ -1,47 +1,50 @@
-from typing import Optional, Dict, Tuple
+from datetime import date, datetime
+from io import BytesIO
+from zoneinfo import ZoneInfo
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
-from sqlmodel import Session, select, func
-from datetime import datetime, date
-from zoneinfo import ZoneInfo
-from io import BytesIO
 from openpyxl import Workbook
-
+from sqlmodel import Session, func, select
 from src.database import get_session
+from src.dependencies import get_current_user
 from src.models.models import (
-    Sale,
-    SaleItem,
+    CommercialProduct,
     InventoryMovement,
-    SaleStatus,
     ItemType,
     MovementType,
     Product,
-    CommercialProduct,
+    Sale,
+    SaleItem,
+    SaleStatus,
     User,
 )
 from src.schemas.schemas import (
-    SaleCreate,
-    SaleResponse,
-    SaleListResponse,
-    SaleListPage,
-    SaleCreateResponse,
     SaleAnnulResponse,
+    SaleCreate,
+    SaleCreateResponse,
+    SaleListPage,
+    SaleListResponse,
+    SaleResponse,
     StockWarning,
 )
-from src.dependencies import get_current_user
 from src.utils.excel import (
-    apply_header_row, apply_data_row, auto_width, add_title_row, fmt_dt,
+    add_title_row,
+    apply_data_row,
+    apply_header_row,
+    auto_width,
+    fmt_dt,
 )
 
 router = APIRouter(prefix="/sales", tags=["Sales"])
 
 
 def _sales_base_query(
-    date_from: Optional[date] = None,
-    date_to: Optional[date] = None,
-    status_filter: Optional[SaleStatus] = None,
-    item_type: Optional[ItemType] = None,
-    item_id: Optional[int] = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    status_filter: SaleStatus | None = None,
+    item_type: ItemType | None = None,
+    item_id: int | None = None,
 ):
     """Construye la query base de ventas con los filtros comunes.
 
@@ -67,13 +70,17 @@ def _sales_base_query(
             item_query = item_query.where(SaleItem.item_type == item_type)
         if item_id is not None:
             item_query = item_query.where(SaleItem.item_id == item_id)
-        base = base.where(Sale.id.in_(item_query))
+        base = base.where(Sale.id.in_(item_query))  # type: ignore[union-attr]
     return base
+
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
 
 
-def _get_item(item_type: ItemType, item_id: int, session: Session):
+def _get_item(
+    item_type: ItemType, item_id: int, session: Session
+) -> Product | CommercialProduct:
+    item: Product | CommercialProduct | None
     if item_type == ItemType.PRODUCT:
         item = session.get(Product, item_id)
     elif item_type == ItemType.COMMERCIAL:
@@ -106,12 +113,12 @@ def create_sale(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    aggregated: Dict[Tuple[str, int], float] = {}
+    aggregated: dict[tuple[str, int], float] = {}
     for item in data.items:
         key = (item.item_type.value, item.item_id)
         aggregated[key] = aggregated.get(key, 0.0) + item.quantity
 
-    validated: list[Tuple[ItemType, int, float, str]] = []
+    validated: list[tuple[ItemType, int, float, str]] = []
     for (type_value, item_id), quantity in aggregated.items():
         item_type = ItemType(type_value)
         product = _get_item(item_type, item_id, session)
@@ -184,16 +191,16 @@ def create_sale(
         )
 
     session.refresh(sale)
-    return SaleCreateResponse(sale=sale, warnings=warnings)
+    return SaleCreateResponse(sale=sale, warnings=warnings)  # type: ignore[arg-type]
 
 
 @router.get("/", response_model=SaleListPage, status_code=status.HTTP_200_OK)
 def get_sales(
-    date_from: Optional[date] = Query(default=None),
-    date_to: Optional[date] = Query(default=None),
-    status_filter: Optional[SaleStatus] = Query(default=None, alias="status"),
-    item_type: Optional[ItemType] = Query(default=None),
-    item_id: Optional[int] = Query(default=None),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    status_filter: SaleStatus | None = Query(default=None, alias="status"),
+    item_type: ItemType | None = Query(default=None),
+    item_id: int | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=50, ge=1, le=200),
     session: Session = Depends(get_session),
@@ -208,7 +215,7 @@ def get_sales(
     )
 
     total = len(session.exec(base).all())
-    base = base.order_by(Sale.sale_date.desc()).offset((page - 1) * limit).limit(limit)
+    base = base.order_by(Sale.sale_date.desc()).offset((page - 1) * limit).limit(limit)  # type: ignore[attr-defined]
     sales = session.exec(base).all()
 
     counts = {}
@@ -216,11 +223,11 @@ def get_sales(
         rows = session.exec(
             select(
                 SaleItem.sale_id,
-                func.count(SaleItem.id),
+                func.count(SaleItem.id),  # type: ignore[arg-type]
                 func.coalesce(func.sum(SaleItem.quantity), 0.0),
             )
-            .where(SaleItem.sale_id.in_([s.id for s in sales]))
-            .group_by(SaleItem.sale_id)
+            .where(SaleItem.sale_id.in_([s.id for s in sales]))  # type: ignore[attr-defined]
+            .group_by(SaleItem.sale_id)  # type: ignore[arg-type]
         ).all()
         counts = {r[0]: (r[1], r[2]) for r in rows}
 
@@ -250,23 +257,27 @@ def get_sales(
     summary="Exportar ventas a Excel (con los filtros de la vista)",
 )
 def export_sales(
-    date_from: Optional[date] = Query(default=None),
-    date_to: Optional[date] = Query(default=None),
-    status_filter: Optional[SaleStatus] = Query(default=None, alias="status"),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    status_filter: SaleStatus | None = Query(default=None, alias="status"),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    base = (
-        _sales_base_query(
-            date_from=date_from, date_to=date_to, status_filter=status_filter
-        )
-        .order_by(Sale.sale_date.desc())
+    base = _sales_base_query(
+        date_from=date_from, date_to=date_to, status_filter=status_filter
+    ).order_by(
+        Sale.sale_date.desc()  # type: ignore[attr-defined]
     )
     sales = session.exec(base).all()
 
     headers = [
-        "ID", "Fecha", "Vendedor", "Estado", "Notas",
-        "Nro. Items", "Cantidad Total",
+        "ID",
+        "Fecha",
+        "Vendedor",
+        "Estado",
+        "Notas",
+        "Nro. Items",
+        "Cantidad Total",
     ]
 
     wb = Workbook()
@@ -283,16 +294,24 @@ def export_sales(
             for it in sale.items:
                 item_count += 1
                 total_qty += it.quantity
-        seller = f"{sale.user.first_name} {sale.user.last_name}".strip() if sale.user else "—"
-        apply_data_row(ws, i, [
-            sale.id,
-            fmt_dt(sale.sale_date),
-            seller,
-            sale.status.value,
-            sale.notes or "—",
-            item_count,
-            total_qty,
-        ])
+        seller = (
+            f"{sale.user.first_name} {sale.user.last_name}".strip()
+            if sale.user
+            else "—"
+        )
+        apply_data_row(
+            ws,
+            i,
+            [
+                sale.id,
+                fmt_dt(sale.sale_date),
+                seller,
+                sale.status.value,
+                sale.notes or "—",
+                item_count,
+                total_qty,
+            ],
+        )
 
     col_count = len(headers)
     add_title_row(
@@ -314,9 +333,7 @@ def export_sales(
     )
 
 
-@router.get(
-    "/{sale_id}", response_model=SaleResponse, status_code=status.HTTP_200_OK
-)
+@router.get("/{sale_id}", response_model=SaleResponse, status_code=status.HTTP_200_OK)
 def get_sale(
     sale_id: int,
     session: Session = Depends(get_session),
@@ -377,8 +394,8 @@ def annul_sale(
 
     return SaleAnnulResponse(
         message="Venta anulada y stock restaurado.",
-        id=sale.id,
+        id=sale.id,  # type: ignore[arg-type]
         status=sale.status,
         changed_at=sale.updated_at,
-        changed_by=current_user.id,
+        changed_by=current_user.id,  # type: ignore[arg-type]
     )

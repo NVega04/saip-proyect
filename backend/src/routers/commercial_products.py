@@ -1,20 +1,9 @@
-from typing import Literal
-
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
-from sqlmodel import Session, select
 from datetime import datetime
+from typing import Literal
 from zoneinfo import ZoneInfo
 
-from src.database import get_session
-from src.models.models import CommercialProduct, ProductCategory, Unit, Provider, User
-from src.schemas.schemas import (
-    CommercialProductCreate,
-    CommercialProductUpdate,
-    CommercialProductResponse,
-    DeleteResponseCommercialProduct,
-    BulkImportResult,
-)
-from src.dependencies import get_current_user
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlmodel import Session, select
 from src.bulk.parser import (
     RowError,
     name_key,
@@ -25,39 +14,81 @@ from src.bulk.parser import (
     safe_float,
     template_response,
 )
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import CommercialProduct, ProductCategory, Provider, Unit, User
+from src.schemas.schemas import (
+    BulkImportResult,
+    CommercialProductCreate,
+    CommercialProductResponse,
+    CommercialProductUpdate,
+    DeleteResponseCommercialProduct,
+)
 
 router = APIRouter(prefix="/commercial-products", tags=["CommercialProducts"])
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
 
 
-@router.get("/", response_model=list[CommercialProductResponse], status_code=status.HTTP_200_OK)
-def get_all(session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
-    return session.exec(select(CommercialProduct).where(CommercialProduct.deleted_at == None)).all()
+@router.get(
+    "/", response_model=list[CommercialProductResponse], status_code=status.HTTP_200_OK
+)
+def get_all(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    return session.exec(
+        select(CommercialProduct).where(CommercialProduct.deleted_at == None)
+    ).all()
 
 
-@router.get("/{product_id}", response_model=CommercialProductResponse, status_code=status.HTTP_200_OK)
-def get_one(product_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.get(
+    "/{product_id}",
+    response_model=CommercialProductResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_one(
+    product_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     product = session.get(CommercialProduct, product_id)
     if not product or product.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado."
+        )
     return product
 
 
-@router.post("/", response_model=CommercialProductResponse, status_code=status.HTTP_201_CREATED)
-def create(data: CommercialProductCreate, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.post(
+    "/", response_model=CommercialProductResponse, status_code=status.HTTP_201_CREATED
+)
+def create(
+    data: CommercialProductCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     category = session.get(ProductCategory, data.category_id)
     if not category or category.status == "inactive":
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La categoría con id '{data.category_id}' no existe.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"La categoría con id '{data.category_id}' no existe.",
+        )
 
     unit = session.get(Unit, data.unit_id)
     if not unit or unit.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.unit_id}' no existe.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"La unidad con id '{data.unit_id}' no existe.",
+        )
 
     if data.provider_id is not None:
         provider = session.get(Provider, data.provider_id)
         if not provider or provider.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El proveedor con id '{data.provider_id}' no existe.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"El proveedor con id '{data.provider_id}' no existe.",
+            )
 
     existing = session.exec(
         select(CommercialProduct).where(
@@ -66,7 +97,10 @@ def create(data: CommercialProductCreate, session: Session = Depends(get_session
         )
     ).first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe un producto con el nombre '{data.name}'.")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ya existe un producto con el nombre '{data.name}'.",
+        )
 
     new_product = CommercialProduct(
         name=data.name,
@@ -87,11 +121,22 @@ def create(data: CommercialProductCreate, session: Session = Depends(get_session
     return new_product
 
 
-@router.patch("/{product_id}", response_model=CommercialProductResponse, status_code=status.HTTP_200_OK)
-def update(product_id: int, data: CommercialProductUpdate, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.patch(
+    "/{product_id}",
+    response_model=CommercialProductResponse,
+    status_code=status.HTTP_200_OK,
+)
+def update(
+    product_id: int,
+    data: CommercialProductUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     product = session.get(CommercialProduct, product_id)
     if not product or product.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado."
+        )
 
     if data.name and data.name != product.name:
         existing = session.exec(
@@ -102,22 +147,34 @@ def update(product_id: int, data: CommercialProductUpdate, session: Session = De
             )
         ).first()
         if existing:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe un producto con el nombre '{data.name}'.")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Ya existe un producto con el nombre '{data.name}'.",
+            )
 
     if data.category_id is not None:
         category = session.get(ProductCategory, data.category_id)
         if not category or category.status == "inactive":
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La categoría con id '{data.category_id}' no existe.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"La categoría con id '{data.category_id}' no existe.",
+            )
 
     if data.unit_id is not None:
         unit = session.get(Unit, data.unit_id)
         if not unit or unit.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"La unidad con id '{data.unit_id}' no existe.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"La unidad con id '{data.unit_id}' no existe.",
+            )
 
     if data.provider_id is not None:
         provider = session.get(Provider, data.provider_id)
         if not provider or provider.deleted_at is not None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"El proveedor con id '{data.provider_id}' no existe.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"El proveedor con id '{data.provider_id}' no existe.",
+            )
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(product, field, value)
@@ -130,11 +187,21 @@ def update(product_id: int, data: CommercialProductUpdate, session: Session = De
     return product
 
 
-@router.delete("/{product_id}", response_model=DeleteResponseCommercialProduct, status_code=status.HTTP_200_OK)
-def delete(product_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+@router.delete(
+    "/{product_id}",
+    response_model=DeleteResponseCommercialProduct,
+    status_code=status.HTTP_200_OK,
+)
+def delete(
+    product_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
     product = session.get(CommercialProduct, product_id)
     if not product or product.deleted_at is not None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado."
+        )
 
     now = datetime.now(BOGOTA_TZ)
     product.deleted_at = now
@@ -146,7 +213,7 @@ def delete(product_id: int, session: Session = Depends(get_session), current_use
     return DeleteResponseCommercialProduct(
         message=f"Producto '{product.name}' eliminado correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
@@ -164,7 +231,18 @@ BULK_COMMERCIAL_HEADERS = [
     "stock_max",
 ]
 BULK_COMMERCIAL_EXAMPLES = [
-    ["Palitos de ajonjoli", "Empaque x12", "Snacks", "paquete", "Distribuidora ABC", 4200, 6500, 90, 20, 200],
+    [
+        "Palitos de ajonjoli",
+        "Empaque x12",
+        "Snacks",
+        "paquete",
+        "Distribuidora ABC",
+        4200,
+        6500,
+        90,
+        20,
+        200,
+    ],
 ]
 
 
@@ -247,7 +325,9 @@ def bulk_import_commercial(
             return True
 
         if existing:
-            raise RowError(f"Ya existe un producto con el nombre '{row.get('nombre')}'.")
+            raise RowError(
+                f"Ya existe un producto con el nombre '{row.get('nombre')}'."
+            )
 
         new_product = CommercialProduct(
             name=nombre,
@@ -257,7 +337,9 @@ def bulk_import_commercial(
             provider_id=provider.id if provider else None,
             purchase_price=precio_compra,
             sale_price=precio_venta,
-            available_quantity=safe_float(row.get("stock_disponible"), "stock_disponible"),
+            available_quantity=safe_float(
+                row.get("stock_disponible"), "stock_disponible"
+            ),
             min_stock=min_stock,
             max_stock=max_stock,
             created_by=current_user.id,

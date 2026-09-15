@@ -71,49 +71,61 @@ function StockIndicator({ available, min, max }: StockIndicatorProps) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-      <div style={{
-        width: "60px",
-        height: "6px",
-        background: "#e0e0e0",
-        borderRadius: "3px",
-        overflow: "hidden",
-      }}>
-        <div style={{
-          width: `${Math.min(percentage, 100)}%`,
-          height: "100%",
-          background: color,
-          transition: "width 0.3s, background 0.3s",
-        }} />
+      <div
+        style={{
+          width: "60px",
+          height: "6px",
+          background: "#e0e0e0",
+          borderRadius: "3px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${Math.min(percentage, 100)}%`,
+            height: "100%",
+            background: color,
+            transition: "width 0.3s, background 0.3s",
+          }}
+        />
       </div>
-      <span style={{ fontSize: "0.75rem", color: "#666" }}>
-        {available}
-      </span>
+      <span style={{ fontSize: "0.75rem", color: "#666" }}>{available}</span>
     </div>
   );
 }
 
 const columns: ColumnDef<Product>[] = [
   { key: "name", header: "Producto", width: "25%" },
-  { key: "unit", header: "Unidad", width: "10%", 
-    render: (row) => row.unit?.abbreviation || "-" },
-  { key: "stock", header: "Stock actual", width: "20%",
+  {
+    key: "unit",
+    header: "Unidad",
+    width: "10%",
+    render: (row) => row.unit?.abbreviation || "-",
+  },
+  {
+    key: "stock",
+    header: "Stock actual",
+    width: "20%",
     render: (row) => (
-      <StockIndicator 
-        available={row.available_quantity} 
-        min={row.min_stock} 
-        max={row.max_stock} 
+      <StockIndicator
+        available={row.available_quantity}
+        min={row.min_stock}
+        max={row.max_stock}
       />
-    )
+    ),
   },
   { key: "min_stock", header: "Stock mínimo", width: "25%" },
   { key: "max_stock", header: "Stock máximo", width: "25%" },
-  { key: "is_locked", header: "Bloqueado", width: "10%",
+  {
+    key: "is_locked",
+    header: "Bloqueado",
+    width: "10%",
     render: (row) => (
-      <Badge 
-        label={row.is_locked ? "Si" : "No"} 
-        variant={row.is_locked ? "warning" : "active"} 
+      <Badge
+        label={row.is_locked ? "Si" : "No"}
+        variant={row.is_locked ? "warning" : "active"}
       />
-    )
+    ),
   },
 ];
 
@@ -128,7 +140,8 @@ export default function Products(): JSX.Element {
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("products");
+  const { download: downloadReport, loading: reportLoading } =
+    useReportDownload("products");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -284,7 +297,10 @@ export default function Products(): JSX.Element {
           const response = await apiFetch(`/products/${id}`, { method: "DELETE" });
 
           if (response.status === 403) {
-            showAlert("warning", "El producto está bloqueado y no puede ser eliminado.");
+            showAlert(
+              "warning",
+              "El producto está bloqueado y no puede ser eliminado.",
+            );
             return;
           }
 
@@ -320,7 +336,7 @@ export default function Products(): JSX.Element {
         "success",
         updated.is_locked
           ? "Producto bloqueado correctamente."
-          : "Producto desbloqueado correctamente."
+          : "Producto desbloqueado correctamente.",
       );
     } catch {
       showAlert("error", "Error de conexión con el servidor.");
@@ -345,26 +361,34 @@ export default function Products(): JSX.Element {
           sortKey="name"
           headerActions={
             <>
-            <Button variant="primary" onClick={handleCrear}>
-              Crear producto
-            </Button>
-            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
-              Cargar masivo
-            </Button>
-             <Button
+              <Button variant="primary" onClick={handleCrear}>
+                Crear producto
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+                Cargar masivo
+              </Button>
+              <Button
                 variant="secondary"
                 onClick={downloadReport}
                 disabled={reportLoading}
                 icon={
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  }
-                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                }
+              >
                 {reportLoading ? "Generando..." : "Exportar excel"}
-            </Button>
+              </Button>
             </>
           }
           renderActions={(row) => (
@@ -377,16 +401,28 @@ export default function Products(): JSX.Element {
                 style={{ opacity: 0.7 }}
               >
                 {row.is_locked ? (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="1.8">
-                    <rect x="3" y="11" width="18" height="11" rx="2"/>
-                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" />
                   </svg>
                 ) : (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="1.8">
-                    <rect x="3" y="11" width="18" height="11" rx="2"/>
-                    <path d="M7 11V7a5 5 0 019.9-1"/>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 019.9-1" />
                   </svg>
                 )}
               </button>
@@ -398,10 +434,16 @@ export default function Products(): JSX.Element {
                 disabled={row.is_locked}
                 style={{ opacity: row.is_locked ? 0.3 : 1 }}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
               </button>
               <button
@@ -412,12 +454,18 @@ export default function Products(): JSX.Element {
                 disabled={row.is_locked}
                 style={{ opacity: row.is_locked ? 0.3 : 1 }}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                  <path d="M10 11v6M14 11v6"/>
-                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                 </svg>
               </button>
             </div>
@@ -486,10 +534,14 @@ export default function Products(): JSX.Element {
               min={0}
               step={1}
               value={form.available_quantity}
-              onChange={(e) => setField("available_quantity", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                setField("available_quantity", parseFloat(e.target.value) || 0)
+              }
               disabled={editTarget?.is_locked}
             />
-            {errors.available_quantity && <span className="pf__error">{errors.available_quantity}</span>}
+            {errors.available_quantity && (
+              <span className="pf__error">{errors.available_quantity}</span>
+            )}
           </div>
 
           <div className="pf__group">

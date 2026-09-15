@@ -4,7 +4,10 @@ interface ApiFetchOptions extends RequestInit {
   skipAuthRedirect?: boolean;
 }
 
-export async function apiFetch(endpoint: string, options?: ApiFetchOptions): Promise<Response> {
+export async function apiFetch(
+  endpoint: string,
+  options?: ApiFetchOptions,
+): Promise<Response> {
   const token = localStorage.getItem("session_token");
 
   const isFormData = options?.body instanceof FormData;

@@ -1,16 +1,26 @@
-import smtplib
 import os
-from email.mime.text import MIMEText
+import smtplib
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-MAIL_HOST     = os.getenv("MAIL_HOST")
-MAIL_PORT     = int(os.getenv("MAIL_PORT", 587))
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-MAIL_FROM     = os.getenv("MAIL_FROM")
+
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if value is None:
+        raise RuntimeError(f"Falta la variable de entorno {name}")
+    return value
+
+
+MAIL_HOST = _require_env("MAIL_HOST")
+MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
+MAIL_USERNAME = _require_env("MAIL_USERNAME")
+MAIL_PASSWORD = _require_env("MAIL_PASSWORD")
+MAIL_FROM = _require_env("MAIL_FROM")
+
 
 def send_reset_email(to_email: str, reset_link: str) -> None:
     subject = "Recuperación de contraseña - SAIP"
@@ -24,8 +34,8 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = MAIL_FROM
-    msg["To"]      = to_email
+    msg["From"] = MAIL_FROM
+    msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html"))
 
     server = smtplib.SMTP(MAIL_HOST, MAIL_PORT)
@@ -35,6 +45,7 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
     server.login(MAIL_USERNAME, MAIL_PASSWORD)
     server.sendmail(MAIL_FROM, to_email, msg.as_string())
     server.quit()
+
 
 def send_welcome_email(to_email: str, first_name: str, temp_password: str) -> None:
     subject = "Bienvenido a SAIP - Tu cuenta ha sido creada"
@@ -50,8 +61,8 @@ def send_welcome_email(to_email: str, first_name: str, temp_password: str) -> No
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = MAIL_FROM
-    msg["To"]      = to_email
+    msg["From"] = MAIL_FROM
+    msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html"))
 
     server = smtplib.SMTP(MAIL_HOST, MAIL_PORT)
@@ -61,6 +72,7 @@ def send_welcome_email(to_email: str, first_name: str, temp_password: str) -> No
     server.login(MAIL_USERNAME, MAIL_PASSWORD)
     server.sendmail(MAIL_FROM, to_email, msg.as_string())
     server.quit()
+
 
 def send_deactivation_email(to_email: str, first_name: str) -> None:
     subject = "Tu cuenta en SAIP ha sido desactivada"
@@ -74,8 +86,8 @@ def send_deactivation_email(to_email: str, first_name: str) -> None:
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = MAIL_FROM
-    msg["To"]      = to_email
+    msg["From"] = MAIL_FROM
+    msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html"))
 
     server = smtplib.SMTP(MAIL_HOST, MAIL_PORT)

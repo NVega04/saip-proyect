@@ -6,19 +6,12 @@ import "./AcercaDe.css";
 export default function AcercaDe(): JSX.Element {
   return (
     <Layout
-      breadcrumbs={[
-        { label: "Dashboard", to: "/dashboard" },
-        { label: "Acerca de" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", to: "/dashboard" }, { label: "Acerca de" }]}
     >
       <div className="acerca">
         <header className="acerca__header">
           <div className="acerca__brand">
-            <img
-              src="/images/logo.png"
-              alt="SAIP Logo"
-              className="acerca__logo"
-            />
+            <img src="/images/logo.png" alt="SAIP Logo" className="acerca__logo" />
           </div>
           <h1 className="acerca__title">Acerca de SAIP</h1>
           <p className="acerca__subtitle">
@@ -30,41 +23,38 @@ export default function AcercaDe(): JSX.Element {
           <h2 className="acerca__section-title">Nuestra historia</h2>
           <div className="acerca__content">
             <p className="acerca__p">
-              SAIP comenzó como un proyecto académico con una pregunta simple:
-              ¿por qué tantos negocios locales siguen gestionando sus productos en
-              cuadernos o en hojas de cálculo desconectadas?
+              SAIP comenzó como un proyecto académico con una pregunta simple: ¿por qué
+              tantos negocios locales siguen gestionando sus productos en cuadernos o en
+              hojas de cálculo desconectadas?
             </p>
             <p className="acerca__p">
-              A medida que avanzábamos, entendimos que el problema no era solo la
-              falta de herramientas, sino la falta de soluciones diseñadas realmente
-              para el día a día de un negocio. Por eso, decidimos construir SAIP
-              con un enfoque práctico, pensando en la operación real.
+              A medida que avanzábamos, entendimos que el problema no era solo la falta
+              de herramientas, sino la falta de soluciones diseñadas realmente para el
+              día a día de un negocio. Por eso, decidimos construir SAIP con un enfoque
+              práctico, pensando en la operación real.
             </p>
             <p className="acerca__p">
-              El sistema fue desarrollado utilizando{" "}
-              <strong>Python y FastAPI</strong> para el backend, permitiendo una
-              arquitectura robusta, escalable y segura. Implementamos autenticación,
-              manejo de sesiones, control de usuarios y una estructura modular
-              orientada a servicios.
+              El sistema fue desarrollado utilizando <strong>Python y FastAPI</strong>{" "}
+              para el backend, permitiendo una arquitectura robusta, escalable y segura.
+              Implementamos autenticación, manejo de sesiones, control de usuarios y una
+              estructura modular orientada a servicios.
             </p>
             <p className="acerca__p">
-              En el frontend utilizamos{" "}
-              <strong>React con TypeScript</strong>, construyendo una interfaz
-              moderna, intuitiva y dinámica. Diseñamos componentes reutilizables,
-              navegación fluida y una experiencia centrada en la usabilidad para
-              facilitar la gestión diaria.
+              En el frontend utilizamos <strong>React con TypeScript</strong>,
+              construyendo una interfaz moderna, intuitiva y dinámica. Diseñamos
+              componentes reutilizables, navegación fluida y una experiencia centrada en
+              la usabilidad para facilitar la gestión diaria.
             </p>
             <p className="acerca__p">
-              Durante el desarrollo integramos funcionalidades clave como control
-              de inventario, registro de ventas, gestión de roles, recetas,
-              categorías de insumos y manejo de proveedores, conectando todo
-              mediante APIs eficientes y bien estructuradas.
+              Durante el desarrollo integramos funcionalidades clave como control de
+              inventario, registro de ventas, gestión de roles, recetas, categorías de
+              insumos y manejo de proveedores, conectando todo mediante APIs eficientes
+              y bien estructuradas.
             </p>
             <p className="acerca__p">
-              Hoy SAIP no es solo un proyecto académico, sino una solución real
-              en evolución, construida con tecnologías modernas y con la visión
-              de escalar hacia un sistema completo para la administración de
-              negocios.
+              Hoy SAIP no es solo un proyecto académico, sino una solución real en
+              evolución, construida con tecnologías modernas y con la visión de escalar
+              hacia un sistema completo para la administración de negocios.
             </p>
           </div>
         </section>
@@ -116,10 +106,7 @@ export default function AcercaDe(): JSX.Element {
               <div className="acerca__timeline-dot" />
               <div className="acerca__timeline-content">
                 <strong>Diseño del sistema</strong>
-                <p>
-                  Definición de arquitectura, modelos de datos y flujo de
-                  usuarios.
-                </p>
+                <p>Definición de arquitectura, modelos de datos y flujo de usuarios.</p>
               </div>
             </div>
             <div className="acerca__timeline-item">
@@ -127,8 +114,8 @@ export default function AcercaDe(): JSX.Element {
               <div className="acerca__timeline-content">
                 <strong>Backend</strong>
                 <p>
-                  Desarrollo con Python y FastAPI, implementación de
-                  autenticación, sesiones y API REST.
+                  Desarrollo con Python y FastAPI, implementación de autenticación,
+                  sesiones y API REST.
                 </p>
               </div>
             </div>
@@ -137,8 +124,8 @@ export default function AcercaDe(): JSX.Element {
               <div className="acerca__timeline-content">
                 <strong>Frontend</strong>
                 <p>
-                  Construcción con React y TypeScript, enfoque en UX y
-                  componentes reutilizables.
+                  Construcción con React y TypeScript, enfoque en UX y componentes
+                  reutilizables.
                 </p>
               </div>
             </div>

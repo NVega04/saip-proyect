@@ -98,7 +98,7 @@ export default function BulkUploadModal({
       if (data.creados > 0 || data.actualizados > 0) {
         showAlert(
           data.errores.length > 0 ? "warning" : "success",
-          `Importación completada: ${data.creados} creado(s), ${data.actualizados} actualizado(s), ${data.errores.length} error(es).`
+          `Importación completada: ${data.creados} creado(s), ${data.actualizados} actualizado(s), ${data.errores.length} error(es).`,
         );
         onImported?.();
       } else {
@@ -115,8 +115,8 @@ export default function BulkUploadModal({
     <Modal isOpen={isOpen} onClose={onClose} title={title} width="560px">
       <div className="saip-bulk">
         <p className="saip-bulk__hint">
-          Cargue un archivo <strong>.xlsx</strong> o <strong>.csv</strong>. Las filas con
-          errores se omiten y se muestran al final del proceso.
+          Cargue un archivo <strong>.xlsx</strong> o <strong>.csv</strong>. Las filas
+          con errores se omiten y se muestran al final del proceso.
         </p>
 
         <div className="saip-bulk__row">
@@ -140,7 +140,11 @@ export default function BulkUploadModal({
           <Button variant="secondary" onClick={onClose} disabled={uploading}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={handleImport} disabled={!file || uploading}>
+          <Button
+            variant="primary"
+            onClick={handleImport}
+            disabled={!file || uploading}
+          >
             {uploading ? "Importando..." : "Importar archivo"}
           </Button>
         </div>

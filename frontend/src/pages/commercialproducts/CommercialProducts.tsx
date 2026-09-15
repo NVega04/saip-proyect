@@ -94,55 +94,83 @@ function StockIndicator({ available, min, max }: StockIndicatorProps) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-      <div style={{
-        width: "60px",
-        height: "6px",
-        background: "#e0e0e0",
-        borderRadius: "3px",
-        overflow: "hidden",
-      }}>
-        <div style={{
-          width: `${Math.min(percentage, 100)}%`,
-          height: "100%",
-          background: color,
-          transition: "width 0.3s, background 0.3s",
-        }} />
+      <div
+        style={{
+          width: "60px",
+          height: "6px",
+          background: "#e0e0e0",
+          borderRadius: "3px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${Math.min(percentage, 100)}%`,
+            height: "100%",
+            background: color,
+            transition: "width 0.3s, background 0.3s",
+          }}
+        />
       </div>
-      <span style={{ fontSize: "0.75rem", color: "#666" }}>
-        {available}
-      </span>
+      <span style={{ fontSize: "0.75rem", color: "#666" }}>{available}</span>
     </div>
   );
 }
 
 const columns: ColumnDef<CommercialProduct>[] = [
   { key: "name", header: "Producto", width: "18%" },
-  { key: "category", header: "Categoria", width: "12%",
-    render: (row) => row.category?.name || "-" },
-  { key: "unit", header: "Unidad", width: "8%",
-    render: (row) => row.unit?.abbreviation || "-" },
-  { key: "provider", header: "Proveedor", width: "15%",
-    render: (row) => row.provider?.company || "-" },
-  { key: "purchase_price", header: "P. compra", width: "8%",
-    render: (row) => `$${row.purchase_price.toFixed(2)}` },
-  { key: "sale_price", header: "P. venta", width: "8%",
-    render: (row) => `$${row.sale_price.toFixed(2)}` },
-  { key: "stock", header: "Stock", width: "18%",
+  {
+    key: "category",
+    header: "Categoria",
+    width: "12%",
+    render: (row) => row.category?.name || "-",
+  },
+  {
+    key: "unit",
+    header: "Unidad",
+    width: "8%",
+    render: (row) => row.unit?.abbreviation || "-",
+  },
+  {
+    key: "provider",
+    header: "Proveedor",
+    width: "15%",
+    render: (row) => row.provider?.company || "-",
+  },
+  {
+    key: "purchase_price",
+    header: "P. compra",
+    width: "8%",
+    render: (row) => `$${row.purchase_price.toFixed(2)}`,
+  },
+  {
+    key: "sale_price",
+    header: "P. venta",
+    width: "8%",
+    render: (row) => `$${row.sale_price.toFixed(2)}`,
+  },
+  {
+    key: "stock",
+    header: "Stock",
+    width: "18%",
     render: (row) => (
       <StockIndicator
         available={row.available_quantity}
         min={row.min_stock}
         max={row.max_stock}
       />
-    )
+    ),
   },
-  { key: "status", header: "Estado", width: "8%",
+  {
+    key: "status",
+    header: "Estado",
+    width: "8%",
     render: (row) => (
       <Badge
         label={row.status === "active" ? "Activo" : "Inactivo"}
         variant={row.status === "active" ? "active" : "inactive"}
       />
-    )
+    ),
   },
 ];
 
@@ -159,7 +187,8 @@ export default function CommercialProducts(): JSX.Element {
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("commercial-products");
+  const { download: downloadReport, loading: reportLoading } =
+    useReportDownload("commercial-products");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -229,7 +258,10 @@ export default function CommercialProducts(): JSX.Element {
     setForm(emptyForm());
   };
 
-  const setField = (field: keyof CommercialProductForm, value: string | number | boolean | null) => {
+  const setField = (
+    field: keyof CommercialProductForm,
+    value: string | number | boolean | null,
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -363,26 +395,34 @@ export default function CommercialProducts(): JSX.Element {
           sortKey="name"
           headerActions={
             <>
-            <Button variant="primary" onClick={handleCrear}>
-              Crear producto
-            </Button>
-            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
-              Cargar masivo
-            </Button>
-             <Button
+              <Button variant="primary" onClick={handleCrear}>
+                Crear producto
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+                Cargar masivo
+              </Button>
+              <Button
                 variant="secondary"
                 onClick={downloadReport}
                 disabled={reportLoading}
                 icon={
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  }
-                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                }
+              >
                 {reportLoading ? "Generando..." : "Exportar excel"}
-            </Button>
+              </Button>
             </>
           }
           renderActions={(row) => (
@@ -393,10 +433,16 @@ export default function CommercialProducts(): JSX.Element {
                 title="Editar"
                 onClick={() => handleEditar(row)}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
               </button>
               <button
@@ -405,12 +451,18 @@ export default function CommercialProducts(): JSX.Element {
                 title="Eliminar"
                 onClick={() => handleEliminar(row.id)}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                  <path d="M10 11v6M14 11v6"/>
-                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                 </svg>
               </button>
             </div>
@@ -466,7 +518,9 @@ export default function CommercialProducts(): JSX.Element {
                   </option>
                 ))}
               </select>
-              {errors.category_id && <span className="cpf__error">{errors.category_id}</span>}
+              {errors.category_id && (
+                <span className="cpf__error">{errors.category_id}</span>
+              )}
             </div>
 
             <div className="cpf__group cpf__group--half">
@@ -494,7 +548,12 @@ export default function CommercialProducts(): JSX.Element {
             <select
               className="cpf__select"
               value={form.provider_id ?? ""}
-              onChange={(e) => setField("provider_id", e.target.value ? parseInt(e.target.value) : null)}
+              onChange={(e) =>
+                setField(
+                  "provider_id",
+                  e.target.value ? parseInt(e.target.value) : null,
+                )
+              }
             >
               <option value="">Sin proveedor</option>
               {providers.map((prov) => (
@@ -514,9 +573,13 @@ export default function CommercialProducts(): JSX.Element {
                 min={0}
                 step={0.01}
                 value={form.purchase_price}
-                onChange={(e) => setField("purchase_price", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  setField("purchase_price", parseFloat(e.target.value) || 0)
+                }
               />
-              {errors.purchase_price && <span className="cpf__error">{errors.purchase_price}</span>}
+              {errors.purchase_price && (
+                <span className="cpf__error">{errors.purchase_price}</span>
+              )}
             </div>
 
             <div className="cpf__group cpf__group--half">
@@ -527,9 +590,13 @@ export default function CommercialProducts(): JSX.Element {
                 min={0}
                 step={0.01}
                 value={form.sale_price}
-                onChange={(e) => setField("sale_price", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  setField("sale_price", parseFloat(e.target.value) || 0)
+                }
               />
-              {errors.sale_price && <span className="cpf__error">{errors.sale_price}</span>}
+              {errors.sale_price && (
+                <span className="cpf__error">{errors.sale_price}</span>
+              )}
             </div>
           </div>
 
@@ -541,9 +608,13 @@ export default function CommercialProducts(): JSX.Element {
               min={0}
               step={1}
               value={form.available_quantity}
-              onChange={(e) => setField("available_quantity", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                setField("available_quantity", parseFloat(e.target.value) || 0)
+              }
             />
-            {errors.available_quantity && <span className="cpf__error">{errors.available_quantity}</span>}
+            {errors.available_quantity && (
+              <span className="cpf__error">{errors.available_quantity}</span>
+            )}
           </div>
 
           <div className="cpf__row">
@@ -557,7 +628,9 @@ export default function CommercialProducts(): JSX.Element {
                 value={form.min_stock}
                 onChange={(e) => setField("min_stock", parseFloat(e.target.value) || 0)}
               />
-              {errors.min_stock && <span className="cpf__error">{errors.min_stock}</span>}
+              {errors.min_stock && (
+                <span className="cpf__error">{errors.min_stock}</span>
+              )}
             </div>
 
             <div className="cpf__group cpf__group--half">
@@ -570,7 +643,9 @@ export default function CommercialProducts(): JSX.Element {
                 value={form.max_stock}
                 onChange={(e) => setField("max_stock", parseFloat(e.target.value) || 0)}
               />
-              {errors.max_stock && <span className="cpf__error">{errors.max_stock}</span>}
+              {errors.max_stock && (
+                <span className="cpf__error">{errors.max_stock}</span>
+              )}
             </div>
           </div>
 

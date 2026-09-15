@@ -2,7 +2,7 @@
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--bakery-text-primary);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   margin-bottom: 1.5rem;
 }
 
@@ -37,7 +37,7 @@
 .saip-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .saip-table__th {
@@ -95,7 +95,9 @@
   align-items: center;
   justify-content: center;
   color: var(--bakery-text-secondary);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .saip-table__action-btn:hover {
@@ -104,8 +106,8 @@
 }
 
 .saip-table__action-btn--danger:hover {
-  background: #F5C8C8;
-  color: #8B1A1A;
+  background: #f5c8c8;
+  color: #8b1a1a;
 }
 
 .saip-table__badges {
@@ -119,7 +121,7 @@
   padding: 3rem 1rem;
   font-size: 0.85rem;
   color: var(--bakery-text-muted);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 @media (max-width: 1024px) {
@@ -185,13 +187,13 @@
   }
 
   .saip-table-wrapper::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     right: 0;
     width: 24px;
     height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.85));
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.85));
     pointer-events: none;
     border-radius: 0 8px 8px 0;
   }

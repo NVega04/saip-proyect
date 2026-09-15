@@ -176,7 +176,16 @@ interface DashboardStats {
 
 const RANGES: readonly number[] = [7, 30, 90];
 const LIST_LIMIT = 8;
-const COLORS: readonly string[] = ["#3a7ca5", "#27ae60", "#d99a2b", "#9b59b6", "#e67e22", "#c0392b", "#1abc9c", "#34495e"];
+const COLORS: readonly string[] = [
+  "#3a7ca5",
+  "#27ae60",
+  "#d99a2b",
+  "#9b59b6",
+  "#e67e22",
+  "#c0392b",
+  "#1abc9c",
+  "#34495e",
+];
 type TabId = "insumos" | "ventas" | "produccion" | "productos";
 
 const TABS: { id: TabId; label: string }[] = [
@@ -295,10 +304,30 @@ export default function Dashboard(): JSX.Element {
 
   const alerts = stats
     ? [
-        { label: `${stats.kpis.stock_bajo_count} insumo(s) en stock bajo`, count: stats.kpis.stock_bajo_count, type: "danger" as const, route: "/supplies" },
-        { label: `${stats.kpis.vencidos_count} insumo(s) vencido(s)`, count: stats.kpis.vencidos_count, type: "danger" as const, route: "/supplies" },
-        { label: `${stats.kpis.por_vencer_count} próximo(s) a vencer`, count: stats.kpis.por_vencer_count, type: "warning" as const, route: "/supplies" },
-        { label: `${pendingOrdersCount} orden(es) pendiente(s)`, count: pendingOrdersCount, type: "warning" as const, route: "/produccion" },
+        {
+          label: `${stats.kpis.stock_bajo_count} insumo(s) en stock bajo`,
+          count: stats.kpis.stock_bajo_count,
+          type: "danger" as const,
+          route: "/supplies",
+        },
+        {
+          label: `${stats.kpis.vencidos_count} insumo(s) vencido(s)`,
+          count: stats.kpis.vencidos_count,
+          type: "danger" as const,
+          route: "/supplies",
+        },
+        {
+          label: `${stats.kpis.por_vencer_count} próximo(s) a vencer`,
+          count: stats.kpis.por_vencer_count,
+          type: "warning" as const,
+          route: "/supplies",
+        },
+        {
+          label: `${pendingOrdersCount} orden(es) pendiente(s)`,
+          count: pendingOrdersCount,
+          type: "warning" as const,
+          route: "/produccion",
+        },
       ]
     : [];
 
@@ -316,7 +345,9 @@ export default function Dashboard(): JSX.Element {
               onClick={() => navigate(a.route)}
               style={{ border: "none" }}
             >
-              <span className={`alert-bar-dot alert-bar-dot--${a.count > 0 ? a.type : "neutral"}`} />
+              <span
+                className={`alert-bar-dot alert-bar-dot--${a.count > 0 ? a.type : "neutral"}`}
+              />
               {a.label}
             </button>
           ))}
@@ -437,8 +468,24 @@ export default function Dashboard(): JSX.Element {
                         tickFormatter={(value: string) => value.slice(5)}
                         tick={{ fontSize: 11, fill: "#647a8a" }}
                       />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Cantidad (unidades)", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
-                      <Tooltip contentStyle={tooltipStyle} formatter={(value: number | string) => [Math.round(Number(value)), "Consumido"]} />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 11, fill: "#647a8a" }}
+                        label={{
+                          value: "Cantidad (unidades)",
+                          angle: -90,
+                          position: "insideLeft",
+                          offset: -5,
+                          style: { fontSize: 10, fill: "#647a8a" },
+                        }}
+                      />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        formatter={(value: number | string) => [
+                          Math.round(Number(value)),
+                          "Consumido",
+                        ]}
+                      />
                       <Line
                         type="monotone"
                         dataKey="cantidad"
@@ -467,17 +514,34 @@ export default function Dashboard(): JSX.Element {
                         height={60}
                         tick={{ fontSize: 10, fill: "#647a8a" }}
                       />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Cantidad", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 11, fill: "#647a8a" }}
+                        label={{
+                          value: "Cantidad",
+                          angle: -90,
+                          position: "insideLeft",
+                          offset: -5,
+                          style: { fontSize: 10, fill: "#647a8a" },
+                        }}
+                      />
                       <Tooltip contentStyle={tooltipStyle} />
                       <Bar dataKey="disponible" name="Disponible" radius={[4, 4, 0, 0]}>
                         {stats.niveles_stock.map((entry) => (
                           <Cell
                             key={entry.name}
-                            fill={entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"}
+                            fill={
+                              entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"
+                            }
                           />
                         ))}
                       </Bar>
-                      <Bar dataKey="minimo" name="Mínimo" fill="#bcc7d0" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="minimo"
+                        name="Mínimo"
+                        fill="#bcc7d0"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
@@ -539,7 +603,9 @@ export default function Dashboard(): JSX.Element {
                             <span style={styles.itemName}>{item.name}</span>
                             <span style={styles.itemMeta}>
                               Venció el{" "}
-                              {new Date(item.expiration_date).toLocaleDateString("es-CO")}
+                              {new Date(item.expiration_date).toLocaleDateString(
+                                "es-CO",
+                              )}
                               {" · "}
                               {formatQty(item.available_quantity)} en stock
                             </span>
@@ -576,7 +642,9 @@ export default function Dashboard(): JSX.Element {
                           <div style={styles.alertInfo}>
                             <span style={styles.itemName}>{item.name}</span>
                             <span style={styles.itemMeta}>
-                              {new Date(item.expiration_date).toLocaleDateString("es-CO")}
+                              {new Date(item.expiration_date).toLocaleDateString(
+                                "es-CO",
+                              )}
                               {" · "}
                               {formatQty(item.available_quantity)} en stock
                             </span>
@@ -635,7 +703,9 @@ export default function Dashboard(): JSX.Element {
                 <KpiCard
                   label="Anuladas"
                   value={stats.ventas.kpis.anuladas_periodo}
-                  accent={stats.ventas.kpis.anuladas_periodo > 0 ? "warning" : "default"}
+                  accent={
+                    stats.ventas.kpis.anuladas_periodo > 0 ? "warning" : "default"
+                  }
                   hint="Ventas anuladas"
                   variant={stats.ventas.kpis.anuladas_periodo > 0 ? "alert" : "info"}
                 />
@@ -659,21 +729,61 @@ export default function Dashboard(): JSX.Element {
                           tickFormatter={(v: string) => v.slice(5)}
                           tick={{ fontSize: 11, fill: "#647a8a" }}
                         />
-                        <YAxis yAxisId="left" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Nº Ventas", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
-                        <YAxis yAxisId="right" orientation="right" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Unidades", angle: 90, position: "insideRight", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <YAxis
+                          yAxisId="left"
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                          label={{
+                            value: "Nº Ventas",
+                            angle: -90,
+                            position: "insideLeft",
+                            offset: -5,
+                            style: { fontSize: 10, fill: "#647a8a" },
+                          }}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                          label={{
+                            value: "Unidades",
+                            angle: 90,
+                            position: "insideRight",
+                            offset: -5,
+                            style: { fontSize: 10, fill: "#647a8a" },
+                          }}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
                         <Legend />
-                        <Bar yAxisId="left" dataKey="num_ventas" name="Nº Ventas" fill="#3a7ca5" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="right" type="monotone" dataKey="cantidad" name="Unidades" stroke="#d99a2b" strokeWidth={2} dot={false} />
+                        <Bar
+                          yAxisId="left"
+                          dataKey="num_ventas"
+                          name="Nº Ventas"
+                          fill="#3a7ca5"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Line
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="cantidad"
+                          name="Unidades"
+                          stroke="#d99a2b"
+                          strokeWidth={2}
+                          dot={false}
+                        />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </ChartCard>
 
                   {stats.ventas.top_items.length === 1 ? (
                     <div className="insight-block">
-                      <span className="insight-block__value">{formatQty(stats.ventas.top_items[0].cantidad)}</span>
+                      <span className="insight-block__value">
+                        {formatQty(stats.ventas.top_items[0].cantidad)}
+                      </span>
                       <span className="insight-block__label">
-                        {stats.ventas.top_items[0].name} — producto más vendido en el período
+                        {stats.ventas.top_items[0].name} — producto más vendido en el
+                        período
                       </span>
                     </div>
                   ) : (
@@ -691,7 +801,17 @@ export default function Dashboard(): JSX.Element {
                             margin={{ left: 10, right: 30 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
-                            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Unidades", position: "insideBottom", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                            <XAxis
+                              type="number"
+                              allowDecimals={false}
+                              tick={{ fontSize: 11, fill: "#647a8a" }}
+                              label={{
+                                value: "Unidades",
+                                position: "insideBottom",
+                                offset: -5,
+                                style: { fontSize: 10, fill: "#647a8a" },
+                              }}
+                            />
                             <YAxis
                               dataKey="name"
                               type="category"
@@ -699,7 +819,12 @@ export default function Dashboard(): JSX.Element {
                               tick={{ fontSize: 11, fill: "#647a8a" }}
                             />
                             <Tooltip contentStyle={tooltipStyle} />
-                            <Bar dataKey="cantidad" name="Unidades" fill="#3a7ca5" radius={[0, 4, 4, 0]} />
+                            <Bar
+                              dataKey="cantidad"
+                              name="Unidades"
+                              fill="#3a7ca5"
+                              radius={[0, 4, 4, 0]}
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       )}
@@ -718,9 +843,15 @@ export default function Dashboard(): JSX.Element {
                   subtitle="Distribución actual de todas las órdenes de producción"
                 >
                   {(() => {
-                    const activeStatuses = stats.produccion.por_estado.filter((s) => s.total > 0);
+                    const activeStatuses = stats.produccion.por_estado.filter(
+                      (s) => s.total > 0,
+                    );
                     if (activeStatuses.length === 0) {
-                      return <p style={styles.emptyText}>Sin órdenes de producción registradas.</p>;
+                      return (
+                        <p style={styles.emptyText}>
+                          Sin órdenes de producción registradas.
+                        </p>
+                      );
                     }
                     if (activeStatuses.length === 1) {
                       const statusNameMap: Record<string, string> = {
@@ -749,7 +880,13 @@ export default function Dashboard(): JSX.Element {
                             cx="50%"
                             cy="50%"
                             outerRadius={90}
-                            label={({ estado, total }: { estado: string; total: number }) => {
+                            label={({
+                              estado,
+                              total,
+                            }: {
+                              estado: string;
+                              total: number;
+                            }) => {
                               const nameMap: Record<string, string> = {
                                 pending: "Pendiente",
                                 in_progress: "En proceso",
@@ -785,8 +922,12 @@ export default function Dashboard(): JSX.Element {
                   title="Unidades producidas diarias"
                   subtitle="Rendimiento total de órdenes completadas por día"
                 >
-                  {stats.produccion.rendimiento_diario.every((d) => d.unidades === 0) ? (
-                    <p style={styles.emptyText}>Sin producción completada en el período.</p>
+                  {stats.produccion.rendimiento_diario.every(
+                    (d) => d.unidades === 0,
+                  ) ? (
+                    <p style={styles.emptyText}>
+                      Sin producción completada en el período.
+                    </p>
                   ) : (
                     <ResponsiveContainer width="100%" height={260}>
                       <BarChart data={stats.produccion.rendimiento_diario}>
@@ -796,9 +937,24 @@ export default function Dashboard(): JSX.Element {
                           tickFormatter={(v: string) => v.slice(5)}
                           tick={{ fontSize: 11, fill: "#647a8a" }}
                         />
-                        <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Unidades", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                          label={{
+                            value: "Unidades",
+                            angle: -90,
+                            position: "insideLeft",
+                            offset: -5,
+                            style: { fontSize: 10, fill: "#647a8a" },
+                          }}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="unidades" name="Unidades" fill="#27ae60" radius={[4, 4, 0, 0]} />
+                        <Bar
+                          dataKey="unidades"
+                          name="Unidades"
+                          fill="#27ae60"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -818,7 +974,11 @@ export default function Dashboard(): JSX.Element {
                         margin={{ left: 10, right: 30 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
-                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} />
+                        <XAxis
+                          type="number"
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                        />
                         <YAxis
                           dataKey="nombre"
                           type="category"
@@ -827,15 +987,29 @@ export default function Dashboard(): JSX.Element {
                         />
                         <Tooltip
                           contentStyle={tooltipStyle}
-                          formatter={(value: number, name: string, props: { dataKey?: string | number }) =>
+                          formatter={(
+                            value: number,
+                            name: string,
+                            props: { dataKey?: string | number },
+                          ) =>
                             props.dataKey === "unidades"
                               ? [formatQty(value), "Unidades"]
                               : [value, "Órdenes"]
                           }
                         />
                         <Legend />
-                        <Bar dataKey="veces" name="Órdenes" fill="#3a7ca5" radius={[0, 4, 4, 0]} />
-                        <Bar dataKey="unidades" name="Unidades" fill="#27ae60" radius={[0, 4, 4, 0]} />
+                        <Bar
+                          dataKey="veces"
+                          name="Órdenes"
+                          fill="#3a7ca5"
+                          radius={[0, 4, 4, 0]}
+                        />
+                        <Bar
+                          dataKey="unidades"
+                          name="Unidades"
+                          fill="#27ae60"
+                          radius={[0, 4, 4, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartCard>
@@ -856,9 +1030,13 @@ export default function Dashboard(): JSX.Element {
                 <KpiCard
                   label="Stock bajo (terminados)"
                   value={stats.productos.kpis.productos_stock_bajo}
-                  accent={stats.productos.kpis.productos_stock_bajo > 0 ? "danger" : "success"}
+                  accent={
+                    stats.productos.kpis.productos_stock_bajo > 0 ? "danger" : "success"
+                  }
                   hint="Por debajo del mínimo"
-                  variant={stats.productos.kpis.productos_stock_bajo > 0 ? "alert" : "info"}
+                  variant={
+                    stats.productos.kpis.productos_stock_bajo > 0 ? "alert" : "info"
+                  }
                 />
                 <KpiCard
                   label="Comerciales activos"
@@ -869,9 +1047,15 @@ export default function Dashboard(): JSX.Element {
                 <KpiCard
                   label="Stock bajo (comerciales)"
                   value={stats.productos.kpis.comerciales_stock_bajo}
-                  accent={stats.productos.kpis.comerciales_stock_bajo > 0 ? "danger" : "success"}
+                  accent={
+                    stats.productos.kpis.comerciales_stock_bajo > 0
+                      ? "danger"
+                      : "success"
+                  }
                   hint="Por debajo del mínimo"
-                  variant={stats.productos.kpis.comerciales_stock_bajo > 0 ? "alert" : "info"}
+                  variant={
+                    stats.productos.kpis.comerciales_stock_bajo > 0 ? "alert" : "info"
+                  }
                 />
               </div>
 
@@ -882,10 +1066,15 @@ export default function Dashboard(): JSX.Element {
                   subtitle="Top 10 más críticos · rojo = bajo el mínimo"
                 >
                   {stats.productos.productos_stock.length === 0 ? (
-                    <p style={styles.emptyText}>Sin productos terminados registrados.</p>
+                    <p style={styles.emptyText}>
+                      Sin productos terminados registrados.
+                    </p>
                   ) : (
                     <ResponsiveContainer width="100%" height={260}>
-                      <BarChart data={stats.productos.productos_stock} margin={{ bottom: 30 }}>
+                      <BarChart
+                        data={stats.productos.productos_stock}
+                        margin={{ bottom: 30 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
                         <XAxis
                           dataKey="name"
@@ -895,17 +1084,38 @@ export default function Dashboard(): JSX.Element {
                           height={60}
                           tick={{ fontSize: 10, fill: "#647a8a" }}
                         />
-                        <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Cantidad", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                          label={{
+                            value: "Cantidad",
+                            angle: -90,
+                            position: "insideLeft",
+                            offset: -5,
+                            style: { fontSize: 10, fill: "#647a8a" },
+                          }}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="disponible" name="Disponible" radius={[4, 4, 0, 0]}>
+                        <Bar
+                          dataKey="disponible"
+                          name="Disponible"
+                          radius={[4, 4, 0, 0]}
+                        >
                           {stats.productos.productos_stock.map((entry) => (
                             <Cell
                               key={entry.name}
-                              fill={entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"}
+                              fill={
+                                entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"
+                              }
                             />
                           ))}
                         </Bar>
-                        <Bar dataKey="minimo" name="Mínimo" fill="#bcc7d0" radius={[4, 4, 0, 0]} />
+                        <Bar
+                          dataKey="minimo"
+                          name="Mínimo"
+                          fill="#bcc7d0"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -916,7 +1126,9 @@ export default function Dashboard(): JSX.Element {
                   subtitle="Top 10 más producidos · barras muestran unidades y órdenes"
                 >
                   {stats.productos.produccion_por_producto.length === 0 ? (
-                    <p style={styles.emptyText}>Sin producción completada en el período.</p>
+                    <p style={styles.emptyText}>
+                      Sin producción completada en el período.
+                    </p>
                   ) : (
                     <ResponsiveContainer width="100%" height={260}>
                       <BarChart
@@ -925,7 +1137,11 @@ export default function Dashboard(): JSX.Element {
                         margin={{ left: 10, right: 30 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
-                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} />
+                        <XAxis
+                          type="number"
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                        />
                         <YAxis
                           dataKey="nombre"
                           type="category"
@@ -941,8 +1157,18 @@ export default function Dashboard(): JSX.Element {
                           }
                         />
                         <Legend />
-                        <Bar dataKey="total" name="Órdenes" fill="#3a7ca5" radius={[0, 4, 4, 0]} />
-                        <Bar dataKey="unidades" name="Unidades" fill="#27ae60" radius={[0, 4, 4, 0]} />
+                        <Bar
+                          dataKey="total"
+                          name="Órdenes"
+                          fill="#3a7ca5"
+                          radius={[0, 4, 4, 0]}
+                        />
+                        <Bar
+                          dataKey="unidades"
+                          name="Unidades"
+                          fill="#27ae60"
+                          radius={[0, 4, 4, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -956,24 +1182,30 @@ export default function Dashboard(): JSX.Element {
                     subtitle="Productos terminados por debajo del mínimo"
                   >
                     <ul style={styles.alertList}>
-                      {stats.productos.productos_stock_bajo.slice(0, LIST_LIMIT).map((item) => (
-                        <li key={`prod-${item.id}-${item.name}`} style={styles.alertItem}>
-                          <span style={styles.dangerDot} />
-                          <div style={styles.alertInfo}>
-                            <span style={styles.itemName}>{item.name}</span>
-                            <span style={styles.itemMeta}>
-                              {item.unit ?? "Sin unidad"}
+                      {stats.productos.productos_stock_bajo
+                        .slice(0, LIST_LIMIT)
+                        .map((item) => (
+                          <li
+                            key={`prod-${item.id}-${item.name}`}
+                            style={styles.alertItem}
+                          >
+                            <span style={styles.dangerDot} />
+                            <div style={styles.alertInfo}>
+                              <span style={styles.itemName}>{item.name}</span>
+                              <span style={styles.itemMeta}>
+                                {item.unit ?? "Sin unidad"}
+                              </span>
+                            </div>
+                            <span style={styles.dangerValue}>
+                              {formatQty(item.available_quantity)} / mín{" "}
+                              {formatQty(item.min_stock)}
                             </span>
-                          </div>
-                          <span style={styles.dangerValue}>
-                            {formatQty(item.available_quantity)} / mín{" "}
-                            {formatQty(item.min_stock)}
-                          </span>
-                        </li>
-                      ))}
+                          </li>
+                        ))}
                       {stats.productos.productos_stock_bajo.length > LIST_LIMIT && (
                         <li style={styles.moreItem}>
-                          +{stats.productos.productos_stock_bajo.length - LIST_LIMIT} producto(s) más
+                          +{stats.productos.productos_stock_bajo.length - LIST_LIMIT}{" "}
+                          producto(s) más
                         </li>
                       )}
                     </ul>
@@ -988,10 +1220,15 @@ export default function Dashboard(): JSX.Element {
                   subtitle="Top 10 más críticos · rojo = bajo el mínimo"
                 >
                   {stats.productos.comerciales_stock.length === 0 ? (
-                    <p style={styles.emptyText}>Sin productos comerciales registrados.</p>
+                    <p style={styles.emptyText}>
+                      Sin productos comerciales registrados.
+                    </p>
                   ) : (
                     <ResponsiveContainer width="100%" height={260}>
-                      <BarChart data={stats.productos.comerciales_stock} margin={{ bottom: 30 }}>
+                      <BarChart
+                        data={stats.productos.comerciales_stock}
+                        margin={{ bottom: 30 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e5ea" />
                         <XAxis
                           dataKey="name"
@@ -1001,17 +1238,38 @@ export default function Dashboard(): JSX.Element {
                           height={60}
                           tick={{ fontSize: 10, fill: "#647a8a" }}
                         />
-                        <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#647a8a" }} label={{ value: "Cantidad", angle: -90, position: "insideLeft", offset: -5, style: { fontSize: 10, fill: "#647a8a" } }} />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 11, fill: "#647a8a" }}
+                          label={{
+                            value: "Cantidad",
+                            angle: -90,
+                            position: "insideLeft",
+                            offset: -5,
+                            style: { fontSize: 10, fill: "#647a8a" },
+                          }}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
-                        <Bar dataKey="disponible" name="Disponible" radius={[4, 4, 0, 0]}>
+                        <Bar
+                          dataKey="disponible"
+                          name="Disponible"
+                          radius={[4, 4, 0, 0]}
+                        >
                           {stats.productos.comerciales_stock.map((entry) => (
                             <Cell
                               key={entry.name}
-                              fill={entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"}
+                              fill={
+                                entry.disponible <= entry.minimo ? "#c0392b" : "#3a7ca5"
+                              }
                             />
                           ))}
                         </Bar>
-                        <Bar dataKey="minimo" name="Mínimo" fill="#bcc7d0" radius={[4, 4, 0, 0]} />
+                        <Bar
+                          dataKey="minimo"
+                          name="Mínimo"
+                          fill="#bcc7d0"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -1020,7 +1278,8 @@ export default function Dashboard(): JSX.Element {
                 {stats.productos.por_categoria.length === 1 ? (
                   <div className="insight-block">
                     <span className="insight-block__label" style={{ fontSize: "1rem" }}>
-                      Todos los productos comerciales están en la categoría: {stats.productos.por_categoria[0].name}
+                      Todos los productos comerciales están en la categoría:{" "}
+                      {stats.productos.por_categoria[0].name}
                     </span>
                   </div>
                 ) : (
@@ -1042,7 +1301,14 @@ export default function Dashboard(): JSX.Element {
                             outerRadius={90}
                           >
                             {topCategorias.map((entry, index) => (
-                              <Cell key={entry.name} fill={entry.name === "Otros" ? "#8d99ae" : COLORS[index % COLORS.length]} />
+                              <Cell
+                                key={entry.name}
+                                fill={
+                                  entry.name === "Otros"
+                                    ? "#8d99ae"
+                                    : COLORS[index % COLORS.length]
+                                }
+                              />
                             ))}
                           </Pie>
                           <Tooltip contentStyle={tooltipStyle} />
@@ -1061,27 +1327,34 @@ export default function Dashboard(): JSX.Element {
                     subtitle="Requieren reposición"
                   >
                     <ul style={styles.alertList}>
-                      {stats.productos.comerciales_stock_bajo.slice(0, LIST_LIMIT).map((item) => (
-                        <li key={`com-${item.id}-${item.name}`} style={styles.alertItem}>
-                          <span style={styles.dangerDot} />
-                          <div style={styles.alertInfo}>
-                            <span style={styles.itemName}>{item.name}</span>
-                            <span style={styles.itemMeta}>
-                              {item.unit ?? "Sin unidad"}
+                      {stats.productos.comerciales_stock_bajo
+                        .slice(0, LIST_LIMIT)
+                        .map((item) => (
+                          <li
+                            key={`com-${item.id}-${item.name}`}
+                            style={styles.alertItem}
+                          >
+                            <span style={styles.dangerDot} />
+                            <div style={styles.alertInfo}>
+                              <span style={styles.itemName}>{item.name}</span>
+                              <span style={styles.itemMeta}>
+                                {item.unit ?? "Sin unidad"}
+                              </span>
+                            </div>
+                            <span style={styles.dangerValue}>
+                              {formatQty(item.available_quantity)} / mín{" "}
+                              {formatQty(item.min_stock)}
                             </span>
-                          </div>
-                          <span style={styles.dangerValue}>
-                            {formatQty(item.available_quantity)} / mín{" "}
-                            {formatQty(item.min_stock)}
-                          </span>
-                        </li>
-                      ))}
+                          </li>
+                        ))}
                     </ul>
                   </ChartCard>
                 )}
 
                 {(() => {
-                  const activeStockHealth = stats.productos.stock_saludable.filter((s) => s.total > 0);
+                  const activeStockHealth = stats.productos.stock_saludable.filter(
+                    (s) => s.total > 0,
+                  );
                   if (activeStockHealth.length === 0) {
                     return (
                       <ChartCard
@@ -1095,8 +1368,14 @@ export default function Dashboard(): JSX.Element {
                   if (activeStockHealth.length === 1) {
                     const estado = activeStockHealth[0].estado;
                     const label = estado === "OK" ? "Stock saludable" : estado;
-                    const totalAll = stats.productos.stock_saludable.reduce((acc, s) => acc + s.total, 0);
-                    const pct = totalAll > 0 ? Math.round((activeStockHealth[0].total / totalAll) * 100) : 0;
+                    const totalAll = stats.productos.stock_saludable.reduce(
+                      (acc, s) => acc + s.total,
+                      0,
+                    );
+                    const pct =
+                      totalAll > 0
+                        ? Math.round((activeStockHealth[0].total / totalAll) * 100)
+                        : 0;
                     return (
                       <div className="insight-block">
                         <span className="insight-block__value">{pct}%</span>
@@ -1106,7 +1385,9 @@ export default function Dashboard(): JSX.Element {
                       </div>
                     );
                   }
-                  const healthLabelMap: Record<string, string> = { OK: "Stock saludable" };
+                  const healthLabelMap: Record<string, string> = {
+                    OK: "Stock saludable",
+                  };
                   return (
                     <ChartCard
                       title="Stock saludable"
@@ -1121,7 +1402,13 @@ export default function Dashboard(): JSX.Element {
                             cx="50%"
                             cy="50%"
                             outerRadius={90}
-                            label={({ estado, total }: { estado: string; total: number }) => `${healthLabelMap[estado] ?? estado}: ${total}`}
+                            label={({
+                              estado,
+                              total,
+                            }: {
+                              estado: string;
+                              total: number;
+                            }) => `${healthLabelMap[estado] ?? estado}: ${total}`}
                           >
                             {stats.productos.stock_saludable.map((entry) => (
                               <Cell
