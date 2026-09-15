@@ -5,8 +5,13 @@
 }
 
 @keyframes dash-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .alert-bar {
@@ -22,12 +27,14 @@
   gap: 0.45rem;
   padding: 0.45rem 0.85rem;
   border-radius: 6px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .alert-bar-item--active {
@@ -87,7 +94,7 @@
   justify-content: center;
   text-align: center;
   gap: 0.35rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   min-height: 260px;
 }
 

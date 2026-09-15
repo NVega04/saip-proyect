@@ -14,7 +14,7 @@ interface ConfirmState extends ConfirmOptions {
 }
 
 interface ConfirmContextType {
-  showConfirm: (options: ConfirmOptions) => void;
+  showConfirm: (_options: ConfirmOptions) => void;
   hideConfirm: () => void;
 }
 

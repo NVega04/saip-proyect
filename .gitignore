@@ -1,5 +1,9 @@
 **/__pycache__/**
+**/node_modules/**
 .env
 .venv
 .vite
 .ruff_cache
+evidencias/
+logs/
+**/.husky/_

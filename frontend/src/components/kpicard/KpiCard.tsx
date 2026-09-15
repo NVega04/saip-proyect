@@ -23,7 +23,7 @@ export default function KpiCard({
       style={{
         ...styles.card,
         borderLeft: `${isAlert ? "6px" : "4px"} solid ${accentColor}`,
-        background: isAlert ? ALERT_BG[accent] ?? "#fdf0ef" : "#f2f2f2",
+        background: isAlert ? (ALERT_BG[accent] ?? "#fdf0ef") : "#f2f2f2",
       }}
     >
       <span style={{ ...styles.value, color: accentColor }}>{value}</span>

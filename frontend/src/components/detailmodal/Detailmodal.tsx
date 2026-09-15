@@ -77,15 +77,11 @@ export default function Detallemodal({
         {/* ── Encabezado ─────────────────────────────────────────────────── */}
         <div className="dm__header">
           <h2 className="dm__titulo">{titulo}</h2>
-          {estado && (
-            <Badge label={estado.label} variant={estado.variant} />
-          )}
+          {estado && <Badge label={estado.label} variant={estado.variant} />}
         </div>
 
         {/* ── Descripción ────────────────────────────────────────────────── */}
-        {descripcion && (
-          <p className="dm__descripcion">{descripcion}</p>
-        )}
+        {descripcion && <p className="dm__descripcion">{descripcion}</p>}
 
         {/* ── Campos tipo ficha ──────────────────────────────────────────── */}
         {campos && campos.length > 0 && (

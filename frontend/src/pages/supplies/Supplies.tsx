@@ -86,12 +86,27 @@ const formatDate = (dateStr: string | null): string => {
 
 const columns: ColumnDef<Supply>[] = [
   { key: "name", header: "Nombre", width: "18%" },
-  { key: "category", header: "Categoria", width: "15%", render: (row) => row.category.name },
-  { key: "unit", header: "Unidad", width: "10%", render: (row) => `${row.unit.name} (${row.unit.abbreviation})` },
+  {
+    key: "category",
+    header: "Categoria",
+    width: "15%",
+    render: (row) => row.category.name,
+  },
+  {
+    key: "unit",
+    header: "Unidad",
+    width: "10%",
+    render: (row) => `${row.unit.name} (${row.unit.abbreviation})`,
+  },
   { key: "available_quantity", header: "Stock", width: "8%" },
   { key: "min_stock", header: "Stock min", width: "8%" },
   { key: "max_stock", header: "Stock max", width: "8%" },
-  { key: "expiration_date", header: "Vencimiento", width: "13%", render: (row) => formatDate(row.expiration_date) },
+  {
+    key: "expiration_date",
+    header: "Vencimiento",
+    width: "13%",
+    render: (row) => formatDate(row.expiration_date),
+  },
 ];
 
 export default function Supplies(): JSX.Element {
@@ -106,7 +121,8 @@ export default function Supplies(): JSX.Element {
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("supplies");
+  const { download: downloadReport, loading: reportLoading } =
+    useReportDownload("supplies");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -235,9 +251,7 @@ export default function Supplies(): JSX.Element {
         }
 
         const updated: Supply = await response.json();
-        setSupplies((prev) =>
-          prev.map((s) => (s.id === editTarget.id ? updated : s))
-        );
+        setSupplies((prev) => prev.map((s) => (s.id === editTarget.id ? updated : s)));
         showAlert("success", "Insumo actualizado correctamente.");
       } else {
         const response = await apiFetch("/supplies/", {
@@ -308,26 +322,34 @@ export default function Supplies(): JSX.Element {
           sortKey="name"
           headerActions={
             <>
-            <Button variant="primary" onClick={handleCrear}>
-              Crear insumo
-            </Button>
-            <Button variant="secondary" onClick={() => setBulkOpen(true)}>
-              Cargar masivo
-            </Button>
-             <Button
+              <Button variant="primary" onClick={handleCrear}>
+                Crear insumo
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkOpen(true)}>
+                Cargar masivo
+              </Button>
+              <Button
                 variant="secondary"
                 onClick={downloadReport}
                 disabled={reportLoading}
                 icon={
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  }
-                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                }
+              >
                 {reportLoading ? "Generando..." : "Exportar excel"}
-            </Button>
+              </Button>
             </>
           }
           renderActions={(row) => (
@@ -448,9 +470,7 @@ export default function Supplies(): JSX.Element {
                 </option>
               ))}
             </select>
-            {errors.unit_id && (
-              <span className="sf__error">{errors.unit_id}</span>
-            )}
+            {errors.unit_id && <span className="sf__error">{errors.unit_id}</span>}
           </div>
 
           <div className="sf__group">
@@ -462,7 +482,9 @@ export default function Supplies(): JSX.Element {
               min={0}
               step={1}
               value={form.available_quantity}
-              onChange={(e) => setField("available_quantity", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                setField("available_quantity", parseFloat(e.target.value) || 0)
+              }
             />
             {errors.available_quantity && (
               <span className="sf__error">{errors.available_quantity}</span>
@@ -480,9 +502,7 @@ export default function Supplies(): JSX.Element {
               value={form.min_stock}
               onChange={(e) => setField("min_stock", parseFloat(e.target.value) || 0)}
             />
-            {errors.min_stock && (
-              <span className="sf__error">{errors.min_stock}</span>
-            )}
+            {errors.min_stock && <span className="sf__error">{errors.min_stock}</span>}
           </div>
 
           <div className="sf__group">
@@ -496,9 +516,7 @@ export default function Supplies(): JSX.Element {
               value={form.max_stock}
               onChange={(e) => setField("max_stock", parseFloat(e.target.value) || 0)}
             />
-            {errors.max_stock && (
-              <span className="sf__error">{errors.max_stock}</span>
-            )}
+            {errors.max_stock && <span className="sf__error">{errors.max_stock}</span>}
           </div>
 
           <div className="sf__group">

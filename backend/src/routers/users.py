@@ -1,19 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
-from sqlmodel import Session, select
 import logging
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from sqlmodel import Session, select
 from src.database import get_session
-from src.models.models import User, Role, UserStatus, SessionApp
-from src.schemas.schemas import UserCreate, UserResponse, DeleteResponseUser, UserUpdateResponse, UserUpdate
-from src.security import hash_password, generate_temp_password, verify_password
-from datetime import datetime, timezone
 from src.dependencies import get_current_user
-from src.email import send_welcome_email, send_deactivation_email
+from src.email import send_deactivation_email, send_welcome_email
+from src.models.models import Role, SessionApp, User, UserStatus
+from src.schemas.schemas import (
+    DeleteResponseUser,
+    UserCreate,
+    UserResponse,
+    UserUpdate,
+    UserUpdateResponse,
+)
+from src.security import generate_temp_password, hash_password, verify_password
 
 router = APIRouter(prefix="/users", tags=["Users"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED, summary="Crear nuevo usuario")
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear nuevo usuario",
+)
 def create_new_user(user_data: UserCreate, session: Session = Depends(get_session)):
     role = session.get(Role, user_data.role_id)
     if not role:
@@ -33,11 +45,11 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
 
     temp_password = generate_temp_password()
     hashed = hash_password(temp_password)
-    #log de respaldo-------------------------------
+    # log de respaldo-------------------------------
     logger.warning(
         f"[SAIP] Password temporal generada para '{user_data.email}': {temp_password}"
     )
-   
+
     new_user = User(
         first_name=user_data.first_name,
         last_name=user_data.last_name,
@@ -55,18 +67,32 @@ def create_new_user(user_data: UserCreate, session: Session = Depends(get_sessio
     try:
         send_welcome_email(new_user.email, new_user.first_name, temp_password)
     except Exception as e:
-        logger.warning(f"[EMAIL ERROR] No se pudo enviar bienvenida a {new_user.email}: {e}")
+        logger.warning(
+            f"[EMAIL ERROR] No se pudo enviar bienvenida a {new_user.email}: {e}"
+        )
 
     return new_user
 
-@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK, summary="Obtener usuario autenticado")
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Obtener usuario autenticado",
+)
 def get_me(
     current_user: User = Depends(get_current_user),
 ):
-    
+
     return current_user
 
-@router.delete("/me", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar cuenta propia con confirmación de contraseña")
+
+@router.delete(
+    "/me",
+    response_model=DeleteResponseUser,
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar cuenta propia con confirmación de contraseña",
+)
 def delete_own_account(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
@@ -93,7 +119,7 @@ def delete_own_account(
             detail="Contraseña incorrecta. No se puede eliminar la cuenta.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     current_user.deleted_at = now
     current_user.deleted_by = current_user.id
     current_user.status = UserStatus.INACTIVE
@@ -115,11 +141,16 @@ def delete_own_account(
     return DeleteResponseUser(
         message=f"Cuenta '{current_user.email}' eliminada correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
-@router.delete("/{user_id}", response_model=DeleteResponseUser, status_code=status.HTTP_200_OK, summary="Eliminar usuario (soft delete)")
+@router.delete(
+    "/{user_id}",
+    response_model=DeleteResponseUser,
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar usuario (soft delete)",
+)
 def delete_user(
     user_id: int,
     session: Session = Depends(get_session),
@@ -150,7 +181,7 @@ def delete_user(
             detail="No puedes eliminarte a ti mismo.",
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     user.deleted_at = now
     user.deleted_by = current_user.id
     user.status = UserStatus.INACTIVE
@@ -171,16 +202,23 @@ def delete_user(
     try:
         send_deactivation_email(user.email, user.first_name)
     except Exception as e:
-        logger.warning(f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}")
+        logger.warning(
+            f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}"
+        )
 
     return DeleteResponseUser(
         message=f"Usuario '{user.email}' eliminado correctamente.",
         deleted_at=now,
-        deleted_by=current_user.id,
+        deleted_by=current_user.id,  # type: ignore[arg-type]
     )
 
 
-@router.put("/{user_id}", response_model=UserUpdateResponse, status_code=status.HTTP_200_OK, summary="Actualizar usuario")
+@router.put(
+    "/{user_id}",
+    response_model=UserUpdateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Actualizar usuario",
+)
 def update_user(
     user_id: int,
     user_data: UserUpdate,
@@ -224,7 +262,7 @@ def update_user(
     for field, value in update_data.items():
         setattr(user, field, value)
 
-    user.updated_at = datetime.now(timezone.utc)
+    user.updated_at = datetime.now(UTC)
     user.updated_by = current_user.id
 
     session.add(user)
@@ -235,17 +273,22 @@ def update_user(
         try:
             send_deactivation_email(user.email, user.first_name)
         except Exception as e:
-            logger.warning(f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}")
+            logger.warning(
+                f"[EMAIL ERROR] No se pudo notificar desactivación a {user.email}: {e}"
+            )
 
     return user
 
-@router.get("/", response_model=list[UserResponse], status_code=status.HTTP_200_OK, summary="Listar todos los usuarios activos",)
+
+@router.get(
+    "/",
+    response_model=list[UserResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Listar todos los usuarios activos",
+)
 def get_all_users(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    users = session.exec(
-        select(User)
-    ).all()
+    users = session.exec(select(User)).all()
     return users
-

@@ -1,24 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
-from sqlmodel import Session, select
-from src.database import get_session
-from src.models.models import User, SessionApp, PasswordReset
-from src.schemas.schemas import (
-    LoginRequest,
-    LoginResponse,
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-)
-from src.security import verify_password, get_session_expiry, hash_password, create_jwt, decode_jwt
-from src.dependencies import get_current_user
+import os
+import secrets
+import uuid
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-import uuid
-import os
-from datetime import datetime, timedelta
-import secrets
+from sqlmodel import Session, select
+from src.database import get_session
+from src.dependencies import get_current_user
 from src.email import send_reset_email
-from src.schemas.schemas import ChangePasswordRequest
-from zoneinfo import ZoneInfo
+from src.models.models import PasswordReset, SessionApp, User
+from src.schemas.schemas import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    ResetPasswordRequest,
+)
+from src.security import (
+    create_jwt,
+    decode_jwt,
+    get_session_expiry,
+    hash_password,
+    verify_password,
+)
 
 BOGOTA_TZ = ZoneInfo("America/Bogota")
 
@@ -46,24 +53,23 @@ def login(
     now = datetime.now(BOGOTA_TZ)
 
     # 2. Verificar bloqueo temporal por intentos fallidos (solo si el usuario existe)
-    if user is not None:
-        if user.locked_until is not None:
-            locked_until = user.locked_until
-            if locked_until.tzinfo is None:
-                locked_until = locked_until.replace(tzinfo=BOGOTA_TZ)
-            if now < locked_until:
-                remaining = int((locked_until - now).total_seconds() // 60) + 1
-                raise HTTPException(
-                    status_code=status.HTTP_423_LOCKED,
-                    detail=(
-                        f"Cuenta bloqueada temporalmente por intentos fallidos. "
-                        f"Inténtalo de nuevo en aproximadamente {remaining} min."
-                    ),
-                )
-            # Bloqueo expirado: reiniciar contador
-            user.failed_login_attempts = 0
-            user.locked_until = None
-            db.add(user)
+    if user is not None and user.locked_until is not None:
+        locked_until = user.locked_until
+        if locked_until.tzinfo is None:
+            locked_until = locked_until.replace(tzinfo=BOGOTA_TZ)
+        if now < locked_until:
+            remaining = int((locked_until - now).total_seconds() // 60) + 1
+            raise HTTPException(
+                status_code=status.HTTP_423_LOCKED,
+                detail=(
+                    f"Cuenta bloqueada temporalmente por intentos fallidos. "
+                    f"Inténtalo de nuevo en aproximadamente {remaining} min."
+                ),
+            )
+        # Bloqueo expirado: reiniciar contador
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.add(user)
 
     if not user:
         raise HTTPException(
@@ -142,12 +148,12 @@ def login(
     db.refresh(new_session)
     db.refresh(user)
 
-    jwt_token = create_jwt(new_session.token, user.id, new_session.expires_at)
+    jwt_token = create_jwt(new_session.token, user.id, new_session.expires_at)  # type: ignore[arg-type]
 
     return LoginResponse(
         session_token=jwt_token,
         expires_at=new_session.expires_at,
-        user=user,
+        user=user,  # type: ignore[arg-type]
         terms_required=False,
     )
 

@@ -1,41 +1,41 @@
 /* src/variables.css */
-:root { 
+:root {
   /* Sidebar / Navbar */
-  --bakery-sidebar-bg:        #003459;
-  --bakery-sidebar-hover:     #003459;
-  --bakery-sidebar-active:    #3a7ca5;
-  --bakery-sidebar-text:      #f2f2f2;
+  --bakery-sidebar-bg: #003459;
+  --bakery-sidebar-hover: #003459;
+  --bakery-sidebar-active: #3a7ca5;
+  --bakery-sidebar-text: #f2f2f2;
 
   /* Cards doradas */
-  --bakery-accent:            #3a7ca5;
-  --bakery-accent-light:      #63a6c4;
-  --bakery-accent-text:       #f2f2f2;
+  --bakery-accent: #3a7ca5;
+  --bakery-accent-light: #63a6c4;
+  --bakery-accent-text: #f2f2f2;
 
   /* Botones */
-  --bakery-btn-primary:       #1A3A8F;
-  --bakery-btn-primary-hover: #142E72;
-  --bakery-btn-danger:        #C0392B;
-  --bakery-btn-danger-hover:  #A02F23;
-  --bakery-btn-text:          #f2f2f2;
+  --bakery-btn-primary: #1a3a8f;
+  --bakery-btn-primary-hover: #142e72;
+  --bakery-btn-danger: #c0392b;
+  --bakery-btn-danger-hover: #a02f23;
+  --bakery-btn-text: #f2f2f2;
 
   /* Fondos */
-  --bakery-bg:                #d9dcd6;
-  --bakery-card-bg:           #f2f2f2;
+  --bakery-bg: #d9dcd6;
+  --bakery-card-bg: #f2f2f2;
 
   /* Texto general */
-  --bakery-text-primary:      #0f1f2e;
-  --bakery-text-secondary:    #4a6375;
-  --bakery-text-muted:        #7a8e9a;
+  --bakery-text-primary: #0f1f2e;
+  --bakery-text-secondary: #4a6375;
+  --bakery-text-muted: #7a8e9a;
 
   /* Bordes */
-  --bakery-border:            #c4cdd3;
-  --bakery-border-focus:      #3a7ca5;
+  --bakery-border: #c4cdd3;
+  --bakery-border-focus: #3a7ca5;
 
   /* Estados */
-  --bakery-success:           #1E7E34;
-  --bakery-success-bg:        #D4EDDA;
-  --bakery-danger:            #C0392B;
-  --bakery-danger-bg:         #F8D7DA;
-  --bakery-warning:           #856404;
-  --bakery-warning-bg:        #FFF3CD;
+  --bakery-success: #1e7e34;
+  --bakery-success-bg: #d4edda;
+  --bakery-danger: #c0392b;
+  --bakery-danger-bg: #f8d7da;
+  --bakery-warning: #856404;
+  --bakery-warning-bg: #fff3cd;
 }

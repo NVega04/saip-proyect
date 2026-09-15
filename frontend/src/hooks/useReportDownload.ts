@@ -8,11 +8,14 @@ export function useReportDownload(entity: string) {
     setLoading(true);
     try {
       const res = await apiFetch(`/reports/${entity}`);
-      if (!res.ok) { alert("Error al generar el reporte."); return; }
+      if (!res.ok) {
+        alert("Error al generar el reporte.");
+        return;
+      }
       const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href     = url;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
       a.download = `reporte_${entity}_${new Date().toISOString().slice(0, 10)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);

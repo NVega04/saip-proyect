@@ -21,6 +21,53 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "black>=26.5.1",
+    "mypy>=2.3.1",
+    "ruff>=0.16.7",
     "selenium>=4.48.0",
     "webdriver-manager>=4.1.2",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+src = ["src"]
+
+[tool.ruff.lint]
+# Patrones intencionales del proyecto:
+#   B008   - defaults como Query(...)/Header(...)/Depends(...) en FastAPI
+#   BLE001 - captura deliberada de Exception en puntos críticos (envío de correo, reportes)
+#   S110   - try/except-pass en telemetría/limpieza
+#   DTZ005 - datetime.now() naive intencional (exportes locales, scripts)
+#   DTZ007 - utcnow() intencional en reverso de compatibilidad con la BD
+ignore = ["B008", "BLE001", "S110", "DTZ005", "DTZ007"]
+
+[tool.ruff.lint.per-file-ignores]
+# Migración legada de merge propiedad de root (sin permiso de escritura local).
+# No se puede editar ni auto-corregir en esta máquina; pendiente: sudo chown.
+"alembic/versions/cd4e9f97101f_merge_bulk_import_and_login_lockout.py" = [
+    "UP035", "I001", "F401", "UP007", "PIE790",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+# Migración legada de merge propiedad de root (sin permiso de escritura local).
+extend-exclude = "alembic/versions/cd4e9f97101f_merge_bulk_import_and_login_lockout\\.py"
+
+[tool.mypy]
+python_version = "3.14"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+check_untyped_defs = true
+show_error_codes = true
+explicit_package_bases = true
+# Librerías sin stubs (openpyxl, slowapi, etc.): no reportar import-untyped.
+disable_error_code = ["import-untyped"]
+
+[[tool.mypy.overrides]]
+# Scripts de automatización (Selenium/Python) fuera del alcance del chequeo
+# estático de producción. Activación incremental documentada en type_ignores.md.
+module = "src.tests.*"
+ignore_errors = true

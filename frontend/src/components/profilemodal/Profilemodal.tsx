@@ -27,7 +27,9 @@ interface Props {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("es-CO", {
-    year: "numeric", month: "long", day: "numeric",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }
 
@@ -37,13 +39,20 @@ function getInitials(first: string, last: string) {
 
 // ── Modal de perfil ────────────────────────────────────────────────────────
 export default function PerfilModal({ isOpen, onClose }: Props) {
-  const [user, setUser]             = useState<UserProfile | null>(null);
-  const [form, setForm]             = useState<FormState>({ first_name: "", last_name: "", phone: "", email: "" });
-  const [editing, setEditing]       = useState(false);
-  const [loading, setLoading]       = useState(true);
-  const [saving, setSaving]         = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [form, setForm] = useState<FormState>({
+    first_name: "",
+    last_name: "",
+    phone: "",
+    email: "",
+  });
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
-  const [toast, setToast]           = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(
+    null,
+  );
   const [loggingOutAll, setLoggingOutAll] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -70,9 +79,9 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
         setUser(data);
         setForm({
           first_name: data.first_name,
-          last_name:  data.last_name,
-          phone:      data.phone ?? "",
-          email:      data.email,
+          last_name: data.last_name,
+          phone: data.phone ?? "",
+          email: data.email,
         });
       }
       setLoading(false);
@@ -106,14 +115,14 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
         method: "PUT",
         body: JSON.stringify({
           first_name: form.first_name,
-          last_name:  form.last_name,
-          phone:      form.phone || null,
-          email:      form.email,
+          last_name: form.last_name,
+          phone: form.phone || null,
+          email: form.email,
         }),
       });
       if (!res.ok) throw new Error();
       const updated = await res.json();
-      setUser((prev) => prev ? { ...prev, ...updated } : prev);
+      setUser((prev) => (prev ? { ...prev, ...updated } : prev));
       setEditing(false);
       setToast({ msg: "Perfil actualizado con éxito", type: "success" });
     } catch {
@@ -125,14 +134,18 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
 
   const handleCancel = () => {
     if (!user) return;
-    setForm({ first_name: user.first_name, last_name: user.last_name, phone: user.phone ?? "", email: user.email });
+    setForm({
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phone: user.phone ?? "",
+      email: user.email,
+    });
     setEditing(false);
   };
 
   return (
     <>
       <Modal isOpen={isOpen} onClose={handleClose} title="Mi perfil" width="600px">
-
         {/* Toast */}
         {toast && (
           <div className={`pm-toast pm-toast--${toast.type}`}>
@@ -146,19 +159,32 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
           <div className="pm-header-skeleton" />
         ) : user ? (
           <div className="pm-profile-header">
-            <div className="pm-avatar">{getInitials(user.first_name, user.last_name)}</div>
+            <div className="pm-avatar">
+              {getInitials(user.first_name, user.last_name)}
+            </div>
             <div className="pm-header-info">
-              <p className="pm-fullname">{user.first_name} {user.last_name}</p>
+              <p className="pm-fullname">
+                {user.first_name} {user.last_name}
+              </p>
               <div className="pm-badges">
                 <span className="pm-badge">{user.role.name}</span>
-                {user.is_admin && <span className="pm-badge pm-badge--admin">Administrador</span>}
+                {user.is_admin && (
+                  <span className="pm-badge pm-badge--admin">Administrador</span>
+                )}
               </div>
             </div>
             {!editing && (
               <button className="pm-edit-btn" onClick={() => setEditing(true)}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
                 Editar
               </button>
@@ -176,35 +202,63 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
             <div className="pm-section">
               <p className="pm-section-title">Información personal</p>
               <div className="pm-grid">
-
                 <div className="pm-field">
                   <label className="pm-label">Nombre</label>
-                  {editing
-                    ? <input className="pm-input" name="first_name" value={form.first_name} onChange={handleChange} />
-                    : <p className="pm-value">{user.first_name}</p>}
+                  {editing ? (
+                    <input
+                      className="pm-input"
+                      name="first_name"
+                      value={form.first_name}
+                      onChange={handleChange}
+                    />
+                  ) : (
+                    <p className="pm-value">{user.first_name}</p>
+                  )}
                 </div>
 
                 <div className="pm-field">
                   <label className="pm-label">Apellido</label>
-                  {editing
-                    ? <input className="pm-input" name="last_name" value={form.last_name} onChange={handleChange} />
-                    : <p className="pm-value">{user.last_name}</p>}
+                  {editing ? (
+                    <input
+                      className="pm-input"
+                      name="last_name"
+                      value={form.last_name}
+                      onChange={handleChange}
+                    />
+                  ) : (
+                    <p className="pm-value">{user.last_name}</p>
+                  )}
                 </div>
 
                 <div className="pm-field">
                   <label className="pm-label">Teléfono</label>
-                  {editing
-                    ? <input className="pm-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+57 300 000 0000" />
-                    : <p className="pm-value">{user.phone ?? "—"}</p>}
+                  {editing ? (
+                    <input
+                      className="pm-input"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+57 300 000 0000"
+                    />
+                  ) : (
+                    <p className="pm-value">{user.phone ?? "—"}</p>
+                  )}
                 </div>
 
                 <div className="pm-field">
                   <label className="pm-label">Correo electrónico</label>
-                  {editing
-                    ? <input className="pm-input" name="email" type="email" value={form.email} onChange={handleChange} />
-                    : <p className="pm-value">{user.email}</p>}
+                  {editing ? (
+                    <input
+                      className="pm-input"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                    />
+                  ) : (
+                    <p className="pm-value">{user.email}</p>
+                  )}
                 </div>
-
               </div>
             </div>
 
@@ -237,43 +291,84 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
             {/* Footer */}
             <div className="pm-footer">
               <button className="pm-pw-btn" onClick={() => setShowPwModal(true)}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0110 0v4"/>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0110 0v4" />
                 </svg>
                 Cambiar contraseña
               </button>
-              <button className="pm-pw-btn pm-pw-btn--danger" onClick={handleLogoutAll} disabled={loggingOutAll}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
+              <button
+                className="pm-pw-btn pm-pw-btn--danger"
+                onClick={handleLogoutAll}
+                disabled={loggingOutAll}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
-                {loggingOutAll ? "Cerrando..." : "Cerrar sesión en todos los dispositivos"}
+                {loggingOutAll
+                  ? "Cerrando..."
+                  : "Cerrar sesión en todos los dispositivos"}
               </button>
 
-                {user && !user.is_admin && (
+              {user && !user.is_admin && (
                 <button
                   className="pm-pw-btn pm-pw-btn--delete"
                   onClick={() => setShowDeleteModal(true)}
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                    <path d="M10 11v6M14 11v6"/>
-                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                   </svg>
                   Eliminar mi cuenta
                 </button>
-                )}
+              )}
 
               {editing && (
                 <div className="pm-actions">
-                  <button className="pm-btn-cancel" onClick={handleCancel} disabled={saving}>
+                  <button
+                    className="pm-btn-cancel"
+                    onClick={handleCancel}
+                    disabled={saving}
+                  >
                     Cancelar
                   </button>
-                  <button className="pm-btn-save" onClick={handleSave} disabled={saving}>
-                    {saving ? <><span className="pm-spinner" /> Guardando...</> : "Guardar cambios"}
+                  <button
+                    className="pm-btn-save"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <span className="pm-spinner" /> Guardando...
+                      </>
+                    ) : (
+                      "Guardar cambios"
+                    )}
                   </button>
                 </div>
               )}
@@ -282,7 +377,6 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
         ) : (
           <p className="pm-error">No se pudo cargar el perfil.</p>
         )}
-
       </Modal>
 
       {/* Modal cambiar contraseña — encima */}
@@ -294,12 +388,11 @@ export default function PerfilModal({ isOpen, onClose }: Props) {
           setToast({ msg: "Contraseña actualizada correctamente", type: "success" });
         }}
       />
-      
-      <DeleteAccountModal
-       isOpen={showDeleteModal}
-       onClose={() => setShowDeleteModal(false)}
-      />
 
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </>
   );
 }
@@ -315,15 +408,17 @@ function ChangePasswordModal({
   onSuccess: () => void;
 }) {
   const [form, setForm] = useState<PasswordForm>({
-    current_password: "", new_password: "", confirm_password: "",
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
   });
   const [show, setShow] = useState({ current: false, next: false, confirm: false });
   const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const blockClipboard = (e: React.ClipboardEvent<HTMLInputElement>) => {
-  e.preventDefault();
-};
+    e.preventDefault();
+  };
   const isStrong = getPasswordStrength(form.new_password).level === "fuerte";
 
   // Reset al cerrar
@@ -342,13 +437,16 @@ function ChangePasswordModal({
 
   const handleSubmit = async () => {
     if (!form.current_password || !form.new_password || !form.confirm_password) {
-      setError("Todos los campos son obligatorios."); return;
+      setError("Todos los campos son obligatorios.");
+      return;
     }
     if (form.new_password !== form.confirm_password) {
-      setError("Las contraseñas nuevas no coinciden."); return;
+      setError("Las contraseñas nuevas no coinciden.");
+      return;
     }
     if (form.new_password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres."); return;
+      setError("La contraseña debe tener al menos 8 caracteres.");
+      return;
     }
     setSaving(true);
     try {
@@ -356,7 +454,7 @@ function ChangePasswordModal({
         method: "POST",
         body: JSON.stringify({
           current_password: form.current_password,
-          new_password:     form.new_password,
+          new_password: form.new_password,
         }),
       });
       if (!res.ok) {
@@ -372,16 +470,23 @@ function ChangePasswordModal({
     }
   };
 
-  const fields: { name: keyof PasswordForm; label: string; showKey: keyof typeof show }[] = [
-    { name: "current_password", label: "Contraseña actual",           showKey: "current" },
-    { name: "new_password",     label: "Nueva contraseña",            showKey: "next"    },
-    { name: "confirm_password", label: "Confirmar nueva contraseña",  showKey: "confirm" },
+  const fields: {
+    name: keyof PasswordForm;
+    label: string;
+    showKey: keyof typeof show;
+  }[] = [
+    { name: "current_password", label: "Contraseña actual", showKey: "current" },
+    { name: "new_password", label: "Nueva contraseña", showKey: "next" },
+    {
+      name: "confirm_password",
+      label: "Confirmar nueva contraseña",
+      showKey: "confirm",
+    },
   ];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Cambiar contraseña" width="420px">
       <div className="pm-section" style={{ paddingTop: 0 }}>
-
         {error && <div className="pm-error-box">{error}</div>}
 
         {fields.map(({ name, label, showKey }) => (
@@ -396,9 +501,9 @@ function ChangePasswordModal({
                 onChange={handleChange}
                 placeholder="••••••••"
                 {...(name !== "current_password" && {
-                  onCopy:  blockClipboard,
+                  onCopy: blockClipboard,
                   onPaste: blockClipboard,
-                  onCut:   blockClipboard,
+                  onCut: blockClipboard,
                 })}
               />
               <button
@@ -407,15 +512,29 @@ function ChangePasswordModal({
                 onClick={() => setShow((s) => ({ ...s, [showKey]: !s[showKey] }))}
               >
                 {show[showKey] ? (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
-                    <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+                    <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 ) : (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
               </button>
@@ -426,15 +545,27 @@ function ChangePasswordModal({
           </div>
         ))}
 
-        <div className="pm-actions" style={{ justifyContent: "flex-end", marginTop: "0.5rem" }}>
+        <div
+          className="pm-actions"
+          style={{ justifyContent: "flex-end", marginTop: "0.5rem" }}
+        >
           <button className="pm-btn-cancel" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button className="pm-btn-save" onClick={handleSubmit} disabled={saving  || !isStrong}>
-            {saving ? <><span className="pm-spinner" /> Guardando...</> : "Actualizar contraseña"}
+          <button
+            className="pm-btn-save"
+            onClick={handleSubmit}
+            disabled={saving || !isStrong}
+          >
+            {saving ? (
+              <>
+                <span className="pm-spinner" /> Guardando...
+              </>
+            ) : (
+              "Actualizar contraseña"
+            )}
           </button>
         </div>
-
       </div>
     </Modal>
   );

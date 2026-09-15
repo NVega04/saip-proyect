@@ -11,7 +11,7 @@ export interface ColumnDef<T> {
   header: string;
   width?: string;
   /** Renderer personalizado para la celda */
-  render?: (row: T) => React.ReactNode;
+  render?: (_row: T) => React.ReactNode;
 }
 
 interface SAIPTableProps<T extends { id: string | number }> {
@@ -20,7 +20,7 @@ interface SAIPTableProps<T extends { id: string | number }> {
   columns: ColumnDef<T>[];
   data: T[];
   /** Acciones al final de cada fila */
-  renderActions?: (row: T) => React.ReactNode;
+  renderActions?: (_row: T) => React.ReactNode;
   /** Botones sobre la tabla (Crear, Eliminar…) */
   headerActions?: React.ReactNode;
   /** Texto vacío */
@@ -32,7 +32,7 @@ interface SAIPTableProps<T extends { id: string | number }> {
   /** Placeholder del buscador */
   searchPlaceholder?: string;
   /** Callback externo de búsqueda (si quieres manejarla fuera) */
-  onSearch?: (value: string) => void;
+  onSearch?: (_value: string) => void;
   /** Clave para orden alfabético */
   sortKey?: string;
   /** Clave numérica para ordenar por ID (default "id") */
@@ -64,8 +64,10 @@ export default function Table<T extends { id: string | number }>({
     ? data
     : data.filter((row) =>
         Object.values(row as Record<string, unknown>).some((val) =>
-          String(val ?? "").toLowerCase().includes(search.toLowerCase())
-        )
+          String(val ?? "")
+            .toLowerCase()
+            .includes(search.toLowerCase()),
+        ),
       );
 
   const sorted = (() => {
@@ -107,7 +109,6 @@ export default function Table<T extends { id: string | number }>({
 
       {/* Card */}
       <div className="saip-table-card">
-
         {/* Toolbar */}
         <div className="saip-table-card__toolbar">
           {searchable && (
@@ -124,9 +125,7 @@ export default function Table<T extends { id: string | number }>({
               }}
             />
           )}
-          <div className="saip-table-card__toolbar-left">
-            {headerActions}
-          </div>
+          <div className="saip-table-card__toolbar-left">{headerActions}</div>
         </div>
 
         {/* Tabla */}

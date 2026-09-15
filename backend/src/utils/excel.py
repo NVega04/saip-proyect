@@ -1,6 +1,6 @@
-from typing import List
 from datetime import datetime
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 # ── Paleta SAIP ────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ def left():
     return Alignment(horizontal="left", vertical="center", wrap_text=True)
 
 
-def apply_header_row(ws, headers: List[str]):
+def apply_header_row(ws, headers: list[str]):
     if ws is None:
         return
     ws.row_dimensions[1].height = 22
@@ -69,7 +69,7 @@ def apply_data_row(ws, row_idx: int, values: list):
         cell.alignment = left()
 
 
-def auto_width(ws, headers: List[str]):
+def auto_width(ws, headers: list[str]):
     for col_idx, header in enumerate(headers, start=1):
         col_letter = get_column_letter(col_idx)
         max_len = len(header) + 4

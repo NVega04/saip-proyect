@@ -14,7 +14,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--dark, #16425b);
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
 }
 
 .sf__required {
@@ -26,13 +26,15 @@
 .sf__textarea,
 .sf__select {
   padding: 0.65rem 0.85rem;
-  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.30));
+  border: 1px solid var(--border-s, rgba(58, 124, 165, 0.3));
   border-radius: 7px;
   font-size: 0.9rem;
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
   color: var(--dark, #16425b);
   background: var(--white, #f2f2f2);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   outline: none;
 }
 
@@ -59,7 +61,7 @@
 .sf__error {
   font-size: 0.75rem;
   color: #c0392b;
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
 }
 
 .sf__actions {

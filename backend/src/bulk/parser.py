@@ -1,7 +1,8 @@
 import csv
 import io
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
@@ -45,25 +46,25 @@ def safe_float(value: Any, label: str, default: float = 0) -> float:
         return default
     try:
         return float(str(value).strip())
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         raise RowError(f"El campo '{label}' debe ser numérico.")
 
 
-def required(row: Dict[str, Any], key: str, label: str) -> str:
+def required(row: dict[str, Any], key: str, label: str) -> str:
     value = name_key(row.get(key))
     if not value:
         raise RowError(f"Falta el campo obligatorio '{label}'.")
     return value
 
 
-def required_raw(row: Dict[str, Any], key: str, label: str) -> str:
+def required_raw(row: dict[str, Any], key: str, label: str) -> str:
     value = str(row.get(key) or "").strip()
     if not value:
         raise RowError(f"Falta el campo obligatorio '{label}'.")
     return value
 
 
-def optional_text(row: Dict[str, Any], key: str) -> Optional[str]:
+def optional_text(row: dict[str, Any], key: str) -> str | None:
     value = row.get(key)
     if value is None or str(value).strip() == "":
         return None
@@ -73,7 +74,7 @@ def optional_text(row: Dict[str, Any], key: str) -> Optional[str]:
     return text
 
 
-def parse_datetime(value: Any, label: str) -> Optional[datetime]:
+def parse_datetime(value: Any, label: str) -> datetime | None:
     if value is None or str(value).strip() == "":
         return None
     if isinstance(value, datetime):
@@ -96,17 +97,17 @@ def parse_datetime(value: Any, label: str) -> Optional[datetime]:
     raise RowError(f"El campo '{label}' tiene una fecha inválida: '{text}'")
 
 
-def _parse_rows(raw_rows) -> List[Dict[str, Any]]:
-    headers: List[str] = []
-    out: List[Dict[str, Any]] = []
+def _parse_rows(raw_rows) -> list[dict[str, Any]]:
+    headers: list[str] = []
+    out: list[dict[str, Any]] = []
     for values in raw_rows:
-        cells = list(values) if not isinstance(values, (list, tuple)) else list(values)
+        cells = list(values)
         if all(c is None or str(c).strip() == "" for c in cells):
             continue
         if not headers:
             headers = [normalize_header(c) for c in cells]
             continue
-        row: Dict[str, Any] = {}
+        row: dict[str, Any] = {}
         for idx, header in enumerate(headers):
             if not header:
                 continue
@@ -116,7 +117,7 @@ def _parse_rows(raw_rows) -> List[Dict[str, Any]]:
     return out
 
 
-def parse_spreadsheet(file: UploadFile) -> List[Dict[str, Any]]:
+def parse_spreadsheet(file: UploadFile) -> list[dict[str, Any]]:
     raw = file.file.read()
     if len(raw) > MAX_FILE_MB * 1024 * 1024:
         raise HTTPException(
@@ -126,7 +127,7 @@ def parse_spreadsheet(file: UploadFile) -> List[Dict[str, Any]]:
 
     filename = (file.filename or "").lower()
     try:
-        if filename.endswith(".xlsx") or filename.endswith(".xlsm"):
+        if filename.endswith((".xlsx", ".xlsm")):
             wb = load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
             rows = _parse_rows(wb.active.iter_rows(values_only=True))
         elif filename.endswith(".csv"):
@@ -155,13 +156,13 @@ def parse_spreadsheet(file: UploadFile) -> List[Dict[str, Any]]:
 
 def run_bulk(
     session: Session,
-    rows: List[Dict[str, Any]],
-    process_row: Callable[[Dict[str, Any]], Optional[bool]],
-    file_line: Optional[Callable[[Dict[str, Any]], Optional[int]]] = None,
+    rows: list[dict[str, Any]],
+    process_row: Callable[[dict[str, Any]], bool | None],
+    file_line: Callable[[dict[str, Any]], int | None] | None = None,
 ) -> BulkImportResult:
     creados = 0
     actualizados = 0
-    errores: List[BulkRowError] = []
+    errores: list[BulkRowError] = []
     for idx, row in enumerate(rows, start=2):
         try:
             with session.begin_nested():
@@ -172,17 +173,17 @@ def run_bulk(
             else:
                 creados += 1
         except RowError as exc:
-            errores.append(BulkRowError(fila=file_line(row) if file_line else idx, mensaje=exc.message))
+            errores.append(BulkRowError(fila=file_line(row) if file_line else idx, mensaje=exc.message))  # type: ignore[arg-type]
         except IntegrityError as exc:
             errores.append(
                 BulkRowError(
-                    fila=file_line(row) if file_line else idx,
+                    fila=file_line(row) if file_line else idx,  # type: ignore[arg-type]
                     mensaje=f"Violación de unicidad o integridad: {_clean_db_error(exc)}",
                 )
             )
         except Exception as exc:
             errores.append(
-                BulkRowError(fila=file_line(row) if file_line else idx, mensaje=str(exc))
+                BulkRowError(fila=file_line(row) if file_line else idx, mensaje=str(exc))  # type: ignore[arg-type]
             )
     session.commit()
     return BulkImportResult(
@@ -190,7 +191,7 @@ def run_bulk(
     )
 
 
-def build_template_bytes(headers: List[str], example_rows: List[list]) -> bytes:
+def build_template_bytes(headers: list[str], example_rows: list[list]) -> bytes:
     wb = Workbook()
     ws = wb.active
     ws.append(headers)
@@ -205,7 +206,7 @@ def build_template_bytes(headers: List[str], example_rows: List[list]) -> bytes:
 
 
 def template_response(
-    filename: str, headers: List[str], example_rows: List[list]
+    filename: str, headers: list[str], example_rows: list[list]
 ) -> StreamingResponse:
     data = build_template_bytes(headers, example_rows)
     return StreamingResponse(

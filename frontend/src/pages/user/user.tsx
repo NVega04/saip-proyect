@@ -46,21 +46,21 @@ type FormErrors = Partial<Record<keyof UserForm, string>>;
 
 const emptyForm = (): UserForm => ({
   first_name: "",
-  last_name:  "",
-  email:      "",
-  phone:      "",
-  role_id:    "",
-  is_admin:   false,
-  accesos:    [],
+  last_name: "",
+  email: "",
+  phone: "",
+  role_id: "",
+  is_admin: false,
+  accesos: [],
 });
 
 // ─── Columnas ─────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<User>[] = [
-  { key: "first_name", header: "Nombre",    width: "12%" },
-  { key: "last_name",  header: "Apellidos", width: "12%" },
-  { key: "email",      header: "Correo",    width: "15%" },
-  { key: "phone",      header: "Número",    width: "10%" },
+  { key: "first_name", header: "Nombre", width: "12%" },
+  { key: "last_name", header: "Apellidos", width: "12%" },
+  { key: "email", header: "Correo", width: "15%" },
+  { key: "phone", header: "Número", width: "10%" },
   {
     key: "col_is_admin",
     header: "Usuario",
@@ -73,9 +73,7 @@ const columns: ColumnDef<User>[] = [
     key: "col_role",
     header: "Rol",
     width: "14%",
-    render: (row) => (
-      <Badge label={row.role.name} variant="access" />
-    ),
+    render: (row) => <Badge label={row.role.name} variant="access" />,
   },
   {
     key: "status",
@@ -93,17 +91,18 @@ const columns: ColumnDef<User>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function User(): JSX.Element {
-  const [users, setUsers]           = useState<User[]>([]);
-  const [modalOpen, setModalOpen]   = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<User | null>(null);
-  const [form, setForm]             = useState<UserForm>(emptyForm());
-  const [errors, setErrors]         = useState<FormErrors>({});
-  const [loading, setLoading]       = useState(true);
+  const [form, setForm] = useState<UserForm>(emptyForm());
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("users");
+  const { download: downloadReport, loading: reportLoading } =
+    useReportDownload("users");
 
   // ── Cargar usuarios ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -144,12 +143,12 @@ export default function User(): JSX.Element {
     setEditTarget(user);
     setForm({
       first_name: user.first_name,
-      last_name:  user.last_name,
-      email:      user.email,
-      phone:      user.phone ?? "",
-      role_id:    String(user.role_id),
-      is_admin:   user.is_admin,
-      accesos:    [],
+      last_name: user.last_name,
+      email: user.email,
+      phone: user.phone ?? "",
+      role_id: String(user.role_id),
+      is_admin: user.is_admin,
+      accesos: [],
     });
     setErrors({});
     setModalOpen(true);
@@ -168,7 +167,7 @@ export default function User(): JSX.Element {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
- /*  const toggleAcceso = (acceso: string) => {
+  /*  const toggleAcceso = (acceso: string) => {
     setForm((prev) => ({
       ...prev,
       accesos: prev.accesos.includes(acceso)
@@ -181,13 +180,13 @@ export default function User(): JSX.Element {
   const validate = (): boolean => {
     const e: FormErrors = {};
     if (!form.first_name.trim()) e.first_name = "El nombre es requerido";
-    if (!form.last_name.trim())  e.last_name  = "El apellido es requerido";
-    if (!form.email.trim())      e.email      = "El correo es requerido";
+    if (!form.last_name.trim()) e.last_name = "El apellido es requerido";
+    if (!form.email.trim()) e.email = "El correo es requerido";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Correo inválido";
 
     // Validaciones exclusivas de creación
     if (!editTarget) {
-      if (!form.role_id)             e.role_id = "Selecciona un rol";
+      if (!form.role_id) e.role_id = "Selecciona un rol";
       /* if (form.accesos.length === 0) e.accesos = "Selecciona al menos un módulo"; */
     }
 
@@ -236,7 +235,7 @@ export default function User(): JSX.Element {
         };
 
         setUsers((prev) =>
-          prev.map((u) => (u.id === editTarget.id ? updatedWithRole : u))
+          prev.map((u) => (u.id === editTarget.id ? updatedWithRole : u)),
         );
 
         showAlert("success", "Usuario actualizado correctamente.");
@@ -269,7 +268,7 @@ export default function User(): JSX.Element {
     } catch {
       showAlert("error", "Error de conexión con el servidor.");
     }
-};
+  };
 
   const handleEliminar = (id: number) => {
     showConfirm({
@@ -298,11 +297,11 @@ export default function User(): JSX.Element {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-   <Layout
-     breadcrumbs={[
-      { label: "Dashboard", to: "/dashboard" },
-      { label: "Gestión de usuarios" },
-    ]}
+    <Layout
+      breadcrumbs={[
+        { label: "Dashboard", to: "/dashboard" },
+        { label: "Gestión de usuarios" },
+      ]}
     >
       {loading ? (
         <div className="saip-loading">Cargando usuarios...</div>
@@ -314,7 +313,7 @@ export default function User(): JSX.Element {
           data={users}
           searchPlaceholder="Buscar usuario"
           headerActions={
-             <>
+            <>
               {isCurrentUserAdmin && (
                 <Button variant="primary" onClick={handleCrear}>
                   Crear usuario
@@ -325,10 +324,18 @@ export default function User(): JSX.Element {
                 onClick={downloadReport}
                 disabled={reportLoading}
                 icon={
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                 }
               >
@@ -344,10 +351,16 @@ export default function User(): JSX.Element {
                 title="Editar"
                 onClick={() => handleEditar(row)}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
               </button>
               <button
@@ -356,12 +369,18 @@ export default function User(): JSX.Element {
                 title="Eliminar"
                 onClick={() => handleEliminar(row.id)}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                  <path d="M10 11v6M14 11v6"/>
-                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                 </svg>
               </button>
             </div>
@@ -377,7 +396,6 @@ export default function User(): JSX.Element {
         width="520px"
       >
         <form className="cuf" onSubmit={handleSubmit}>
-
           {/* ── Nombre y Apellido (siempre visibles) ── */}
           <div className="cuf__row">
             <div className="cuf__group">
@@ -390,7 +408,9 @@ export default function User(): JSX.Element {
                 value={form.first_name}
                 onChange={(e) => setField("first_name", e.target.value)}
               />
-              {errors.first_name && <span className="cuf__error">{errors.first_name}</span>}
+              {errors.first_name && (
+                <span className="cuf__error">{errors.first_name}</span>
+              )}
             </div>
 
             <div className="cuf__group">
@@ -403,7 +423,9 @@ export default function User(): JSX.Element {
                 value={form.last_name}
                 onChange={(e) => setField("last_name", e.target.value)}
               />
-              {errors.last_name && <span className="cuf__error">{errors.last_name}</span>}
+              {errors.last_name && (
+                <span className="cuf__error">{errors.last_name}</span>
+              )}
             </div>
           </div>
 
@@ -444,7 +466,9 @@ export default function User(): JSX.Element {
                 >
                   <option value="">Seleccionar rol…</option>
                   {roles.map((r) => (
-                    <option key={r.id} value={String(r.id)}>{r.name}</option>
+                    <option key={r.id} value={String(r.id)}>
+                      {r.name}
+                    </option>
                   ))}
                 </select>
                 {errors.role_id && <span className="cuf__error">{errors.role_id}</span>}

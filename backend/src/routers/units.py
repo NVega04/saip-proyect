@@ -1,11 +1,11 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from datetime import datetime, timezone
-
 from src.database import get_session
-from src.models.models import Unit, User
-from src.schemas.schemas import UnitCreate, UnitUpdate, UnitResponse
 from src.dependencies import get_current_user
+from src.models.models import Unit, User
+from src.schemas.schemas import UnitCreate, UnitResponse, UnitUpdate
 
 router = APIRouter(prefix="/units", tags=["Units"])
 
@@ -115,7 +115,7 @@ def update_unit(
     for field, value in update_fields.items():
         setattr(unit, field, value)
 
-    unit.updated_at = datetime.now(timezone.utc)
+    unit.updated_at = datetime.now(UTC)
     unit.updated_by = current_user.id
 
     session.add(unit)
@@ -138,10 +138,8 @@ def delete_unit(
             detail="Unidad no encontrada",
         )
 
-    unit.deleted_at = datetime.now(timezone.utc)
+    unit.deleted_at = datetime.now(UTC)
     unit.deleted_by = current_user.id
 
     session.add(unit)
     session.commit()
-
-    return None

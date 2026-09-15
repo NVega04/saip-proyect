@@ -1,12 +1,22 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Optional, List
-from enum import Enum
-from src.models.models import UserStatus, RoleStatus, ProductStatus, ProviderStatus, RecipeStatus, ProductionOrderStatus, SaleStatus, ItemType, MovementType
 from datetime import datetime
+from enum import Enum
+from typing import ClassVar
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from src.models.models import (
+    ItemType,
+    ProductionOrderStatus,
+    ProductStatus,
+    ProviderStatus,
+    RecipeStatus,
+    RoleStatus,
+    SaleStatus,
+    UserStatus,
+)
 
 
 class UppercaseMixin:
-    EXCLUDE_FIELDS = {
+    EXCLUDE_FIELDS: ClassVar[set[str]] = {
         "email",
         "description",
         "password",
@@ -15,7 +25,6 @@ class UppercaseMixin:
         "current_password",
         "notas",
         "observaciones",
-        "notas",
         "status",
     }
 
@@ -34,7 +43,7 @@ class UserCreate(UppercaseMixin, BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     role_id: int
     is_admin: bool = False
 
@@ -52,14 +61,14 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: Optional[str]
+    phone: str | None
     role_id: int
     role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime
     accepted_terms: bool
-    accepted_terms_at: Optional[datetime]
+    accepted_terms_at: datetime | None
 
     class Config:
         from_attributes = True
@@ -72,13 +81,13 @@ class DeleteResponseUser(BaseModel):
 
 
 class UserUpdate(UppercaseMixin, BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    role_id: Optional[int] = None
-    is_admin: Optional[bool] = None
-    status: Optional[UserStatus] = None 
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    role_id: int | None = None
+    is_admin: bool | None = None
+    status: UserStatus | None = None
 
 
 class UserUpdateResponse(BaseModel):
@@ -86,14 +95,14 @@ class UserUpdateResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: Optional[str]
+    phone: str | None
     role_id: int
     role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
+    updated_at: datetime | None
+    updated_by: int | None
 
     class Config:
         from_attributes = True
@@ -117,8 +126,8 @@ class RoleResponse(BaseModel):
 
 ## Esquemas relacionados a sesiones en el sistema.
 class RoleUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class RolePublic(BaseModel):
@@ -127,10 +136,10 @@ class RolePublic(BaseModel):
     description: str
     created_at: datetime
     status: RoleStatus
-    updated_at: Optional[datetime] = None
-    updated_by: Optional[int] = None
-    deleted_at: Optional[datetime] = None
-    deleted_by: Optional[int] = None
+    updated_at: datetime | None = None
+    updated_by: int | None = None
+    deleted_at: datetime | None = None
+    deleted_by: int | None = None
 
     class Config:
         from_attributes = True
@@ -194,15 +203,15 @@ class ChangePasswordRequest(BaseModel):
 class UnitCreate(UppercaseMixin, BaseModel):
     name: str
     abbreviation: str
-    description: Optional[str] = None
+    description: str | None = None
     quantity: float
 
 
 class UnitUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    abbreviation: Optional[str] = None
-    description: Optional[str] = None
-    quantity: Optional[float] = None
+    name: str | None = None
+    abbreviation: str | None = None
+    description: str | None = None
+    quantity: float | None = None
 
 
 class UnitResponse(BaseModel):
@@ -210,14 +219,14 @@ class UnitResponse(BaseModel):
     token: str
     name: str
     abbreviation: str
-    description: Optional[str]
+    description: str | None
     quantity: float
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -235,7 +244,7 @@ class UnitBasic(BaseModel):
 
 class ProductCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     unit_id: int
     available_quantity: float = 0
     min_stock: float = 0
@@ -244,20 +253,20 @@ class ProductCreate(UppercaseMixin, BaseModel):
 
 
 class ProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    unit_id: Optional[int] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
-    is_locked: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    unit_id: int | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
+    is_locked: bool | None = None
 
 
 class ProductResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     unit_id: int
     unit: UnitBasic
     available_quantity: float
@@ -266,11 +275,11 @@ class ProductResponse(BaseModel):
     is_locked: bool
     status: ProductStatus
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -296,27 +305,27 @@ class SupplyBasic(BaseModel):
 
 class SupplyCategoryCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class SupplyCategoryUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class SupplyCategoryResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
-    supplies: List[SupplyBasic]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
+    supplies: list[SupplyBasic]
 
     class Config:
         from_attributes = True
@@ -340,33 +349,33 @@ class SupplyCategoryBasic(BaseModel):
 
 class SupplyCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     category_id: int
     unit_id: int
     available_quantity: float = 0
     min_stock: float = 0
     max_stock: float = 0
-    supplier_id: Optional[int] = None
-    expiration_date: Optional[datetime] = None
+    supplier_id: int | None = None
+    expiration_date: datetime | None = None
 
 
 class SupplyUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
-    supplier_id: Optional[int] = None
-    expiration_date: Optional[datetime] = None
+    name: str | None = None
+    description: str | None = None
+    category_id: int | None = None
+    unit_id: int | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
+    supplier_id: int | None = None
+    expiration_date: datetime | None = None
 
 
 class SupplyResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     category_id: int
     category: SupplyCategoryBasic
     unit_id: int
@@ -374,15 +383,15 @@ class SupplyResponse(BaseModel):
     available_quantity: float
     min_stock: float
     max_stock: float
-    supplier_id: Optional[int]
-    expiration_date: Optional[datetime]
+    supplier_id: int | None
+    expiration_date: datetime | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -393,44 +402,51 @@ class DeleteResponseSupply(BaseModel):
     deleted_at: datetime
     deleted_by: int
 
+
 class ProviderContactCreate(BaseModel):
     name: str
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    notes: str | None = None
+
 
 class ProviderContactUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    notes: str | None = None
+
 
 class ProviderContactResponse(BaseModel):
     id: int
     token: str
     provider_id: int
     name: str
-    email: Optional[str]
-    phone: Optional[str]
-    notes: Optional[str]
+    email: str | None
+    phone: str | None
+    notes: str | None
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
+
     class Config:
         from_attributes = True
+
 
 class ProviderCreate(BaseModel):
     company: str
     nit: str
     email: EmailStr
 
+
 class ProviderUpdate(BaseModel):
-    company: Optional[str] = None
-    nit: Optional[str] = None
-    email: Optional[EmailStr] = None
+    company: str | None = None
+    nit: str | None = None
+    email: EmailStr | None = None
+
 
 class ProviderResponse(BaseModel):
     id: int
@@ -440,12 +456,12 @@ class ProviderResponse(BaseModel):
     email: str
     status: ProviderStatus
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
-    contacts: List[ProviderContactResponse]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
+    contacts: list[ProviderContactResponse]
 
     class Config:
         from_attributes = True
@@ -455,6 +471,7 @@ class ProviderDeleteResponse(BaseModel):
     message: str
     deleted_at: datetime
     deleted_by: int
+
 
 ## Esquemas relacionados a ProductCategory
 class ProductCategoryBasic(BaseModel):
@@ -478,27 +495,27 @@ class CommercialProductBasic(BaseModel):
 
 class ProductCategoryCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class ProductCategoryUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class ProductCategoryResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
-    commercial_products: List[CommercialProductBasic]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
+    commercial_products: list[CommercialProductBasic]
 
     class Config:
         from_attributes = True
@@ -522,10 +539,10 @@ class ProviderBasic(BaseModel):
 
 class CommercialProductCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     category_id: int
     unit_id: int
-    provider_id: Optional[int] = None
+    provider_id: int | None = None
     purchase_price: float = 0
     sale_price: float = 0
     available_quantity: float = 0
@@ -534,29 +551,29 @@ class CommercialProductCreate(UppercaseMixin, BaseModel):
 
 
 class CommercialProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    provider_id: Optional[int] = None
-    purchase_price: Optional[float] = None
-    sale_price: Optional[float] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
+    name: str | None = None
+    description: str | None = None
+    category_id: int | None = None
+    unit_id: int | None = None
+    provider_id: int | None = None
+    purchase_price: float | None = None
+    sale_price: float | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
 
 
 class CommercialProductResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     category_id: int
     category: ProductCategoryBasic
     unit_id: int
     unit: UnitBasic
-    provider_id: Optional[int]
-    provider: Optional[ProviderBasic]
+    provider_id: int | None
+    provider: ProviderBasic | None
     purchase_price: float
     sale_price: float
     available_quantity: float
@@ -564,11 +581,11 @@ class CommercialProductResponse(BaseModel):
     max_stock: float
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -585,7 +602,7 @@ class RecipeIngredientCreate(BaseModel):
     supply_id: int
     quantity: float
     unit_id: int
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class RecipeIngredientResponse(BaseModel):
@@ -596,7 +613,7 @@ class RecipeIngredientResponse(BaseModel):
     quantity: float
     unit_id: int
     unit: UnitBasic
-    notes: Optional[str]
+    notes: str | None
 
     class Config:
         from_attributes = True
@@ -604,7 +621,7 @@ class RecipeIngredientResponse(BaseModel):
 
 class RecipeCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     product_id: int
     yield_quantity: float = 1
     yield_unit_id: int
@@ -612,32 +629,32 @@ class RecipeCreate(UppercaseMixin, BaseModel):
 
 
 class RecipeUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    product_id: Optional[int] = None
-    yield_quantity: Optional[float] = None
-    yield_unit_id: Optional[int] = None
-    status: Optional[RecipeStatus] = None
-    ingredients: Optional[list[RecipeIngredientCreate]] = None
+    name: str | None = None
+    description: str | None = None
+    product_id: int | None = None
+    yield_quantity: float | None = None
+    yield_unit_id: int | None = None
+    status: RecipeStatus | None = None
+    ingredients: list[RecipeIngredientCreate] | None = None
 
 
 class RecipeResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
-    product_id: Optional[int]
+    description: str | None
+    product_id: int | None
     yield_quantity: float
     yield_unit_id: int
     yield_unit: UnitBasic
     status: RecipeStatus
     ingredients: list[RecipeIngredientResponse]
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -660,7 +677,7 @@ class DeleteResponseRecipe(BaseModel):
 class RecipeBasic(BaseModel):
     id: int
     name: str
-    product_id: Optional[int] = None
+    product_id: int | None = None
     yield_quantity: float
     yield_unit: UnitBasic
 
@@ -671,12 +688,12 @@ class RecipeBasic(BaseModel):
 class ProductionOrderCreate(BaseModel):
     recipe_id: int
     quantity_multiplier: float = Field(gt=0)
-    scheduled_at: Optional[datetime] = None
-    notes: Optional[str] = Field(default=None, max_length=500)
+    scheduled_at: datetime | None = None
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class ProductionOrderCancelRequest(BaseModel):
-    reason: Optional[str] = Field(default=None, max_length=500)
+    reason: str | None = Field(default=None, max_length=500)
 
 
 class ProductionOrderResponse(BaseModel):
@@ -687,17 +704,17 @@ class ProductionOrderResponse(BaseModel):
     quantity_multiplier: float
     total_yield: float
     status: ProductionOrderStatus
-    scheduled_at: Optional[datetime]
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
-    cancelled_at: Optional[datetime]
-    notes: Optional[str]
+    scheduled_at: datetime | None
+    started_at: datetime | None
+    completed_at: datetime | None
+    cancelled_at: datetime | None
+    notes: str | None
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -728,6 +745,7 @@ class ProductionSnapshotResponse(BaseModel):
     stock_before: float
     stock_after: float
 
+
 ## Esquemas relacionados a Sales (Ventas)
 class UserBasic(BaseModel):
     id: int
@@ -738,20 +756,22 @@ class UserBasic(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ProductionCompleteResponse(BaseModel):
     message: str
     id: int
     status: ProductionOrderStatus
     total_yield: float
     completed_at: datetime
-    product_id: Optional[int] = None
-    product_name: Optional[str] = None
-    product_quantity_added: Optional[float] = None
+    product_id: int | None = None
+    product_name: str | None = None
+    product_quantity_added: float | None = None
     snapshots: list[ProductionSnapshotResponse]
     completed_by: int
 
     class Config:
         from_attributes = True
+
 
 class SaleItemCreate(BaseModel):
     item_type: ItemType
@@ -760,8 +780,8 @@ class SaleItemCreate(BaseModel):
 
 
 class SaleCreate(BaseModel):
-    items: List[SaleItemCreate] = Field(min_length=1)
-    notes: Optional[str] = Field(default=None, max_length=500)
+    items: list[SaleItemCreate] = Field(min_length=1)
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class SaleItemResponse(BaseModel):
@@ -783,14 +803,14 @@ class SaleResponse(BaseModel):
     user: UserBasic
     sale_date: datetime
     status: SaleStatus
-    notes: Optional[str]
-    items: List[SaleItemResponse]
+    notes: str | None
+    items: list[SaleItemResponse]
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -810,7 +830,7 @@ class SaleListResponse(BaseModel):
     user: UserBasic
     sale_date: datetime
     status: SaleStatus
-    notes: Optional[str]
+    notes: str | None
     item_count: int
     total_quantity: float
     created_at: datetime
@@ -835,7 +855,7 @@ class StockWarning(BaseModel):
 
 
 class SaleListPage(BaseModel):
-    items: List[SaleListResponse]
+    items: list[SaleListResponse]
     total: int
     page: int
     limit: int
@@ -843,7 +863,7 @@ class SaleListPage(BaseModel):
 
 class SaleCreateResponse(BaseModel):
     sale: SaleResponse
-    warnings: List[StockWarning]
+    warnings: list[StockWarning]
 
 
 class SaleAnnulResponse(BaseModel):
@@ -877,8 +897,8 @@ class StockLevelPoint(BaseModel):
 class LowStockSupplyItem(BaseModel):
     id: int
     name: str
-    category: Optional[str] = None
-    unit: Optional[str] = None
+    category: str | None = None
+    unit: str | None = None
     available_quantity: float
     min_stock: float
 
@@ -927,14 +947,14 @@ class TopRecipePoint(BaseModel):
 
 class SalesSection(BaseModel):
     kpis: SalesKpis
-    tendencia: List[DailySalesPoint]
-    top_items: List[TopSaleItem]
+    tendencia: list[DailySalesPoint]
+    top_items: list[TopSaleItem]
 
 
 class ProductionSection(BaseModel):
-    por_estado: List[ProductionByStatusPoint]
-    rendimiento_diario: List[DailyProductionPoint]
-    top_recetas: List[TopRecipePoint]
+    por_estado: list[ProductionByStatusPoint]
+    rendimiento_diario: list[DailyProductionPoint]
+    top_recetas: list[TopRecipePoint]
 
 
 class ProductsKpis(BaseModel):
@@ -954,7 +974,7 @@ class ProductStockPoint(BaseModel):
 class LowStockProduct(BaseModel):
     id: int
     name: str
-    unit: Optional[str] = None
+    unit: str | None = None
     available_quantity: float
     min_stock: float
     max_stock: float
@@ -984,25 +1004,27 @@ class StockHealthPoint(BaseModel):
 
 class ProductsSection(BaseModel):
     kpis: ProductsKpis
-    productos_stock: List[ProductStockPoint]
-    productos_stock_bajo: List[LowStockProduct]
-    produccion_por_producto: List[ProductProductionPoint]
-    comerciales_stock: List[CommercialStockPoint]
-    comerciales_stock_bajo: List[LowStockProduct]
-    por_categoria: List[CategoryCountPoint]
-    stock_saludable: List[StockHealthPoint]
+    productos_stock: list[ProductStockPoint]
+    productos_stock_bajo: list[LowStockProduct]
+    produccion_por_producto: list[ProductProductionPoint]
+    comerciales_stock: list[CommercialStockPoint]
+    comerciales_stock_bajo: list[LowStockProduct]
+    por_categoria: list[CategoryCountPoint]
+    stock_saludable: list[StockHealthPoint]
 
 
 class DashboardStatsResponse(BaseModel):
     kpis: DashboardKpis
-    consumo_tendencia: List[ConsumptionPoint]
-    niveles_stock: List[StockLevelPoint]
-    stock_bajo: List[LowStockSupplyItem]
-    vencidos: List[ExpiringSupplyItem]
-    por_vencer: List[ExpiringSupplyItem]
+    consumo_tendencia: list[ConsumptionPoint]
+    niveles_stock: list[StockLevelPoint]
+    stock_bajo: list[LowStockSupplyItem]
+    vencidos: list[ExpiringSupplyItem]
+    por_vencer: list[ExpiringSupplyItem]
     ventas: SalesSection
     produccion: ProductionSection
     productos: ProductsSection
+
+
 class InventoryItemStatus(str, Enum):
     LOW = "bajo"
     NORMAL = "normal"
@@ -1013,9 +1035,9 @@ class InventoryItem(BaseModel):
     id: int
     item_type: str
     name: str
-    description: Optional[str] = None
-    category_name: Optional[str] = None
-    unit_abbreviation: Optional[str] = None
+    description: str | None = None
+    category_name: str | None = None
+    unit_abbreviation: str | None = None
     available_quantity: float
     min_stock: float
     max_stock: float
@@ -1030,7 +1052,7 @@ class InventorySummary(BaseModel):
 
 
 class InventoryPage(BaseModel):
-    items: List[InventoryItem]
+    items: list[InventoryItem]
     total: int
     page: int
     limit: int

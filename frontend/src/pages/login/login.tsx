@@ -1,7 +1,7 @@
 import { useState, useRef, ChangeEvent } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
-import './login.css';
+import "./login.css";
 import { apiFetch, getMe } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "../../components/modal/Modal";
@@ -30,15 +30,21 @@ export default function Login() {
   const { setCurrentUser } = useAuth(); // ← para setear el usuario al contexto al instante
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [remember, setRemember]         = useState<boolean>(() => !!localStorage.getItem("remembered_email"));
-  const [email, setEmail]               = useState<string>(() => localStorage.getItem("remembered_email") ?? "");
-  const [password, setPassword]         = useState<string>("");
-  const [isLoading, setIsLoading]       = useState<boolean>(false);
+  const [remember, setRemember] = useState<boolean>(
+    () => !!localStorage.getItem("remembered_email"),
+  );
+  const [email, setEmail] = useState<string>(
+    () => localStorage.getItem("remembered_email") ?? "",
+  );
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const termsAcceptedRef = useRef<boolean>(false);
   const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "warning" | "info">("error");
+  const [alertType, setAlertType] = useState<"success" | "error" | "warning" | "info">(
+    "error",
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -47,7 +53,11 @@ export default function Login() {
       const response = await apiFetch("/session/login", {
         method: "POST",
         skipAuthRedirect: true,
-        body: JSON.stringify({ email, password, accepted_terms: termsAcceptedRef.current }),
+        body: JSON.stringify({
+          email,
+          password,
+          accepted_terms: termsAcceptedRef.current,
+        }),
       });
 
       if (response.status === 403) {
@@ -67,7 +77,9 @@ export default function Login() {
       if (response.status === 423) {
         const error = await response.json();
         setAlertType("warning");
-        setAlertMessage(error.detail || "Cuenta bloqueada temporalmente por intentos fallidos.");
+        setAlertMessage(
+          error.detail || "Cuenta bloqueada temporalmente por intentos fallidos.",
+        );
         setShowAlert(true);
         setIsLoading(false);
         return;
@@ -135,22 +147,30 @@ export default function Login() {
             {/* ── Panel derecho ── */}
             <div className="panel-form">
               <h1 className="form-title">Iniciar sesión</h1>
-              <p className="form-desc">Ingrese sus credenciales para acceder a su cuenta.</p>
+              <p className="form-desc">
+                Ingrese sus credenciales para acceder a su cuenta.
+              </p>
               <form onSubmit={handleSubmit} className="login-form">
                 <div className="field-group">
-                  <label className="field-label" htmlFor="email">Correo</label>
+                  <label className="field-label" htmlFor="email">
+                    Correo
+                  </label>
                   <input
                     id="email"
                     type="text"
                     className="field-input"
                     placeholder="Su nombre de usuario o correo electrónico"
                     value={email}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
                     autoComplete="username"
                   />
                 </div>
                 <div className="field-group">
-                  <label className="field-label" htmlFor="password">Contraseña</label>
+                  <label className="field-label" htmlFor="password">
+                    Contraseña
+                  </label>
                   <div className="field-wrapper">
                     <input
                       id="password"
@@ -158,25 +178,43 @@ export default function Login() {
                       className="field-input has-icon"
                       placeholder="Ingrese su contraseña"
                       value={password}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setPassword(e.target.value)
+                      }
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       className="toggle-pw"
                       onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      aria-label={
+                        showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                      }
                     >
                       {showPassword ? (
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
-                          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
-                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        <svg
+                          width="17"
+                          height="17"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        >
+                          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+                          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
                         </svg>
                       ) : (
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
+                        <svg
+                          width="17"
+                          height="17"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        >
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
                         </svg>
                       )}
                     </button>
@@ -187,11 +225,15 @@ export default function Login() {
                     <input
                       type="checkbox"
                       checked={remember}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setRemember(e.target.checked)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setRemember(e.target.checked)
+                      }
                     />
                     Recordar correo
                   </label>
-                  <Link to="/reset-password" className="forgot-link">¿Olvidó su contraseña?</Link>
+                  <Link to="/reset-password" className="forgot-link">
+                    ¿Olvidó su contraseña?
+                  </Link>
                 </div>
                 <button type="submit" className="btn-submit" disabled={isLoading}>
                   {isLoading && <span className="btn-spinner" />}
@@ -205,19 +247,21 @@ export default function Login() {
       {/* ── Footer ── */}
       <footer className="login-footer">
         <div className="footer-links">
-          <Link to="/" className="footer-link">Conócenos</Link>
+          <Link to="/" className="footer-link">
+            Conócenos
+          </Link>
         </div>
         <div className="footer-social">
           <div className="footer-icon">
             <svg viewBox="0 0 24 24">
-              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
             </svg>
           </div>
           <div className="footer-icon">
             <svg viewBox="0 0 24 24">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <circle cx="12" cy="12" r="4"/>
-              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
             </svg>
           </div>
         </div>
@@ -234,62 +278,61 @@ export default function Login() {
           <div className="terms-scroll">
             <h3>1. Aceptación de los términos</h3>
             <p>
-              Al acceder y utilizar SAIP (Sistema Administrativo Integral de Productos), 
-              usted acepta estar sujeto a estos términos y condiciones. Si no está de 
+              Al acceder y utilizar SAIP (Sistema Administrativo Integral de Productos),
+              usted acepta estar sujeto a estos términos y condiciones. Si no está de
               acuerdo con alguno de estos términos, por favor no utilice el sistema.
             </p>
 
             <h3>2. Descripción del servicio</h3>
             <p>
-              SAIP es una plataforma de gestión administrativa diseñada para el control 
-              de inventario y productos de panadería. El sistema permite administrar 
-              usuarios, productos, unidades de medida y demás elementos relacionados 
-              con la operación del negocio.
+              SAIP es una plataforma de gestión administrativa diseñada para el control
+              de inventario y productos de panadería. El sistema permite administrar
+              usuarios, productos, unidades de medida y demás elementos relacionados con
+              la operación del negocio.
             </p>
 
             <h3>3. Cuenta de usuario</h3>
             <p>
-              Para acceder al sistema, cada usuario recibirá credenciales de acceso 
-              personalizadas (correo electrónico y contraseña). El usuario es responsable 
-              de mantener la confidencialidad de sus credenciales y de todas las 
-              actividades que ocurran bajo su cuenta.
+              Para acceder al sistema, cada usuario recibirá credenciales de acceso
+              personalizadas (correo electrónico y contraseña). El usuario es
+              responsable de mantener la confidencialidad de sus credenciales y de todas
+              las actividades que ocurran bajo su cuenta.
             </p>
 
             <h3>4. Uso adecuado</h3>
             <p>
-              El usuario se compromete a utilizar el sistema únicamente para fines 
-              legítimos y de acuerdo con las políticas internas de la organización. 
-              Queda prohibido utilizar el sistema para actividades ilegales o no 
+              El usuario se compromete a utilizar el sistema únicamente para fines
+              legítimos y de acuerdo con las políticas internas de la organización.
+              Queda prohibido utilizar el sistema para actividades ilegales o no
               autorizadas.
             </p>
 
             <h3>5. Protección de datos</h3>
             <p>
-              Sus datos personales serán tratados de acuerdo con las políticas de 
-              privacidad de la organización. Nos comprometemos a proteger su 
-              información y utilizarla únicamente para los fines contemplados 
-              en este servicio.
+              Sus datos personales serán tratados de acuerdo con las políticas de
+              privacidad de la organización. Nos comprometemos a proteger su información
+              y utilizarla únicamente para los fines contemplados en este servicio.
             </p>
 
             <h3>6. Modificaciones del servicio</h3>
             <p>
-              SAIP se reserva el derecho de modificar o discontinuar el servicio 
-              en cualquier momento, con o sin previo aviso. No nos haremos 
-              responsables por la pérdida de datos derivada de estas modificaciones.
+              SAIP se reserva el derecho de modificar o discontinuar el servicio en
+              cualquier momento, con o sin previo aviso. No nos haremos responsables por
+              la pérdida de datos derivada de estas modificaciones.
             </p>
 
             <h3>7. Limitación de responsabilidad</h3>
             <p>
-              El sistema se proporciona "tal cual". No garantizamos que el servicio 
-              sea ininterrumpido, seguro o libre de errores. El usuario utiliza el 
-              sistema bajo su propia responsabilidad.
+              El sistema se proporciona "tal cual". No garantizamos que el servicio sea
+              ininterrumpido, seguro o libre de errores. El usuario utiliza el sistema
+              bajo su propia responsabilidad.
             </p>
 
             <h3>8. Ley aplicable</h3>
             <p>
-              Estos términos se rigen por las leyes vigentes. Cualquier disputa 
-              derivada del uso del sistema será resuelta de acuerdo con los 
-              procedimientos legales aplicables.
+              Estos términos se rigen por las leyes vigentes. Cualquier disputa derivada
+              del uso del sistema será resuelta de acuerdo con los procedimientos
+              legales aplicables.
             </p>
           </div>
           <div className="terms-actions">

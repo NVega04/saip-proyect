@@ -4,7 +4,7 @@ import { getMe, UserProfile } from "../utils/api";
 interface AuthContextType {
   currentUser: UserProfile | null;
   loading: boolean;
-  setCurrentUser: (user: UserProfile | null) => void;
+  setCurrentUser: (_user: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,14 +19,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(() =>
+    Boolean(localStorage.getItem("session_token")),
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("session_token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
     // Fetch en segundo plano para obtener datos frescos del backend
     getMe()
       .then((me) => {

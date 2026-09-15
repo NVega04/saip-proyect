@@ -4,7 +4,6 @@ import { logout } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import PerfilModal from "../profilemodal/Profilemodal";
 
-
 interface NavbarProps {
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
@@ -13,15 +12,15 @@ interface NavbarProps {
 export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
-  const [isMobile, setIsMobile]   = useState(false);
-  const [scrolled, setScrolled]   = useState(false);
-  const menuRef                   = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const { currentUser } = useAuth();
   const user = currentUser
     ? {
-        nombre:  `${currentUser.first_name} ${currentUser.last_name}`,
-        rol:     currentUser.role.name,
+        nombre: `${currentUser.first_name} ${currentUser.last_name}`,
+        rol: currentUser.role.name,
         isAdmin: currentUser.is_admin,
       }
     : null;
@@ -41,7 +40,8 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
+        setMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -94,20 +94,25 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
         }
       `}</style>
 
-      <nav style={{
-        height: "58px",
-        background: "#003459",
-        borderBottom: scrolled
-          ? "1px solid rgba(255,255,255,0.1)"
-          : "1px solid rgba(255,255,255,0.1)",
-        boxShadow: scrolled ? "0 1px 8px rgba(22,66,91,0.09)" : "none",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 1.5rem",
-        position: "sticky", top: 0, zIndex: 100,
-        fontFamily: "'Outfit', system-ui, sans-serif",
-        transition: "box-shadow 0.25s ease, border-color 0.25s ease",
-      }}>
-
+      <nav
+        style={{
+          height: "58px",
+          background: "#003459",
+          borderBottom: scrolled
+            ? "1px solid rgba(255,255,255,0.1)"
+            : "1px solid rgba(255,255,255,0.1)",
+          boxShadow: scrolled ? "0 1px 8px rgba(22,66,91,0.09)" : "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 1.5rem",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          fontFamily: "'Outfit', system-ui, sans-serif",
+          transition: "box-shadow 0.25s ease, border-color 0.25s ease",
+        }}
+      >
         {/* ── Izquierda ── */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
           {isMobile && (
@@ -116,51 +121,90 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               onClick={onToggleSidebar}
               aria-label="Toggle sidebar"
               style={{
-                display: "flex", flexDirection: "column",
-                justifyContent: "center", alignItems: "center", gap: "4.5px",
-                width: "36px", height: "36px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "4.5px",
+                width: "36px",
+                height: "36px",
                 border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: "7px", cursor: "pointer", padding: "6px",
+                borderRadius: "7px",
+                cursor: "pointer",
+                padding: "6px",
                 background: sidebarOpen ? "rgba(255,255,255,0.1)" : "transparent",
                 transition: "background 0.2s",
               }}
             >
               {[0, 1, 2].map((i) => (
-                <span key={i} style={{
-                  display: "block", width: "15px", height: "1.5px",
-                   background: "#f2f2f2", borderRadius: "2px",
-                  transition: "transform 0.25s ease, opacity 0.2s ease",
-                  transform: sidebarOpen
-                    ? i === 0 ? "rotate(45deg) translate(4px, 4px)"
-                    : i === 2 ? "rotate(-45deg) translate(4px, -4px)" : "none"
-                    : "none",
-                  opacity: sidebarOpen && i === 1 ? 0 : 1,
-                }} />
+                <span
+                  key={i}
+                  style={{
+                    display: "block",
+                    width: "15px",
+                    height: "1.5px",
+                    background: "#f2f2f2",
+                    borderRadius: "2px",
+                    transition: "transform 0.25s ease, opacity 0.2s ease",
+                    transform: sidebarOpen
+                      ? i === 0
+                        ? "rotate(45deg) translate(4px, 4px)"
+                        : i === 2
+                          ? "rotate(-45deg) translate(4px, -4px)"
+                          : "none"
+                      : "none",
+                    opacity: sidebarOpen && i === 1 ? 0 : 1,
+                  }}
+                />
               ))}
             </button>
           )}
-          <Link to="/dashboard" style={{
-            display: "flex", alignItems: "center", gap: "0.65rem", textDecoration: "none",
-          }}>
-            <div style={{
-              width: "35px", height: "35px",
-              background: "#f2f2f2", borderRadius: "7px",
-              border: "1px solid rgba(255,255,255,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <img src="/images/logo.png" alt="SAIP" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
+          <Link
+            to="/dashboard"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.65rem",
+              textDecoration: "none",
+            }}
+          >
+            <div
+              style={{
+                width: "35px",
+                height: "35px",
+                background: "#f2f2f2",
+                borderRadius: "7px",
+                border: "1px solid rgba(255,255,255,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src="/images/logo.png"
+                alt="SAIP"
+                style={{ width: "36px", height: "36px", objectFit: "contain" }}
+              />
             </div>
-            <span style={{
-              fontSize: "1rem", fontWeight: 700, color: "#f2f2f2",
-              fontFamily: "'Outfit', sans-serif",
-            }}>
+            <span
+              style={{
+                fontSize: "1rem",
+                fontWeight: 700,
+                color: "#f2f2f2",
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
               SAIP
             </span>
-            <span style={{
-              fontSize: "0.72rem", color: "rgba(255,255,255,0.6)",
-              borderLeft: "1px solid rgba(255,255,255,0.2)",
-              paddingLeft: "0.6rem", fontFamily: "'Outfit', sans-serif",
-            }}>
+            <span
+              style={{
+                fontSize: "0.72rem",
+                color: "rgba(255,255,255,0.6)",
+                borderLeft: "1px solid rgba(255,255,255,0.2)",
+                paddingLeft: "0.6rem",
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
               Sistema de administración integral de productos
             </span>
           </Link>
@@ -169,7 +213,9 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
         {/* ── Centro ── */}
         {!isMobile && (
           <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-            <a href="/acerca" className="saip-link">Acerca de SAIP</a>
+            <a href="/acerca" className="saip-link">
+              Acerca de SAIP
+            </a>
           </div>
         )}
 
@@ -179,37 +225,63 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
             className="saip-trigger"
             onClick={() => setMenuOpen(!menuOpen)}
             style={{
-              display: "flex", alignItems: "center", gap: "0.55rem",
-              cursor: "pointer", padding: "5px 8px",
-              borderRadius: "11px", transition: "background 0.18s",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.55rem",
+              cursor: "pointer",
+              padding: "5px 8px",
+              borderRadius: "11px",
+              transition: "background 0.18s",
             }}
           >
             {!isMobile && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                <span style={{
-                  fontSize: "0.82rem", fontWeight: 600,
-                  color: "#f2f2f2",
-                  fontFamily: "'Outfit', system-ui, sans-serif", lineHeight: 1,
-                }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: "2px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    color: "#f2f2f2",
+                    fontFamily: "'Outfit', system-ui, sans-serif",
+                    lineHeight: 1,
+                  }}
+                >
                   {user?.nombre ?? "· · ·"}
                 </span>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <span style={{
-                    fontSize: "0.7rem", fontWeight: 300,
-                   color: "rgba(255,255,255,0.7)", lineHeight: 1,
-                   fontFamily: "'Outfit', system-ui, sans-serif",
-                 }}>
-                   {user?.rol ?? ""}
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 300,
+                      color: "rgba(255,255,255,0.7)",
+                      lineHeight: 1,
+                      fontFamily: "'Outfit', system-ui, sans-serif",
+                    }}
+                  >
+                    {user?.rol ?? ""}
                   </span>
                   {user && (
-                    <span style={{
-                      fontSize: "0.59rem", fontWeight: 700, letterSpacing: "0.07em",
-                      color: user.isAdmin ? "#1e4a18" : "var(--bakery-text-secondary)",
-                      background: user.isAdmin ? "#b8e0b0" : "var(--bakery-bg)",
-                      border: `1px solid ${user.isAdmin ? "#52a844" : "var(--bakery-border)"}`,
-                      borderRadius: "99px", padding: "1px 7px",
-                      fontFamily: "'Outfit', system-ui, sans-serif",
-                    }}>
+                    <span
+                      style={{
+                        fontSize: "0.59rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.07em",
+                        color: user.isAdmin
+                          ? "#1e4a18"
+                          : "var(--bakery-text-secondary)",
+                        background: user.isAdmin ? "#b8e0b0" : "var(--bakery-bg)",
+                        border: `1px solid ${user.isAdmin ? "#52a844" : "var(--bakery-border)"}`,
+                        borderRadius: "99px",
+                        padding: "1px 7px",
+                        fontFamily: "'Outfit', system-ui, sans-serif",
+                      }}
+                    >
                       {user.isAdmin ? "ADMIN" : "USER"}
                     </span>
                   )}
@@ -217,91 +289,176 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
               </div>
             )}
 
-            <div style={{
-              width: "34px", height: "34px", borderRadius: "50%",
-              background: "var(--bakery-btn-primary)",
-              border: "1.5px solid var(--bakery-btn-primary-hover)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "0.7rem", fontWeight: 700,
-              color: "#f2f2f2",
-              fontFamily: "'Outfit', system-ui, sans-serif",
-              flexShrink: 0, userSelect: "none",
-            }}>
+            <div
+              style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
+                background: "var(--bakery-btn-primary)",
+                border: "1.5px solid var(--bakery-btn-primary-hover)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                color: "#f2f2f2",
+                fontFamily: "'Outfit', system-ui, sans-serif",
+                flexShrink: 0,
+                userSelect: "none",
+              }}
+            >
               {initials || (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="#f2f2f2" strokeWidth="1.8">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#f2f2f2"
+                  strokeWidth="1.8"
+                >
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
               )}
             </div>
 
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="rgba(255,255,255,0.5)" strokeWidth="2.2"
-              style={{ transition: "transform 0.2s", transform: menuOpen ? "rotate(180deg)" : "none", flexShrink: 0 }}>
-              <polyline points="6 9 12 15 18 9"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="2.2"
+              style={{
+                transition: "transform 0.2s",
+                transform: menuOpen ? "rotate(180deg)" : "none",
+                flexShrink: 0,
+              }}
+            >
+              <polyline points="6 9 12 15 18 9" />
             </svg>
           </div>
 
           {menuOpen && (
-            <div style={{
-              position: "absolute", right: 0, top: "calc(100% + 8px)",
-              background: "var(--bakery-card-bg)",
-              border: "1px solid var(--bakery-border)",
-              borderRadius: "11px",
-              boxShadow: "0 4px 20px rgba(22,66,91,0.12)",
-              minWidth: "190px", zIndex: 300, overflow: "hidden",
-              animation: "saip-drop 0.18s ease",
-            }}>
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "calc(100% + 8px)",
+                background: "var(--bakery-card-bg)",
+                border: "1px solid var(--bakery-border)",
+                borderRadius: "11px",
+                boxShadow: "0 4px 20px rgba(22,66,91,0.12)",
+                minWidth: "190px",
+                zIndex: 300,
+                overflow: "hidden",
+                animation: "saip-drop 0.18s ease",
+              }}
+            >
               {isMobile && user && (
                 <>
-                  <div style={{ padding: "12px 14px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <span style={{
-                      fontSize: "0.83rem", fontWeight: 600,
-                color: "#f2f2f2",
-                      fontFamily: "'Outfit', system-ui, sans-serif",
-                    }}>
+                  <div
+                    style={{
+                      padding: "12px 14px 8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "2px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.83rem",
+                        fontWeight: 600,
+                        color: "#f2f2f2",
+                        fontFamily: "'Outfit', system-ui, sans-serif",
+                      }}
+                    >
                       {user.nombre}
                     </span>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                      <span style={{ fontSize: "0.7rem", color: "var(--bakery-text-secondary)" }}>{user.rol}</span>
-                      <span style={{
-                        fontSize: "0.59rem", fontWeight: 700, letterSpacing: "0.07em",
-                        color: user.isAdmin ? "var(--bakery-success)" : "var(--bakery-text-secondary)",
-                        background: user.isAdmin ? "var(--bakery-success-bg)" : "var(--bakery-bg)",
-                        border: `1px solid ${user.isAdmin ? "var(--bakery-success)" : "var(--bakery-border)"}`,
-                        borderRadius: "99px", padding: "1px 7px",
-                        fontFamily: "'Outfit', system-ui, sans-serif",
-                      }}>
+                      <span
+                        style={{
+                          fontSize: "0.7rem",
+                          color: "var(--bakery-text-secondary)",
+                        }}
+                      >
+                        {user.rol}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.59rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.07em",
+                          color: user.isAdmin
+                            ? "var(--bakery-success)"
+                            : "var(--bakery-text-secondary)",
+                          background: user.isAdmin
+                            ? "var(--bakery-success-bg)"
+                            : "var(--bakery-bg)",
+                          border: `1px solid ${user.isAdmin ? "var(--bakery-success)" : "var(--bakery-border)"}`,
+                          borderRadius: "99px",
+                          padding: "1px 7px",
+                          fontFamily: "'Outfit', system-ui, sans-serif",
+                        }}
+                      >
                         {user.isAdmin ? "ADMIN" : "USER"}
                       </span>
                     </div>
                   </div>
-                  <div style={{ height: "1px", background: "var(--bakery-bg)", margin: "0 12px" }} />
+                  <div
+                    style={{
+                      height: "1px",
+                      background: "var(--bakery-bg)",
+                      margin: "0 12px",
+                    }}
+                  />
                 </>
               )}
 
               <button
                 className="saip-dd-item"
                 style={{ color: "var(--bakery-text-primary)" }}
-                onClick={() => { setPerfilOpen(true); setMenuOpen(false); }}
+                onClick={() => {
+                  setPerfilOpen(true);
+                  setMenuOpen(false);
+                }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="var(--bakery-text-secondary)" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--bakery-text-secondary)"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                >
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
                 Ver perfil
               </button>
 
-              <div style={{ height: "1px", background: "var(--bakery-bg)", margin: "0 12px" }} />
+              <div
+                style={{
+                  height: "1px",
+                  background: "var(--bakery-bg)",
+                  margin: "0 12px",
+                }}
+              />
 
               <button className="saip-dd-item saip-dd-danger" onClick={handleLogout}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
                 Cerrar sesión
               </button>
@@ -309,7 +466,9 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }: NavbarProps) {
           )}
         </div>
       </nav>
-      {perfilOpen && <PerfilModal isOpen={perfilOpen} onClose={() => setPerfilOpen(false)} />}
+      {perfilOpen && (
+        <PerfilModal isOpen={perfilOpen} onClose={() => setPerfilOpen(false)} />
+      )}
     </>
   );
 }

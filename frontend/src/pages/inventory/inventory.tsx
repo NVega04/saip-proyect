@@ -154,10 +154,7 @@ export default function Inventario(): JSX.Element {
 
   return (
     <Layout
-      breadcrumbs={[
-        { label: "Dashboard", to: "/dashboard" },
-        { label: "Inventario" },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", to: "/dashboard" }, { label: "Inventario" }]}
     >
       <div className="inventory">
         {/* Resumen visual */}

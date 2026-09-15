@@ -1,7 +1,7 @@
 .saip-modal__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(22,66,91,0.35);
+  background: rgba(22, 66, 91, 0.35);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   background: var(--bakery-card-bg);
   border-radius: 12px;
   border: 1px solid var(--bakery-border);
-  box-shadow: 0 8px 32px rgba(22,66,91,0.12);
+  box-shadow: 0 8px 32px rgba(22, 66, 91, 0.12);
   max-height: 90vh;
   overflow-y: auto;
   animation: modal-slide-in 0.18s ease;
@@ -36,7 +36,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--bakery-text-primary);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   margin: 0;
   flex: 1;
   min-width: 0;
@@ -53,7 +53,9 @@
   align-items: center;
   justify-content: center;
   color: var(--bakery-text-muted);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
   flex-shrink: 0;
 }
 
@@ -67,13 +69,23 @@
 }
 
 @keyframes modal-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modal-slide-in {
-  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (max-width: 767px) {
@@ -112,6 +124,12 @@
 }
 
 @keyframes modal-slide-up {
-  from { opacity: 0; transform: translateY(100%); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -33,10 +33,16 @@ export default function ConfirmModal({
         </div>
 
         <div className="saip-confirm__actions">
-          <button className="saip-confirm__btn saip-confirm__btn--cancel" onClick={onCancel}>
+          <button
+            className="saip-confirm__btn saip-confirm__btn--cancel"
+            onClick={onCancel}
+          >
             {cancelText}
           </button>
-          <button className="saip-confirm__btn saip-confirm__btn--danger" onClick={onConfirm}>
+          <button
+            className="saip-confirm__btn saip-confirm__btn--danger"
+            onClick={onConfirm}
+          >
             {confirmText}
           </button>
         </div>

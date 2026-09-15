@@ -1,13 +1,8 @@
+from datetime import UTC, datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlmodel import Session, select
-from datetime import datetime, timezone
-
-from src.database import get_session
-from src.models.models import Product, ProductStatus, User, Unit
-from src.schemas.schemas import ProductCreate, ProductUpdate, ProductResponse, BulkImportResult
-from src.dependencies import get_current_user
 from src.bulk.parser import (
     RowError,
     name_key,
@@ -17,6 +12,15 @@ from src.bulk.parser import (
     run_bulk,
     safe_float,
     template_response,
+)
+from src.database import get_session
+from src.dependencies import get_current_user
+from src.models.models import Product, Unit, User
+from src.schemas.schemas import (
+    BulkImportResult,
+    ProductCreate,
+    ProductResponse,
+    ProductUpdate,
 )
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -138,7 +142,7 @@ def update_product(
     for field, value in update_fields.items():
         setattr(product, field, value)
 
-    product.updated_at = datetime.now(timezone.utc)
+    product.updated_at = datetime.now(UTC)
     product.updated_by = current_user.id
 
     session.add(product)
@@ -167,13 +171,11 @@ def delete_product(
             detail="El producto esta bloqueado y no puede ser eliminado",
         )
 
-    product.deleted_at = datetime.now(timezone.utc)
+    product.deleted_at = datetime.now(UTC)
     product.deleted_by = current_user.id
 
     session.add(product)
     session.commit()
-
-    return None
 
 
 @router.patch(
@@ -192,7 +194,7 @@ def toggle_product_lock(
         )
 
     product.is_locked = not product.is_locked
-    product.updated_at = datetime.now(timezone.utc)
+    product.updated_at = datetime.now(UTC)
     product.updated_by = current_user.id
 
     session.add(product)
@@ -263,19 +265,23 @@ def bulk_import_products(
                 existing.description = descripcion
             existing.min_stock = min_stock
             existing.max_stock = max_stock
-            existing.updated_at = datetime.now(timezone.utc)
+            existing.updated_at = datetime.now(UTC)
             existing.updated_by = current_user.id
             session.add(existing)
             return True
 
         if existing:
-            raise RowError(f"Ya existe un producto con el nombre '{row.get('nombre')}'.")
+            raise RowError(
+                f"Ya existe un producto con el nombre '{row.get('nombre')}'."
+            )
 
         new_product = Product(
             name=nombre,
             description=descripcion,
             unit_id=unit.id,
-            available_quantity=safe_float(row.get("stock_disponible"), "stock_disponible"),
+            available_quantity=safe_float(
+                row.get("stock_disponible"), "stock_disponible"
+            ),
             min_stock=min_stock,
             max_stock=max_stock,
             is_locked=False,
