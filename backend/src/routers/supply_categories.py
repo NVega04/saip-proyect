@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from datetime import datetime, timezone
@@ -15,6 +17,69 @@ from src.dependencies import get_current_user
 router = APIRouter(prefix="/supply-categories", tags=["SupplyCategories"])
 
 
+def _obtener_categoria_o_404(session: Session, categoria_id: int) -> SupplyCategory:
+    """Devuelve la categoría de insumo con el id indicado o lanza 404."""
+    categoria = session.get(SupplyCategory, categoria_id)
+    if not categoria:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"La categoría con id '{categoria_id}' no existe.",
+        )
+    return categoria
+
+
+def _buscar_categoria_por_nombre(
+    session: Session, nombre: str
+) -> Optional[SupplyCategory]:
+    """Busca una categoría de insumo con el nombre indicado."""
+    return session.exec(
+        select(SupplyCategory).where(SupplyCategory.name == nombre)
+    ).first()
+
+
+def _verificar_nombre_disponible(
+    session: Session, nombre: str, mensaje_conflicto: str
+) -> None:
+    """Lanza 409 si ya existe una categoría de insumo con el nombre indicado."""
+    categoria_existente = _buscar_categoria_por_nombre(session, nombre)
+    if categoria_existente:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=mensaje_conflicto,
+        )
+
+
+def _aplicar_actualizacion(
+    categoria: SupplyCategory,
+    datos_categoria: SupplyCategoryUpdate,
+    usuario_actual: User,
+) -> None:
+    """Aplica los campos enviados y registra la auditoría de actualización."""
+    campos_a_actualizar = datos_categoria.model_dump(exclude_unset=True)
+    for campo, valor in campos_a_actualizar.items():
+        setattr(categoria, campo, valor)
+
+    categoria.updated_at = datetime.now(timezone.utc)
+    categoria.updated_by = usuario_actual.id
+
+
+def _marcar_categoria_eliminada(
+    categoria: SupplyCategory,
+    usuario_actual: User,
+) -> DeleteResponseSupplyCategory:
+    """Registra la eliminación lógica (soft delete) de la categoría."""
+    ahora = datetime.now(timezone.utc)
+    categoria.deleted_at = ahora
+    categoria.deleted_by = usuario_actual.id
+    categoria.status = "inactive"
+
+    return DeleteResponseSupplyCategory(
+        message=f"Categoría '{categoria.name}' eliminada correctamente.",
+        deleted_at=ahora,
+        deleted_by=usuario_actual.id,
+    )
+
+
 @router.post(
     "/",
     response_model=SupplyCategoryResponse,
@@ -26,26 +91,23 @@ def create_supply_category(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    existing = session.exec(
-        select(SupplyCategory).where(SupplyCategory.name == data.name)
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"La categoría '{data.name}' ya existe.",
-        )
+    _verificar_nombre_disponible(
+        session,
+        data.name,
+        mensaje_conflicto=f"La categoría '{data.name}' ya existe.",
+    )
 
-    new_category = SupplyCategory(
+    nueva_categoria = SupplyCategory(
         name=data.name,
         description=data.description,
         created_by=current_user.id,
     )
 
-    session.add(new_category)
+    session.add(nueva_categoria)
     session.commit()
-    session.refresh(new_category)
+    session.refresh(nueva_categoria)
 
-    return new_category
+    return nueva_categoria
 
 
 @router.get(
@@ -58,8 +120,8 @@ def get_all_supply_categories(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    categories = session.exec(select(SupplyCategory)).all()
-    return categories
+    categorias = session.exec(select(SupplyCategory)).all()
+    return categorias
 
 
 @router.get(
@@ -73,13 +135,7 @@ def get_supply_category(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    category = session.get(SupplyCategory, category_id)
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"La categoría con id '{category_id}' no existe.",
-        )
-    return category
+    return _obtener_categoria_o_404(session, category_id)
 
 
 @router.put(
@@ -94,35 +150,22 @@ def update_supply_category(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    category = session.get(SupplyCategory, category_id)
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"La categoría con id '{category_id}' no existe.",
+    categoria = _obtener_categoria_o_404(session, category_id)
+
+    if data.name and data.name != categoria.name:
+        _verificar_nombre_disponible(
+            session,
+            data.name,
+            mensaje_conflicto=f"El nombre '{data.name}' ya está en uso.",
         )
 
-    if data.name and data.name != category.name:
-        existing = session.exec(
-            select(SupplyCategory).where(SupplyCategory.name == data.name)
-        ).first()
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"El nombre '{data.name}' ya está en uso.",
-            )
+    _aplicar_actualizacion(categoria, data, current_user)
 
-    update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(category, field, value)
-
-    category.updated_at = datetime.now(timezone.utc)
-    category.updated_by = current_user.id
-
-    session.add(category)
+    session.add(categoria)
     session.commit()
-    session.refresh(category)
+    session.refresh(categoria)
 
-    return category
+    return categoria
 
 
 @router.delete(
@@ -136,29 +179,17 @@ def delete_supply_category(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    category = session.get(SupplyCategory, category_id)
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"La categoría con id '{category_id}' no existe.",
-        )
+    categoria = _obtener_categoria_o_404(session, category_id)
 
-    if category.status == "inactive":
+    if categoria.status == "inactive":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"La categoría con id '{category_id}' ya fue eliminada.",
         )
 
-    now = datetime.now(timezone.utc)
-    category.deleted_at = now
-    category.deleted_by = current_user.id
-    category.status = "inactive"
+    respuesta_eliminacion = _marcar_categoria_eliminada(categoria, current_user)
 
-    session.add(category)
+    session.add(categoria)
     session.commit()
 
-    return DeleteResponseSupplyCategory(
-        message=f"Categoría '{category.name}' eliminada correctamente.",
-        deleted_at=now,
-        deleted_by=current_user.id,
-    )
+    return respuesta_eliminacion
