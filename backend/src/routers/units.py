@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from datetime import datetime, timezone
@@ -10,12 +12,71 @@ from src.dependencies import get_current_user
 router = APIRouter(prefix="/units", tags=["Units"])
 
 
+def _obtener_unidad_activa_o_404(session: Session, unidad_id: int) -> Unit:
+    """Devuelve la unidad activa con el id indicado o lanza 404."""
+    unidad = session.get(Unit, unidad_id)
+    if not unidad or unidad.deleted_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Unidad no encontrada",
+        )
+    return unidad
+
+
+def _buscar_unidad_por_nombre_o_abreviatura(
+    session: Session, nombre: str, abreviatura: str
+) -> Optional[Unit]:
+    """Busca una unidad activa que use el mismo nombre o la misma abreviatura."""
+    return session.exec(
+        select(Unit).where(
+            (Unit.name == nombre) | (Unit.abbreviation == abreviatura),
+            Unit.deleted_at == None,
+        )
+    ).first()
+
+
+def _buscar_unidad_por_campo(
+    session: Session,
+    campo: Any,
+    valor: str,
+    unidad_id_a_excluir: int,
+) -> Optional[Unit]:
+    """Busca una unidad activa por un campo único (nombre o abreviatura), excluyendo una unidad."""
+    return session.exec(
+        select(Unit).where(
+            campo == valor,
+            Unit.id != unidad_id_a_excluir,
+            Unit.deleted_at == None,
+        )
+    ).first()
+
+
+def _aplicar_actualizacion(
+    unidad: Unit,
+    datos_unidad: UnitUpdate,
+    usuario_actual: User,
+) -> None:
+    """Aplica los campos enviados y registra la auditoría de actualización."""
+    campos_a_actualizar = datos_unidad.model_dump(exclude_unset=True)
+    for campo, valor in campos_a_actualizar.items():
+        setattr(unidad, campo, valor)
+
+    unidad.updated_at = datetime.now(timezone.utc)
+    unidad.updated_by = usuario_actual.id
+
+
+def _marcar_unidad_eliminada(unidad: Unit, usuario_actual: User) -> None:
+    """Registra la eliminación lógica (soft delete) de la unidad."""
+    unidad.deleted_at = datetime.now(timezone.utc)
+    unidad.deleted_by = usuario_actual.id
+
+
 @router.get("/", response_model=list[UnitResponse], status_code=status.HTTP_200_OK)
 def get_units(
     session: Session = Depends(get_session),
 ):
-    units = session.exec(select(Unit).where(Unit.deleted_at == None)).all()
-    return units
+    unidades = session.exec(select(Unit).where(Unit.deleted_at == None)).all()
+    return unidades
 
 
 @router.get("/{unit_id}", response_model=UnitResponse, status_code=status.HTTP_200_OK)
@@ -23,13 +84,7 @@ def get_unit(
     unit_id: int,
     session: Session = Depends(get_session),
 ):
-    unit = session.get(Unit, unit_id)
-    if not unit or unit.deleted_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Unidad no encontrada",
-        )
-    return unit
+    return _obtener_unidad_activa_o_404(session, unit_id)
 
 
 @router.post("/", response_model=UnitResponse, status_code=status.HTTP_201_CREATED)
@@ -38,20 +93,16 @@ def create_unit(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    existing = session.exec(
-        select(Unit).where(
-            (Unit.name == unit_data.name)
-            | (Unit.abbreviation == unit_data.abbreviation),
-            Unit.deleted_at == None,
-        )
-    ).first()
-    if existing:
+    unidad_existente = _buscar_unidad_por_nombre_o_abreviatura(
+        session, unit_data.name, unit_data.abbreviation
+    )
+    if unidad_existente:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ya existe una unidad con ese nombre o abreviatura",
         )
 
-    new_unit = Unit(
+    nueva_unidad = Unit(
         name=unit_data.name,
         abbreviation=unit_data.abbreviation,
         description=unit_data.description,
@@ -59,11 +110,11 @@ def create_unit(
         created_by=current_user.id,
     )
 
-    session.add(new_unit)
+    session.add(nueva_unidad)
     session.commit()
-    session.refresh(new_unit)
+    session.refresh(nueva_unidad)
 
-    return new_unit
+    return nueva_unidad
 
 
 @router.patch("/{unit_id}", response_model=UnitResponse, status_code=status.HTTP_200_OK)
@@ -73,22 +124,13 @@ def update_unit(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    unit = session.get(Unit, unit_id)
-    if not unit or unit.deleted_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Unidad no encontrada",
-        )
+    unidad = _obtener_unidad_activa_o_404(session, unit_id)
 
-    if unit_data.name is not None and unit_data.name != unit.name:
-        existing = session.exec(
-            select(Unit).where(
-                Unit.name == unit_data.name,
-                Unit.id != unit_id,
-                Unit.deleted_at == None,
-            )
-        ).first()
-        if existing:
+    if unit_data.name is not None and unit_data.name != unidad.name:
+        nombre_en_uso = _buscar_unidad_por_campo(
+            session, Unit.name, unit_data.name, unit_id
+        )
+        if nombre_en_uso:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Ya existe una unidad con ese nombre",
@@ -96,33 +138,24 @@ def update_unit(
 
     if (
         unit_data.abbreviation is not None
-        and unit_data.abbreviation != unit.abbreviation
+        and unit_data.abbreviation != unidad.abbreviation
     ):
-        existing = session.exec(
-            select(Unit).where(
-                Unit.abbreviation == unit_data.abbreviation,
-                Unit.id != unit_id,
-                Unit.deleted_at == None,
-            )
-        ).first()
-        if existing:
+        abreviatura_en_uso = _buscar_unidad_por_campo(
+            session, Unit.abbreviation, unit_data.abbreviation, unit_id
+        )
+        if abreviatura_en_uso:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Ya existe una unidad con esa abreviatura",
             )
 
-    update_fields = unit_data.model_dump(exclude_unset=True)
-    for field, value in update_fields.items():
-        setattr(unit, field, value)
+    _aplicar_actualizacion(unidad, unit_data, current_user)
 
-    unit.updated_at = datetime.now(timezone.utc)
-    unit.updated_by = current_user.id
-
-    session.add(unit)
+    session.add(unidad)
     session.commit()
-    session.refresh(unit)
+    session.refresh(unidad)
 
-    return unit
+    return unidad
 
 
 @router.delete("/{unit_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -131,17 +164,11 @@ def delete_unit(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    unit = session.get(Unit, unit_id)
-    if not unit or unit.deleted_at is not None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Unidad no encontrada",
-        )
+    unidad = _obtener_unidad_activa_o_404(session, unit_id)
 
-    unit.deleted_at = datetime.now(timezone.utc)
-    unit.deleted_by = current_user.id
+    _marcar_unidad_eliminada(unidad, current_user)
 
-    session.add(unit)
+    session.add(unidad)
     session.commit()
 
     return None

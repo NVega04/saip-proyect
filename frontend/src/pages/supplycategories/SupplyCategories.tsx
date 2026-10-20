@@ -9,6 +9,8 @@ import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
 import "./SupplyCategories.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
+import { LONGITUDES_MAX } from "../../constants/validations.constants";
+import { validarCampoRequerido, validarLongitudMaxima } from "../../utils/validations";
 
 interface Supply {
   id: number;
@@ -39,7 +41,7 @@ interface SupplyCategoryForm {
 
 type FormErrors = Partial<Record<keyof SupplyCategoryForm, string>>;
 
-const emptyForm = (): SupplyCategoryForm => ({
+const crearFormularioVacio = (): SupplyCategoryForm => ({
   name: "",
   description: "",
 });
@@ -67,128 +69,151 @@ const columns: ColumnDef<SupplyCategory>[] = [
   },
 ];
 
+/**
+ * Valida los campos del formulario de categorías de insumos.
+ * Devuelve el objeto de errores (vacío si el formulario es válido).
+ */
+const validarFormulario = (datosFormulario: SupplyCategoryForm): FormErrors => {
+  const errores: FormErrors = {};
+
+  const nombreRequerido = validarCampoRequerido(datosFormulario.name);
+  const nombreDemasiadoLargo = validarLongitudMaxima(datosFormulario.name, LONGITUDES_MAX.name);
+  if (nombreRequerido) errores.name = nombreRequerido;
+  if (nombreDemasiadoLargo) errores.name = nombreDemasiadoLargo;
+
+  const descripcionDemasiadoLarga = validarLongitudMaxima(
+    datosFormulario.description,
+    LONGITUDES_MAX.description
+  );
+  if (descripcionDemasiadoLarga) errores.description = descripcionDemasiadoLarga;
+
+  return errores;
+};
+
+/**
+ * Construye el cuerpo de la petición enviada al backend
+ * a partir de los datos actuales del formulario.
+ */
+const construirCuerpoPeticion = (datosFormulario: SupplyCategoryForm) => ({
+  name: datosFormulario.name,
+  description: datosFormulario.description || null,
+});
+
 export default function SupplyCategories(): JSX.Element {
-  const [categories, setCategories] = useState<SupplyCategory[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<SupplyCategory | null>(null);
-  const [form, setForm] = useState<SupplyCategoryForm>(emptyForm());
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
+  const [categorias, setCategorias] = useState<SupplyCategory[]>([]);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [categoriaEnEdicion, setCategoriaEnEdicion] = useState<SupplyCategory | null>(null);
+  const [datosFormulario, setDatosFormulario] = useState<SupplyCategoryForm>(
+    crearFormularioVacio()
+  );
+  const [errores, setErrores] = useState<FormErrors>({});
+  const [cargando, setCargando] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("supply-categories");
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const cargarCategorias = async () => {
       try {
         const response = await apiFetch("/supply-categories/");
         if (!response.ok) throw new Error("Error al cargar categorias");
         const data: SupplyCategory[] = await response.json();
-        setCategories(data.filter((c) => c.status === "active"));
+        setCategorias(data.filter((c) => c.status === "active"));
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        setCargando(false);
       }
     };
-    fetchCategories();
+    cargarCategorias();
   }, []);
 
-  const handleCrear = () => {
-    setEditTarget(null);
-    setForm(emptyForm());
-    setErrors({});
-    setModalOpen(true);
+  const manejarCreacion = () => {
+    setCategoriaEnEdicion(null);
+    setDatosFormulario(crearFormularioVacio());
+    setErrores({});
+    setModalAbierto(true);
   };
 
-  const handleEditar = (category: SupplyCategory) => {
-    setEditTarget(category);
-    setForm({
-      name: category.name,
-      description: category.description ?? "",
+  const manejarEdicion = (categoria: SupplyCategory) => {
+    setCategoriaEnEdicion(categoria);
+    setDatosFormulario({
+      name: categoria.name,
+      description: categoria.description ?? "",
     });
-    setErrors({});
-    setModalOpen(true);
+    setErrores({});
+    setModalAbierto(true);
   };
 
-  const handleCerrar = () => {
-    setModalOpen(false);
-    setEditTarget(null);
-    setForm(emptyForm());
+  const manejarCierre = () => {
+    setModalAbierto(false);
+    setCategoriaEnEdicion(null);
+    setDatosFormulario(crearFormularioVacio());
   };
 
-  const setField = (field: keyof SupplyCategoryForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  const actualizarCampo = (campo: keyof SupplyCategoryForm, valor: string) => {
+    setDatosFormulario((prev) => ({ ...prev, [campo]: valor }));
+    setErrores((prev) => ({ ...prev, [campo]: undefined }));
   };
 
-  const validate = (): boolean => {
-    const e: FormErrors = {};
-    if (!form.name.trim()) e.name = "El nombre es requerido";
-    if (form.name.length > 100) e.name = "Maximo 100 caracteres";
-    if (form.description && form.description.length > 255)
-      e.description = "Maximo 255 caracteres";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const validarYConfirmarFormulario = (): boolean => {
+    const erroresDetectados = validarFormulario(datosFormulario);
+    setErrores(erroresDetectados);
+    return Object.keys(erroresDetectados).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const guardarCategoria = async () => {
+    const esActualizacion = categoriaEnEdicion !== null;
+    const url = esActualizacion
+      ? `/supply-categories/${categoriaEnEdicion.id}`
+      : "/supply-categories/";
+    const metodo = esActualizacion ? "PUT" : "POST";
+
+    const response = await apiFetch(url, {
+      method: metodo,
+      body: JSON.stringify(construirCuerpoPeticion(datosFormulario)),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      showAlert(
+        "error",
+        err.detail ||
+          (esActualizacion ? "Error al actualizar categoria" : "Error al crear categoria")
+      );
+      return;
+    }
+
+    const categoriaGuardada: SupplyCategory = await response.json();
+    if (esActualizacion) {
+      setCategorias((prev) =>
+        prev.map((c) => (c.id === categoriaEnEdicion.id ? categoriaGuardada : c))
+      );
+      showAlert("success", "Categoria actualizada correctamente.");
+    } else {
+      setCategorias((prev) => [...prev, categoriaGuardada]);
+      showAlert("success", "Categoria creada correctamente.");
+    }
+  };
+
+  const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
+    if (!validarYConfirmarFormulario()) {
       showAlert("warning", "Completa los campos obligatorios.");
       return;
     }
 
     try {
-      if (editTarget) {
-        const response = await apiFetch(`/supply-categories/${editTarget.id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            name: form.name,
-            description: form.description || null,
-          }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          showAlert("error", err.detail || "Error al actualizar categoria");
-          return;
-        }
-
-        const updated: SupplyCategory = await response.json();
-        setCategories((prev) =>
-          prev.map((c) => (c.id === editTarget.id ? updated : c))
-        );
-        showAlert("success", "Categoria actualizada correctamente.");
-      } else {
-        const response = await apiFetch("/supply-categories/", {
-          method: "POST",
-          body: JSON.stringify({
-            name: form.name,
-            description: form.description || null,
-          }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          showAlert("error", err.detail || "Error al crear categoria");
-          return;
-        }
-
-        const created: SupplyCategory = await response.json();
-        setCategories((prev) => [...prev, created]);
-        showAlert("success", "Categoria creada correctamente.");
-      }
-
-      handleCerrar();
+      await guardarCategoria();
+      manejarCierre();
     } catch {
       showAlert("error", "Error de conexion con el servidor.");
     }
   };
 
-  const handleEliminar = (id: number) => {
+  const manejarEliminacion = (id: number) => {
     showConfirm({
       title: "Eliminar categoria",
       message: "¿Esta seguro que desea eliminar este registro?",
@@ -206,7 +231,7 @@ export default function SupplyCategories(): JSX.Element {
             return;
           }
 
-          setCategories((prev) => prev.filter((c) => c.id !== id));
+          setCategorias((prev) => prev.filter((c) => c.id !== id));
           showAlert("success", "Categoria eliminada correctamente.");
         } catch {
           showAlert("error", "Error de conexion con el servidor.");
@@ -223,18 +248,18 @@ export default function SupplyCategories(): JSX.Element {
         { label: "Categorias de insumos" },
       ]}
     >
-      {loading ? (
+      {cargando ? (
         <div className="saip-loading">Cargando categorias...</div>
       ) : (
         <Table
           title="Categorias de insumos"
           columns={columns}
-          data={categories}
+          data={categorias}
           searchPlaceholder="Buscar categoria"
           sortKey="name"
           headerActions={
             <>
-            <Button variant="primary" onClick={handleCrear}>
+            <Button variant="primary" onClick={manejarCreacion}>
               Crear categoria
             </Button>
              <Button
@@ -259,7 +284,7 @@ export default function SupplyCategories(): JSX.Element {
                 type="button"
                 className="saip-table__action-btn"
                 title="Editar"
-                onClick={() => handleEditar(row)}
+                onClick={() => manejarEdicion(row)}
               >
                 <svg
                   width="15"
@@ -277,7 +302,7 @@ export default function SupplyCategories(): JSX.Element {
                 type="button"
                 className="saip-table__action-btn saip-table__action-btn--danger"
                 title="Eliminar"
-                onClick={() => handleEliminar(row.id)}
+                onClick={() => manejarEliminacion(row.id)}
               >
                 <svg
                   width="15"
@@ -299,24 +324,24 @@ export default function SupplyCategories(): JSX.Element {
       )}
 
       <Modal
-        isOpen={modalOpen}
-        onClose={handleCerrar}
-        title={editTarget ? "Editar categoria" : "Crear categoria"}
+        isOpen={modalAbierto}
+        onClose={manejarCierre}
+        title={categoriaEnEdicion ? "Editar categoria" : "Crear categoria"}
         width="480px"
       >
-        <form className="scf" onSubmit={handleSubmit}>
+        <form className="scf" onSubmit={manejarEnvio}>
           <div className="scf__group">
             <label className="scf__label">
               Nombre<span className="scf__required">*</span>
             </label>
             <input
-              className={`scf__input ${errors.name ? "scf__input--error" : ""}`}
+              className={`scf__input ${errores.name ? "scf__input--error" : ""}`}
               placeholder="Ej: Harinas, Azucares, Frutas..."
-              maxLength={100}
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
+              maxLength={LONGITUDES_MAX.name}
+              value={datosFormulario.name}
+              onChange={(e) => actualizarCampo("name", e.target.value)}
             />
-            {errors.name && <span className="scf__error">{errors.name}</span>}
+            {errores.name && <span className="scf__error">{errores.name}</span>}
           </div>
 
           <div className="scf__group">
@@ -325,22 +350,22 @@ export default function SupplyCategories(): JSX.Element {
               className="scf__textarea"
               placeholder="Describe esta categoria de insumo..."
               rows={3}
-              maxLength={255}
-              value={form.description}
-              onChange={(e) => setField("description", e.target.value)}
+              maxLength={LONGITUDES_MAX.description}
+              value={datosFormulario.description}
+              onChange={(e) => actualizarCampo("description", e.target.value)}
             />
-            {errors.description && (
-              <span className="scf__error">{errors.description}</span>
+            {errores.description && (
+              <span className="scf__error">{errores.description}</span>
             )}
           </div>
 
 
           <div className="scf__actions">
-            <Button variant="secondary" type="button" onClick={handleCerrar}>
+            <Button variant="secondary" type="button" onClick={manejarCierre}>
               Cancelar
             </Button>
             <Button variant="primary" type="submit">
-              {editTarget ? "Guardar cambios" : "Crear categoria"}
+              {categoriaEnEdicion ? "Guardar cambios" : "Crear categoria"}
             </Button>
           </div>
         </form>

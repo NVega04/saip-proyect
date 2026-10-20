@@ -9,6 +9,8 @@ import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
 import "./units.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
+import { LONGITUDES_MAX, MENSAJES_VALIDACION } from "../../constants/validations.constants";
+import { validarCampoRequerido, validarLongitudMaxima } from "../../utils/validations";
 
 interface Unit {
   id: number;
@@ -28,7 +30,7 @@ interface UnitForm {
 
 type FormErrors = Partial<Record<keyof UnitForm, string>>;
 
-const emptyForm = (): UnitForm => ({
+const crearFormularioVacio = (): UnitForm => ({
   name: "",
   abbreviation: "",
   description: "",
@@ -42,132 +44,155 @@ const columns: ColumnDef<Unit>[] = [
   { key: "quantity", header: "Cantidad base", width: "10%" },
 ];
 
+/**
+ * Valida los campos del formulario de unidades.
+ * Devuelve el objeto de errores (vacío si el formulario es válido).
+ */
+const validarFormulario = (datosFormulario: UnitForm): FormErrors => {
+  const errores: FormErrors = {};
+
+  const nombreRequerido = validarCampoRequerido(datosFormulario.name);
+  const nombreDemasiadoLargo = validarLongitudMaxima(datosFormulario.name, LONGITUDES_MAX.name);
+  if (nombreRequerido) errores.name = nombreRequerido;
+  if (nombreDemasiadoLargo) errores.name = nombreDemasiadoLargo;
+
+  const abreviaturaRequerida = validarCampoRequerido(
+    datosFormulario.abbreviation,
+    MENSAJES_VALIDACION.abreviaturaRequerida
+  );
+  const abreviaturaDemasiadoLarga = validarLongitudMaxima(
+    datosFormulario.abbreviation,
+    LONGITUDES_MAX.abbreviation
+  );
+  if (abreviaturaRequerida) errores.abbreviation = abreviaturaRequerida;
+  if (abreviaturaDemasiadoLarga) errores.abbreviation = abreviaturaDemasiadoLarga;
+
+  if (datosFormulario.quantity < 0) errores.quantity = MENSAJES_VALIDACION.cantidadNegativa;
+
+  return errores;
+};
+
+/**
+ * Construye el cuerpo de la petición enviada al backend
+ * a partir de los datos actuales del formulario.
+ */
+const construirCuerpoPeticion = (datosFormulario: UnitForm) => ({
+  name: datosFormulario.name,
+  abbreviation: datosFormulario.abbreviation,
+  description: datosFormulario.description || null,
+  quantity: datosFormulario.quantity,
+});
+
 export default function Units(): JSX.Element {
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Unit | null>(null);
-  const [form, setForm] = useState<UnitForm>(emptyForm());
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
+  const [unidades, setUnidades] = useState<Unit[]>([]);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [unidadEnEdicion, setUnidadEnEdicion] = useState<Unit | null>(null);
+  const [datosFormulario, setDatosFormulario] = useState<UnitForm>(crearFormularioVacio());
+  const [errores, setErrores] = useState<FormErrors>({});
+  const [cargando, setCargando] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("units");
 
   useEffect(() => {
-    const fetchUnits = async () => {
+    const cargarUnidades = async () => {
       try {
         const response = await apiFetch("/units/");
         if (!response.ok) throw new Error("Error al cargar unidades");
         const data: Unit[] = await response.json();
-        setUnits(data);
+        setUnidades(data);
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        setCargando(false);
       }
     };
-    fetchUnits();
+    cargarUnidades();
   }, []);
 
-  const handleCrear = () => {
-    setEditTarget(null);
-    setForm(emptyForm());
-    setErrors({});
-    setModalOpen(true);
+  const manejarCreacion = () => {
+    setUnidadEnEdicion(null);
+    setDatosFormulario(crearFormularioVacio());
+    setErrores({});
+    setModalAbierto(true);
   };
 
-  const handleEditar = (unit: Unit) => {
-    setEditTarget(unit);
-    setForm({
-      name: unit.name,
-      abbreviation: unit.abbreviation,
-      description: unit.description ?? "",
-      quantity: unit.quantity,
+  const manejarEdicion = (unidad: Unit) => {
+    setUnidadEnEdicion(unidad);
+    setDatosFormulario({
+      name: unidad.name,
+      abbreviation: unidad.abbreviation,
+      description: unidad.description ?? "",
+      quantity: unidad.quantity,
     });
-    setErrors({});
-    setModalOpen(true);
+    setErrores({});
+    setModalAbierto(true);
   };
 
-  const handleCerrar = () => {
-    setModalOpen(false);
-    setEditTarget(null);
-    setForm(emptyForm());
+  const manejarCierre = () => {
+    setModalAbierto(false);
+    setUnidadEnEdicion(null);
+    setDatosFormulario(crearFormularioVacio());
   };
 
-  const setField = (field: keyof UnitForm, value: string | number) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  const actualizarCampo = (campo: keyof UnitForm, valor: string | number) => {
+    setDatosFormulario((prev) => ({ ...prev, [campo]: valor }));
+    setErrores((prev) => ({ ...prev, [campo]: undefined }));
   };
 
-  const validate = (): boolean => {
-    const e: FormErrors = {};
-    if (!form.name.trim()) e.name = "El nombre es requerido";
-    if (!form.abbreviation.trim()) e.abbreviation = "La abreviatura es requerida";
-    if (form.abbreviation.length > 20) e.abbreviation = "Maximo 20 caracteres";
-    if (form.quantity < 0) e.quantity = "La cantidad no puede ser negativa";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const validarYConfirmarFormulario = (): boolean => {
+    const erroresDetectados = validarFormulario(datosFormulario);
+    setErrores(erroresDetectados);
+    return Object.keys(erroresDetectados).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const guardarUnidad = async () => {
+    const esActualizacion = unidadEnEdicion !== null;
+    const url = esActualizacion ? `/units/${unidadEnEdicion.id}` : "/units/";
+    const metodo = esActualizacion ? "PATCH" : "POST";
+
+    const response = await apiFetch(url, {
+      method: metodo,
+      body: JSON.stringify(construirCuerpoPeticion(datosFormulario)),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      showAlert(
+        "error",
+        err.detail || (esActualizacion ? "Error al actualizar unidad" : "Error al crear unidad")
+      );
+      return;
+    }
+
+    const unidadGuardada: Unit = await response.json();
+    if (esActualizacion) {
+      setUnidades((prev) => prev.map((u) => (u.id === unidadEnEdicion.id ? unidadGuardada : u)));
+      showAlert("success", "Unidad actualizada correctamente.");
+    } else {
+      setUnidades((prev) => [...prev, unidadGuardada]);
+      showAlert("success", "Unidad creada correctamente.");
+    }
+  };
+
+  const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
+    if (!validarYConfirmarFormulario()) {
       showAlert("warning", "Completa los campos obligatorios.");
       return;
     }
 
     try {
-      if (editTarget) {
-        const response = await apiFetch(`/units/${editTarget.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            name: form.name,
-            abbreviation: form.abbreviation,
-            description: form.description || null,
-            quantity: form.quantity,
-          }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          showAlert("error", err.detail || "Error al actualizar unidad");
-          return;
-        }
-
-        const updated: Unit = await response.json();
-        setUnits((prev) => prev.map((u) => (u.id === editTarget.id ? updated : u)));
-        showAlert("success", "Unidad actualizada correctamente.");
-      } else {
-        const response = await apiFetch("/units/", {
-          method: "POST",
-          body: JSON.stringify({
-            name: form.name,
-            abbreviation: form.abbreviation,
-            description: form.description || null,
-            quantity: form.quantity,
-          }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          showAlert("error", err.detail || "Error al crear unidad");
-          return;
-        }
-
-        const created: Unit = await response.json();
-        setUnits((prev) => [...prev, created]);
-        showAlert("success", "Unidad creada correctamente.");
-      }
-
-      handleCerrar();
+      await guardarUnidad();
+      manejarCierre();
     } catch {
       showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
-  const handleEliminar = (id: number) => {
+  const manejarEliminacion = (id: number) => {
     showConfirm({
       title: "Eliminar unidad",
       message: "¿Está seguro que desea eliminar este registro?",
@@ -183,7 +208,7 @@ export default function Units(): JSX.Element {
             return;
           }
 
-          setUnits((prev) => prev.filter((u) => u.id !== id));
+          setUnidades((prev) => prev.filter((u) => u.id !== id));
           showAlert("success", "Unidad eliminada correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
@@ -199,18 +224,18 @@ export default function Units(): JSX.Element {
         { label: "Unidades" },
       ]}
     >
-      {loading ? (
+      {cargando ? (
         <div className="saip-loading">Cargando unidades...</div>
       ) : (
         <Table
           title="Unidades de medida"
           columns={columns}
-          data={units}
+          data={unidades}
           searchPlaceholder="Buscar unidad"
           sortKey="name"
           headerActions={
             <>
-            <Button variant="primary" onClick={handleCrear}>
+            <Button variant="primary" onClick={manejarCreacion}>
               Crear unidad
             </Button>
              <Button
@@ -235,7 +260,7 @@ export default function Units(): JSX.Element {
                 type="button"
                 className="saip-table__action-btn"
                 title="Editar"
-                onClick={() => handleEditar(row)}
+                onClick={() => manejarEdicion(row)}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="1.8">
@@ -247,7 +272,7 @@ export default function Units(): JSX.Element {
                 type="button"
                 className="saip-table__action-btn saip-table__action-btn--danger"
                 title="Eliminar"
-                onClick={() => handleEliminar(row.id)}
+                onClick={() => manejarEliminacion(row.id)}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="1.8">
@@ -263,23 +288,23 @@ export default function Units(): JSX.Element {
       )}
 
       <Modal
-        isOpen={modalOpen}
-        onClose={handleCerrar}
-        title={editTarget ? "Editar unidad" : "Crear unidad"}
+        isOpen={modalAbierto}
+        onClose={manejarCierre}
+        title={unidadEnEdicion ? "Editar unidad" : "Crear unidad"}
         width="480px"
       >
-        <form className="unf" onSubmit={handleSubmit}>
+        <form className="unf" onSubmit={manejarEnvio}>
           <div className="unf__group">
             <label className="unf__label">
               Nombre<span className="unf__required">*</span>
             </label>
             <input
-              className={`unf__input ${errors.name ? "unf__input--error" : ""}`}
+              className={`unf__input ${errores.name ? "unf__input--error" : ""}`}
               placeholder="Ej: Kilogramo, Litro..."
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
+              value={datosFormulario.name}
+              onChange={(e) => actualizarCampo("name", e.target.value)}
             />
-            {errors.name && <span className="unf__error">{errors.name}</span>}
+            {errores.name && <span className="unf__error">{errores.name}</span>}
           </div>
 
           <div className="unf__group">
@@ -287,13 +312,13 @@ export default function Units(): JSX.Element {
               Abreviatura<span className="unf__required">*</span>
             </label>
             <input
-              className={`unf__input ${errors.abbreviation ? "unf__input--error" : ""}`}
+              className={`unf__input ${errores.abbreviation ? "unf__input--error" : ""}`}
               placeholder="Ej: kg, L, g..."
-              maxLength={20}
-              value={form.abbreviation}
-              onChange={(e) => setField("abbreviation", e.target.value)}
+              maxLength={LONGITUDES_MAX.abbreviation}
+              value={datosFormulario.abbreviation}
+              onChange={(e) => actualizarCampo("abbreviation", e.target.value)}
             />
-            {errors.abbreviation && <span className="unf__error">{errors.abbreviation}</span>}
+            {errores.abbreviation && <span className="unf__error">{errores.abbreviation}</span>}
           </div>
 
           <div className="unf__group">
@@ -302,8 +327,8 @@ export default function Units(): JSX.Element {
               className="unf__textarea"
               placeholder="Describe esta unidad de medida..."
               rows={3}
-              value={form.description}
-              onChange={(e) => setField("description", e.target.value)}
+              value={datosFormulario.description}
+              onChange={(e) => actualizarCampo("description", e.target.value)}
             />
           </div>
 
@@ -313,22 +338,22 @@ export default function Units(): JSX.Element {
             </label>
             <input
               type="number"
-              className={`unf__input ${errors.quantity ? "unf__input--error" : ""}`}
+              className={`unf__input ${errores.quantity ? "unf__input--error" : ""}`}
               placeholder="Cantidad base para conversion"
               min={0}
               step={1}
-              value={form.quantity}
-              onChange={(e) => setField("quantity", parseFloat(e.target.value) || 0)}
+              value={datosFormulario.quantity}
+              onChange={(e) => actualizarCampo("quantity", parseFloat(e.target.value) || 0)}
             />
-            {errors.quantity && <span className="unf__error">{errors.quantity}</span>}
+            {errores.quantity && <span className="unf__error">{errores.quantity}</span>}
           </div>
 
           <div className="unf__actions">
-            <Button variant="secondary" type="button" onClick={handleCerrar}>
+            <Button variant="secondary" type="button" onClick={manejarCierre}>
               Cancelar
             </Button>
             <Button variant="primary" type="submit">
-              {editTarget ? "Guardar cambios" : "Crear unidad"}
+              {unidadEnEdicion ? "Guardar cambios" : "Crear unidad"}
             </Button>
           </div>
         </form>
