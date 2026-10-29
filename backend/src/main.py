@@ -21,6 +21,7 @@ from src.routers.production import router as production_router
 from src.routers.sales import router as sales_router
 from src.routers.stats import router as stats_router
 from src.routers.inventory import router as inventory_router
+from src.routers.health import router as health_router
 
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -49,6 +50,7 @@ app.add_middleware(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+app.include_router(health_router)
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(session.router)
