@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
-from src.schemas.schemas import BulkImportResult, BulkRowError
+from src.core.schemas import BulkImportResult, BulkRowError
 
 MAX_BULK_ROWS = 2000
 MAX_FILE_MB = 5

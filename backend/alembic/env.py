@@ -5,8 +5,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from sqlmodel import SQLModel
-from src.database import mysql_url
-from src.models.models import User, Role
+from src.core.database import mysql_url
+import src.models_registry  # noqa: F401  (registra todos los modelos)
 
 import os
 # this is the Alembic Config object, which provides
