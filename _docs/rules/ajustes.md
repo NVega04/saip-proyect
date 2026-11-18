@@ -177,7 +177,8 @@ Crea `core/config.py` con `pydantic-settings` (`BaseSettings`) que lea todas las
 
 ---
 
-## FASE 2 — Seguridad P0 (crítico, antes de cualquier despliegue)
+## FASE 2 — Seguridad P0 (crítico, antes de cualquier despliegue) 
+## YOHAN MARTINEZ
 
 > Nota: estos cambios son pequeños y de alto impacto. Si el proyecto ya está expuesto en internet, el desarrollador puede decidir adelantarlos como hotfix independiente de la Fase 1. Pregunta antes de reordenar.
 
@@ -243,6 +244,7 @@ Crea `core/config.py` con `pydantic-settings` (`BaseSettings`) que lea todas las
 ---
 
 ## FASE 3 — Seguridad P1 (antes de producción)
+## YOHAN MARTINEZ
 
 ### 3.1 Rate limiting global
 - Hoy solo el login está limitado (5/min vía SlowAPI).
@@ -287,6 +289,7 @@ Crea `core/config.py` con `pydantic-settings` (`BaseSettings`) que lea todas las
 ---
 
 ## FASE 4 — Reglas de negocio y trazabilidad
+## ISABEL MARTINEZ
 
 ### 4.1 Audit log
 - Crear el modelo `AuditLog` (módulo `audit/`) con: `id`, `user_id`, `action`, `resource_type`, `resource_id`, `old_value` (JSON), `new_value` (JSON), `ip_address` (opcional), `timestamp` (UTC).
@@ -319,6 +322,7 @@ Crea `core/config.py` con `pydantic-settings` (`BaseSettings`) que lea todas las
 ---
 
 ## FASE 5 — Testing completo
+## ISABEL MARTINEZ
 
 Estructura objetivo:
 
@@ -344,6 +348,7 @@ backend/tests/
 ---
 
 ## FASE 6 — Frontend, logging y documentación
+## NICOLE VEGA y test finales, paso 7, 8 y 9
 
 ### 6.1 Logging estructurado
 - Reemplazar `logging.basicConfig(level=WARNING)` por configuración central (`core/logging.py`): formato JSON o estructurado, nivel por entorno, ID de petición (middleware) para correlacionar logs.
