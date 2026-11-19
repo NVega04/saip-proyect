@@ -2,6 +2,7 @@ import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta
+from typing import Optional
 
 from sqlmodel import Session, select
 
@@ -24,6 +25,7 @@ from src.core.security import (
     verify_password,
 )
 from src.core.time import BOGOTA_TZ
+from src.modules.audit.service import AuditService
 from src.modules.auth.schemas import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -41,8 +43,9 @@ PASSWORD_RESET_EXPIRE_MINUTES = 30
 
 
 class AuthService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
 
     def login(self, credentials: LoginRequest) -> LoginResponse:
         user = self.session.exec(
@@ -84,6 +87,16 @@ class AuthService:
                     minutes=LOCK_DURATION_MINUTES
                 )
             self.session.add(user)
+            self.audit.log_action(
+                "login.locked" if user.locked_until else "login.failed",
+                "user",
+                resource_id=user.id,
+                new_value={
+                    "failed_attempts": user.failed_login_attempts,
+                    "locked": user.locked_until is not None,
+                },
+                user_id=user.id,
+            )
             self.session.commit()
             attempts_left = max(
                 MAX_LOGIN_ATTEMPTS - user.failed_login_attempts, 0
@@ -214,6 +227,13 @@ class AuthService:
             + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
         )
         self.session.add(reset_entry)
+        self.audit.log_action(
+            "password.reset_requested",
+            "user",
+            resource_id=user.id,
+            new_value={"requested": True},
+            user_id=user.id,
+        )
         self.session.commit()
 
         reset_link = settings.frontend_link(f"reset-password?token={raw_token}")
@@ -261,6 +281,13 @@ class AuthService:
             s.is_active = False
             self.session.add(s)
 
+        self.audit.log_action(
+            "password.reset",
+            "user",
+            resource_id=user.id,
+            new_value={"password_changed": True},
+            user_id=user.id,
+        )
         self.session.commit()
 
         return {"message": "Contraseña actualizada correctamente."}
@@ -277,6 +304,13 @@ class AuthService:
         current_user.password_hash = hash_password(body.new_password)
         current_user.updated_at = datetime.now(BOGOTA_TZ)
         self.session.add(current_user)
+        self.audit.log_action(
+            "password.changed",
+            "user",
+            resource_id=current_user.id,
+            new_value={"password_changed": True},
+            user_id=current_user.id,
+        )
         self.session.commit()
 
         return {"message": "Contraseña actualizada correctamente."}

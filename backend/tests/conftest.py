@@ -31,7 +31,7 @@ import pymysql  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlmodel import Session, SQLModel, create_engine  # noqa: E402
 
-import src.models_registry  # noqa: E402,F401  (registra las 21 tablas)
+import src.models_registry  # noqa: E402,F401  (registra las 22 tablas)
 from src.core.config import settings  # noqa: E402
 from src.core.database import get_session  # noqa: E402
 from src.core.security import create_jwt, get_session_expiry, hash_password  # noqa: E402

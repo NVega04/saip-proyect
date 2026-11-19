@@ -52,4 +52,4 @@ def assign_modules(
     service: RoleModulesService = Depends(get_role_modules_service),
     current_user: User = Depends(require_admin),
 ):
-    return service.assign_modules(role_id, data)
+    return service.assign_modules(role_id, data, current_user)
