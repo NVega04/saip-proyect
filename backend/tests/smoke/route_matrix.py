@@ -1,4 +1,4 @@
-"""Matriz de cobertura de los 93 endpoints de SAIP.
+"""Matriz de cobertura de los 94 endpoints de SAIP.
 
 Cada entrada declara cómo se autentica la ruta. ``test_route_coverage.py``
 compara esta matriz contra ``app.routes``: si se agrega o elimina un endpoint
@@ -19,6 +19,7 @@ class RouteCase:
 
 
 ROUTE_MATRIX: tuple[RouteCase, ...] = (
+    RouteCase('GET', '/audit/', 'admin', 'list', 'Solo administradores.'),
     RouteCase('GET', '/commercial-products/', 'user', 'list', ''),
     RouteCase('POST', '/commercial-products/', 'user', 'write', ''),
     RouteCase('POST', '/commercial-products/bulk/import', 'user', 'write', ''),
@@ -81,7 +82,7 @@ ROUTE_MATRIX: tuple[RouteCase, ...] = (
     RouteCase('POST', '/sales/', 'user', 'write', ''),
     RouteCase('GET', '/sales/export', 'user', 'file', ''),
     RouteCase('GET', '/sales/{sale_id}', 'user', 'detail', ''),
-    RouteCase('PATCH', '/sales/{sale_id}/annul', 'user', 'write', ''),
+    RouteCase('PATCH', '/sales/{sale_id}/annul', 'module:sales', 'write', "Exige el módulo RBAC 'sales' y motivo."),
     RouteCase('POST', '/session/change-password', 'user', 'write', ''),
     RouteCase('POST', '/session/forgot-password', 'public', 'write', ''),
     RouteCase('POST', '/session/login', 'public', 'write', ''),

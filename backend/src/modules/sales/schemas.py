@@ -109,6 +109,10 @@ class SaleCreateResponse(BaseModel):
     warnings: List[StockWarning]
 
 
+class SaleAnnulRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+
+
 class SaleAnnulResponse(BaseModel):
     message: str
     id: int

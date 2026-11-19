@@ -6,14 +6,21 @@ from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 from sqlmodel import Session, func, select
 
-from src.core.exceptions import BusinessRuleError, NotFoundError, ServerError
+from src.core.exceptions import (
+    BusinessRuleError,
+    DomainError,
+    NotFoundError,
+    ServerError,
+)
 from src.core.time import BOGOTA_TZ
+from src.modules.audit.service import AuditService
 from src.modules.inventory.models import InventoryMovement, MovementType
 from src.modules.products.models import Product
 from src.modules.commercial_products.models import CommercialProduct
 from src.modules.sales.models import ItemType, Sale, SaleItem, SaleStatus
 from src.modules.sales.schemas import (
     SaleAnnulResponse,
+    SaleAnnulRequest,
     SaleCreate,
     SaleCreateResponse,
     SaleListPage,
@@ -21,6 +28,7 @@ from src.modules.sales.schemas import (
     SaleResponse,
     StockWarning,
 )
+from src.modules.sales.state import ensure_annulment_window, ensure_transition
 from src.modules.users.models import User
 from src.utils.excel import (
     add_title_row,
@@ -62,8 +70,26 @@ def _sales_base_query(
 
 
 class SalesService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
+
+    def _log_movement(self, movement: InventoryMovement, user_id: int) -> None:
+        self.audit.log_action(
+            "inventory.movement_created",
+            "inventory_movement",
+            new_value={
+                "item_type": movement.item_type.value,
+                "item_id": movement.item_id,
+                "movement_type": movement.movement_type.value,
+                "quantity": movement.quantity,
+                "stock_before": movement.stock_before,
+                "stock_after": movement.stock_after,
+                "reference_type": movement.reference_type,
+                "reference_id": movement.reference_id,
+            },
+            user_id=user_id,
+        )
 
     def _get_item(self, item_type: ItemType, item_id: int):
         if item_type == ItemType.PRODUCT:
@@ -78,6 +104,14 @@ class SalesService:
 
     def _get_sale_or_404(self, sale_id: int) -> Sale:
         sale = self.session.get(Sale, sale_id)
+        if not sale or sale.deleted_at is not None:
+            raise NotFoundError("Venta no encontrada")
+        return sale
+
+    def _get_sale_for_update(self, sale_id: int) -> Sale:
+        sale = self.session.exec(
+            select(Sale).where(Sale.id == sale_id).with_for_update()
+        ).first()
         if not sale or sale.deleted_at is not None:
             raise NotFoundError("Venta no encontrada")
         return sale
@@ -137,6 +171,7 @@ class SalesService:
                     user_id=current_user.id,
                 )
                 self.session.add(movement)
+                self._log_movement(movement, current_user.id)
 
                 if product.available_quantity < product.min_stock:
                     warnings.append(
@@ -149,7 +184,28 @@ class SalesService:
                         )
                     )
 
+            self.audit.log_action(
+                "sale.created",
+                "sale",
+                resource_id=sale.id,
+                new_value={
+                    "status": sale.status.value,
+                    "notes": sale.notes,
+                    "items": [
+                        {
+                            "item_type": item_type.value,
+                            "item_id": item_id,
+                            "quantity": quantity,
+                        }
+                        for item_type, item_id, quantity, _name in validated
+                    ],
+                },
+                user_id=current_user.id,
+            )
             self.session.commit()
+        except DomainError:
+            self.session.rollback()
+            raise
         except Exception:
             self.session.rollback()
             raise ServerError("Error al registrar la venta. Intente nuevamente.")
@@ -294,11 +350,14 @@ class SalesService:
         _ = sale.items
         return sale
 
-    def annul(self, sale_id: int, current_user: User) -> SaleAnnulResponse:
-        sale = self._get_sale_or_404(sale_id)
-        if sale.status != SaleStatus.COMPLETED:
-            raise BusinessRuleError("La venta ya fue anulada.")
+    def annul(
+        self, sale_id: int, current_user: User, reason: str
+    ) -> SaleAnnulResponse:
+        sale = self._get_sale_for_update(sale_id)
+        ensure_transition(sale.status, SaleStatus.ANNULLED)
+        ensure_annulment_window(sale.sale_date)
 
+        old_status = sale.status.value
         items = sale.items
         try:
             for sale_item in items:
@@ -319,12 +378,35 @@ class SalesService:
                     user_id=current_user.id,
                 )
                 self.session.add(movement)
+                self._log_movement(movement, current_user.id)
 
             sale.status = SaleStatus.ANNULLED
             sale.updated_at = datetime.now(BOGOTA_TZ)
             sale.updated_by = current_user.id
             self.session.add(sale)
+            self.audit.log_action(
+                "sale.annulled",
+                "sale",
+                resource_id=sale.id,
+                old_value={"status": old_status},
+                new_value={
+                    "status": sale.status.value,
+                    "reason": reason,
+                    "restored_items": [
+                        {
+                            "item_type": item.item_type.value,
+                            "item_id": item.item_id,
+                            "quantity": item.quantity,
+                        }
+                        for item in items
+                    ],
+                },
+                user_id=current_user.id,
+            )
             self.session.commit()
+        except DomainError:
+            self.session.rollback()
+            raise
         except Exception:
             self.session.rollback()
             raise ServerError("Error al anular la venta. Intente nuevamente.")
