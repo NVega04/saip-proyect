@@ -7,8 +7,11 @@ import bcrypt
 import jwt
 
 from src.core.config import settings
+from src.core.password import password_errors
 from src.core.time import BOGOTA_TZ
 
+# Sin valor por defecto: ``Settings.jwt_secret`` es obligatorio y la
+# importación falla si JWT_SECRET no está configurado (ver src.core.config).
 JWT_SECRET = settings.jwt_secret
 JWT_ALGORITHM = settings.jwt_algorithm
 
@@ -30,15 +33,24 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 
+TEMP_PASSWORD_ALPHABET = string.ascii_letters + string.digits + "!@#$%^*-_?"
+TEMP_PASSWORD_LENGTH = 14
+
+
 def generate_temp_password() -> str:
+    """Genera una contraseña temporal que cumple la política de la Fase 2.
+
+    Se generan caracteres de todas las clases requeridas y se repite el
+    proceso hasta que el validador compartido no reporte errores. El valor
+    nunca se escribe en logs: solo se envía por correo al usuario.
     """
-    Genera una password temporal legible.
-    Formato: Temp@ + 4 dígitos + 2 letras mayúsculas
-    Ejemplo: Temp@4821XK
-    """
-    digits = "".join(secrets.choice(string.digits) for _ in range(4))
-    letters = "".join(secrets.choice(string.ascii_uppercase) for _ in range(2))
-    return f"Temp@{digits}{letters}"
+    while True:
+        candidate = "".join(
+            secrets.choice(TEMP_PASSWORD_ALPHABET)
+            for _ in range(TEMP_PASSWORD_LENGTH)
+        )
+        if not password_errors(candidate):
+            return candidate
 
 
 def create_session_token() -> str:

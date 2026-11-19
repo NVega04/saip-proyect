@@ -4,7 +4,10 @@ import { apiFetch, getMe, UserProfile } from "../../utils/api";
 import "./Profilemodal.css";
 import DeleteAccountModal from "../deleteaccountmodal/DeleteAccountModal";
 import PasswordStrengthBar from "../passwordstrengthbar/PasswordStrengthBar";
-import { getPasswordStrength } from "../../utils/passwordStrength";
+import {
+  getPasswordStrength,
+  PASSWORD_POLICY_MESSAGE,
+} from "../../utils/passwordStrength";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 interface FormState {
@@ -347,8 +350,8 @@ function ChangePasswordModal({
     if (form.new_password !== form.confirm_password) {
       setError("Las contraseñas nuevas no coinciden."); return;
     }
-    if (form.new_password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres."); return;
+    if (!isStrong) {
+      setError(PASSWORD_POLICY_MESSAGE); return;
     }
     setSaving(true);
     try {

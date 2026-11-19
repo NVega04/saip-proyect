@@ -337,7 +337,29 @@ Schemas usados directamente por más endpoints (los 12 primeros; los schemas ani
 | `session_token` | `session_token` | Solo `POST /session/logout`. **No** está en `allow_headers` de CORS: un navegador no puede enviarlo en un preflight. |
 | `X-Confirm-Password` | `X-Confirm-Password` | Solo `DELETE /users/me`: confirma la contraseña antes de la baja lógica. |
 
-### 5.2 Códigos de error
+### 5.2 CORS (Fase 2)
+
+Los orígenes ya no están hardcodeados: se leen de `CORS_ORIGINS` (CSV) en
+`src.core.config`. La configuración de referencia es
+`http://localhost:5173,https://saip.lat`. Se normalizan quitando espacios y
+barras finales, se deduplican y se rechazan comodines o esquemas distintos de
+`http://`/`https://`.
+
+`allow_methods` = `GET, POST, PUT, PATCH, DELETE, OPTIONS`;
+`allow_headers` = `Content-Type, session-token, X-Confirm-Password`;
+`allow_credentials = true`.
+
+Preflight verificado contra la app real:
+
+| Origen | Resultado |
+|---|---|
+| `http://localhost:5173` | 200, ACAO reflejado |
+| `https://saip.lat` | 200, ACAO reflejado |
+| `https://saip.lat/` | 400 (barra final rechazada) |
+| `exp://*` | 400 |
+| `http://161.35.6.77:5173` | 400 |
+
+### 5.3 Códigos de error
 
 | Excepción | HTTP |
 |---|---:|

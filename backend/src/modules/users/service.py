@@ -11,6 +11,7 @@ from src.core.exceptions import (
     PermissionDeniedError,
     UnauthorizedError,
 )
+from src.core.password import validate_password
 from src.core.security import (
     generate_temp_password,
     hash_password,
@@ -43,10 +44,9 @@ class UsersService:
             raise ConflictError(f"El email '{data.email}' ya está registrado.")
 
         temp_password = generate_temp_password()
+        validate_password(temp_password)
         hashed = hash_password(temp_password)
-        logger.warning(
-            f"[SAIP] Password temporal generada para '{data.email}': {temp_password}"
-        )
+        logger.info("Se generó la contraseña temporal para la cuenta '%s'.", data.email)
 
         new_user = User(
             first_name=data.first_name,
@@ -64,9 +64,9 @@ class UsersService:
 
         try:
             send_welcome_email(new_user.email, new_user.first_name, temp_password)
-        except Exception as e:
+        except Exception:
             logger.warning(
-                f"[EMAIL ERROR] No se pudo enviar bienvenida a {new_user.email}: {e}"
+                "No se pudo enviar la bienvenida a %s.", new_user.email
             )
 
         return new_user

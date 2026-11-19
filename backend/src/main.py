@@ -7,6 +7,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from src.core.config import settings
 from src.core.exceptions import DomainError
 from src.modules.auth.router import router as auth_router
 from src.modules.commercial_products.categories_router import (
@@ -44,17 +45,9 @@ app = FastAPI(
     title="SAIP - Sistema administrativo integral de productos", version="1.0.0"
 )
 
-ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8081",
-    "http://161.35.6.77:5173",
-    "https://saip.lat/",
-    "exp://*",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "session-token", "X-Confirm-Password"],

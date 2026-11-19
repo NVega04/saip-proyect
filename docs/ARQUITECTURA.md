@@ -137,7 +137,10 @@ con `upgrade`, `downgrade` y `alembic check` sin cambios pendientes.
 
 ## Pendientes de fases posteriores
 
-- Fases 2 a 6: seguridad, reglas de negocio, testing y documentación ampliada.
+- Fases 3 a 6: seguridad P1, reglas de negocio, testing y documentación ampliada.
 
 Ya verificados en Fase 0/1: tests smoke y `conftest.py`, `alembic check` sin
 cambios (tras la revisión `756185c644ac`), compose dev/prod y healthchecks.
+Ya verificados en Fase 2: JWT sin fallback, CORS por entorno, `echo` desactivo,
+política de contraseñas compartida con el frontend y enlaces de correo
+configurables (detalle en `docs/FASE-2.md`).

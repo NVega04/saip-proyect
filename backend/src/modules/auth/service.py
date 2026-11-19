@@ -1,3 +1,4 @@
+import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta
@@ -14,6 +15,7 @@ from src.core.exceptions import (
     PermissionDeniedError,
     UnauthorizedError,
 )
+from src.core.password import validate_password
 from src.core.security import (
     create_jwt,
     decode_jwt,
@@ -30,6 +32,8 @@ from src.modules.auth.schemas import (
     ResetPasswordRequest,
 )
 from src.modules.users.models import PasswordReset, SessionApp, User
+
+logger = logging.getLogger(__name__)
 
 MAX_LOGIN_ATTEMPTS = 3
 LOCK_DURATION_MINUTES = 3
@@ -212,11 +216,11 @@ class AuthService:
         self.session.add(reset_entry)
         self.session.commit()
 
-        reset_link = f"{settings.frontend_url}/reset-password?token={raw_token}"
+        reset_link = settings.frontend_link(f"reset-password?token={raw_token}")
         try:
             send_reset_email(user.email, reset_link)
-        except Exception as e:
-            print(f"[EMAIL ERROR] No se pudo enviar a {user.email}: {e}")
+        except Exception:
+            logger.warning("No se pudo enviar el correo de reseteo a %s.", user.email)
 
         return {
             "message": "Si el correo está registrado, recibirás instrucciones."
@@ -239,6 +243,7 @@ class AuthService:
             raise BusinessRuleError("El token ha expirado.")
 
         user = reset_entry.user
+        validate_password(body.new_password)
         user.password_hash = hash_password(body.new_password)
         user.updated_at = datetime.now(BOGOTA_TZ)
         self.session.add(user)
@@ -268,6 +273,7 @@ class AuthService:
         ):
             raise BusinessRuleError("La contraseña actual es incorrecta.")
 
+        validate_password(body.new_password)
         current_user.password_hash = hash_password(body.new_password)
         current_user.updated_at = datetime.now(BOGOTA_TZ)
         self.session.add(current_user)
