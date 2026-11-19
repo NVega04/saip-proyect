@@ -11,20 +11,21 @@
 
 | Dato | Valor |
 |---|---|
-| Fecha de generación | 2026-11-17 |
-| Rama | `fase-0-preparacion` (sobre `fase-1-arquitectura`) |
+| Fecha de generación | 2026-11-17 (actualizado en Fase 4) |
+| Rama | `fase-4-reglas-trazabilidad` |
 | Base del refactor | `0f86777` (`master`, previo a la Fase 1) |
 | Versión de la app | 1.0.0 |
-| Endpoints | 93 |
-| Tablas | 21 |
-| Schemas propios | 104 |
-| Schemas usados directamente por operaciones | 63 |
+| Endpoints | 94 |
+| Tablas | 22 |
+| Schemas propios | 107 |
+| Schemas usados directamente por operaciones | 66 |
 | Título OpenAPI | SAIP - Sistema administrativo integral de productos |
 
-Distribución por autenticación: **17 públicos**, **73 con sesión de
-usuario**, **2 con módulo RBAC** (`inventory`) y **1 solo admin**.
+Distribución por autenticación: **17 públicos**, **71 con sesión de
+usuario**, **3 con módulo RBAC** (`inventory` ×2, `sales` ×1) y **2 solo admin**
+(`role-modules` y `audit`).
 
-## 2. Superficie HTTP (93 endpoints)
+## 2. Superficie HTTP (94 endpoints)
 
 Leyenda de autenticación:
 
@@ -32,6 +33,7 @@ Leyenda de autenticación:
 - **usuario**: exige el header `session-token` con un JWT de una sesión activa.
 - **admin**: además exige `User.is_admin = true`.
 - **módulo `inventory`**: exige que el rol tenga asignado el módulo `inventory` (los admin lo saltan).
+- **módulo `sales`**: exige que el rol tenga asignado el módulo `sales` (los admin lo saltan).
 
 Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 `StreamingResponse` aparecen sin schema porque FastAPI no las describe.
@@ -40,6 +42,7 @@ Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 
 | Tag | Endpoints | Públicos | Usuario | Admin | Módulo |
 |---|---:|---:|---:|---:|---:|
+| Audit | 1 | 0 | 0 | 1 | 0 |
 | CommercialProducts | 7 | 1 | 6 | 0 | 0 |
 | Health | 1 | 1 | 0 | 0 | 0 |
 | Inventory | 3 | 1 | 0 | 0 | 2 |
@@ -51,7 +54,7 @@ Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 | Reports | 1 | 0 | 1 | 0 | 0 |
 | Role Modules | 3 | 0 | 2 | 1 | 0 |
 | Roles | 4 | 1 | 3 | 0 | 0 |
-| Sales | 5 | 0 | 5 | 0 | 0 |
+| Sales | 5 | 0 | 4 | 0 | 1 |
 | Session | 6 | 3 | 3 | 0 | 0 |
 | Stats | 1 | 0 | 1 | 0 | 0 |
 | Supplies | 7 | 1 | 6 | 0 | 0 |
@@ -60,6 +63,12 @@ Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 | Users | 6 | 1 | 5 | 0 | 0 |
 
 ### 2.2 Detalle
+
+#### Audit (1)
+
+| Método | Ruta | Auth | Código | Respuesta | Notas |
+|---|---|---:|---|---|---|
+| GET | `/audit/` | admin | 200 | AuditLogPage | Consulta paginada; filtros `action` y `user_id`. |
 
 #### CommercialProducts (7)
 
@@ -182,7 +191,7 @@ Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 | POST | `/sales/` | usuario | 201 | SaleCreateResponse |  |
 | GET | `/sales/export` | usuario | 200 | — | Descarga Excel; no declara schema en OpenAPI. |
 | GET | `/sales/{sale_id}` | usuario | 200 | SaleResponse |  |
-| PATCH | `/sales/{sale_id}/annul` | usuario | 200 | SaleAnnulResponse |  |
+| PATCH | `/sales/{sale_id}/annul` | módulo `sales` | 200 | SaleAnnulResponse | Body `SaleAnnulRequest.reason` (3–500 chars); máximo 24 h. |
 
 #### Session (6)
 
@@ -244,13 +253,14 @@ Código = código HTTP declarado por el endpoint. Las descargas y respuestas
 | DELETE | `/users/{user_id}` | usuario | 200 | DeleteResponseUser |  |
 | PUT | `/users/{user_id}` | usuario | 200 | UserUpdateResponse |  |
 
-## 3. Modelos de datos (21 tablas)
+## 3. Modelos de datos (22 tablas)
 
 Todos los modelos viven en `src/modules/<dominio>/models.py` y se registran
 en `SQLModel.metadata` desde `src/models_registry.py`.
 
 | Módulo | Clase | Tabla | Columnas | PK | Soft delete | FKs |
 |---|---|---|---:|---|---|---|
+| `audit` | `AuditLog` | `audit_log` | 9 | id | no | `users.id` |
 | `commercial_products` | `CommercialProduct` | `commercial_products` | 19 | id | sí | `product_categories.id`, `providers.id`, `units.id`, `users.id` |
 | `commercial_products` | `ProductCategory` | `product_categories` | 11 | id | sí | `users.id` |
 | `inventory` | `InventoryMovement` | `inventory_movements` | 12 | id | no | `users.id` |
@@ -275,7 +285,7 @@ en `SQLModel.metadata` desde `src/models_registry.py`.
 
 Notas de modelado:
 
-- **Soft delete**: 13 de las 21 tablas tienen `deleted_at` y `deleted_by`. Las 8 restantes son de unión o de historial: `sessions`, `password_resets`, `role_modules`, `modules`, `recipe_ingredients`, `sale_items`, `inventory_movements` y `production_order_snapshots`.
+- **Soft delete**: 13 de las 22 tablas tienen `deleted_at` y `deleted_by`. Las 9 restantes son de unión o de historial: `audit_log`, `sessions`, `password_resets`, `role_modules`, `modules`, `recipe_ingredients`, `sale_items`, `inventory_movements` y `production_order_snapshots`.
 - **Ciclo de FKs** entre `users.role_id → roles.id` y `roles.updated_by/deleted_by → users.id`: por eso el esquema se crea con `SET FOREIGN_KEY_CHECKS=0` en las pruebas y en Alembic se usan FKs diferidas (`use_alter=True`).
 - **Tokens públicos**: casi todas las tablas de negocio exponen `token` UUID además del `id` autoincremental; la API sigue usando `id` en las rutas.
 
@@ -283,6 +293,7 @@ Notas de modelado:
 
 | Módulo | Schemas | Nombres |
 |---|---:|---|
+| `audit` | 2 | `AuditLogResponse`, `AuditLogPage` |
 | `auth` | 5 | `LoginRequest`, `LoginResponse`, `ForgotPasswordRequest`, `ResetPasswordRequest`, `ChangePasswordRequest` |
 | `commercial_products` | 11 | `ProductCategoryBasic`, `CommercialProductBasic`, `ProductCategoryCreate`, `ProductCategoryUpdate`, `ProductCategoryResponse`, `DeleteResponseProductCategory`, `ProviderBasic`, `CommercialProductCreate`, `CommercialProductUpdate`, `CommercialProductResponse`, `DeleteResponseCommercialProduct` |
 | `health` | 0 | — |
@@ -293,14 +304,14 @@ Notas de modelado:
 | `recipes` | 6 | `RecipeIngredientCreate`, `RecipeIngredientResponse`, `RecipeCreate`, `RecipeUpdate`, `RecipeResponse`, `DeleteResponseRecipe` |
 | `reports` | 0 | — |
 | `roles` | 7 | `RoleCreate`, `RoleResponse`, `RoleUpdate`, `RolePublic`, `ModuleResponse`, `RoleModuleAssign`, `RoleModuleResponse` |
-| `sales` | 10 | `UserBasic`, `SaleItemCreate`, `SaleCreate`, `SaleItemResponse`, `SaleResponse`, `SaleListResponse`, `StockWarning`, `SaleListPage`, `SaleCreateResponse`, `SaleAnnulResponse` |
+| `sales` | 11 | `UserBasic`, `SaleItemCreate`, `SaleCreate`, `SaleItemResponse`, `SaleResponse`, `SaleListResponse`, `StockWarning`, `SaleListPage`, `SaleCreateResponse`, `SaleAnnulRequest`, `SaleAnnulResponse` |
 | `stats` | 22 | `DashboardKpis`, `ConsumptionPoint`, `StockLevelPoint`, `LowStockSupplyItem`, `ExpiringSupplyItem`, `SalesKpis`, `DailySalesPoint`, `TopSaleItem`, `ProductionByStatusPoint`, `DailyProductionPoint`, `TopRecipePoint`, `SalesSection`, `ProductionSection`, `ProductsKpis`, `ProductStockPoint`, `LowStockProduct`, `ProductProductionPoint`, `CommercialStockPoint`, `CategoryCountPoint`, `StockHealthPoint`, `ProductsSection`, `DashboardStatsResponse` |
 | `supplies` | 10 | `SupplyBasic`, `SupplyCategoryBasic`, `SupplyCategoryCreate`, `SupplyCategoryUpdate`, `SupplyCategoryResponse`, `DeleteResponseSupplyCategory`, `SupplyCreate`, `SupplyUpdate`, `SupplyResponse`, `DeleteResponseSupply` |
 | `units` | 4 | `UnitCreate`, `UnitUpdate`, `UnitResponse`, `UnitBasic` |
 | `users` | 6 | `RoleBasic`, `UserCreate`, `UserResponse`, `DeleteResponseUser`, `UserUpdate`, `UserUpdateResponse` |
 | `core` | 2 | `BulkRowError`, `BulkImportResult` |
 
-Total: **104 schemas** definidos a mano (los `HTTPValidationError` y demás schemas automáticos de FastAPI no se cuentan).
+Total: **107 schemas** definidos a mano (los `HTTPValidationError` y demás schemas automáticos de FastAPI no se cuentan).
 
 Schemas usados directamente por más endpoints (los 12 primeros; los schemas anidados dentro de otro schema no cuentan aquí):
 
@@ -424,10 +435,10 @@ El contrato se congela en `backend/tests/snapshots/openapi_baseline.json`:
 
 | Dato | Valor |
 |---|---|
-| Origen | `app.openapi()` del commit `0f86777` (`master`, antes de la Fase 1) |
-| Paths | 59 |
-| Schemas | 120 |
-| SHA-256 | `3f2bc1bef68fca4138e88d4abd996c7fafbd02958e1f08f948a6eeb3f1295902` |
+| Origen | `app.openapi()` actual, actualizado en Fase 4 con aprobación explícita |
+| Paths | 60 |
+| Schemas | 123 |
+| SHA-256 | `d5b5f24dcf9683f3a1b5d74bac9a4659cba801f519233407fbf06ced6350607a` |
 | Test | `backend/tests/test_openapi_snapshot.py` |
 
 El test compara paths, métodos, parámetros, request bodies, respuestas y
@@ -461,7 +472,13 @@ faltantes y 0 sobrantes frente a la metadata, `alembic check` terminó con
 `No new upgrade operations detected.`, y el ciclo
 `downgrade -1 → upgrade head` eliminó y restauró exactamente las 6
 restricciones. La misma revisión se aplicó a la base de desarrollo y la suite
-completa sigue en verde (227 tests).
+completa sigue en verde (227 tests en ese momento).
+
+La Fase 4 agregó la revisión `898807c7b86f` (hija de `756185c644ac`) para crear
+`audit_log` con su FK a `users.id` y 4 índices. El resultado actual es
+**22 tablas + `alembic_version` = 23**, con `alembic check` en
+`No new upgrade operations detected.` y la suite completa en verde
+(**273 tests**).
 
 ## 9. Regla de mantenimiento
 

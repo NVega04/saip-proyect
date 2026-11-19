@@ -15,9 +15,10 @@ backend/
 │   └── env.py                  # Importa src.models_registry
 ├── src/
 │   ├── main.py                 # Crea la app, CORS, rate limit y routers
-│   ├── models_registry.py      # Registra los 21 modelos en SQLModel.metadata
+│   ├── models_registry.py      # Registra los 22 modelos en SQLModel.metadata
 │   ├── core/
 │   │   ├── config.py           # Settings centralizados
+│   │   ├── audit_context.py    # IP de origen para auditoría
 │   │   ├── database.py         # engine y get_session
 │   │   ├── dependencies.py     # get_current_user, require_module, require_admin
 │   │   ├── email.py            # Envío de correos
@@ -26,6 +27,7 @@ backend/
 │   │   ├── security.py         # JWT, hashing, passwords temporales
 │   │   └── time.py             # Zona horaria de Bogotá
 │   ├── modules/
+│   │   ├── audit/
 │   │   ├── auth/
 │   │   ├── commercial_products/
 │   │   ├── health/
@@ -36,7 +38,7 @@ backend/
 │   │   ├── recipes/
 │   │   ├── reports/
 │   │   ├── roles/
-│   │   ├── sales/
+│   │   ├── sales/              # Incluye state.py (transiciones y 24 h)
 │   │   ├── stats/
 │   │   ├── supplies/
 │   │   ├── units/
@@ -44,6 +46,8 @@ backend/
 │   ├── bulk/
 │   └── utils/
 └── tests/
+    ├── integration/
+    ├── unit/
     └── snapshots/openapi_baseline.json
 ```
 
@@ -81,6 +85,7 @@ estado, bloqueos y transacciones viven en `service.py`.
 
 | Módulo | Responsabilidad | Rutas principales |
 |---|---|---|
+| `audit` | Registro inmutable y consulta de acciones críticas | `/audit/` |
 | `auth` | Login, logout, recuperación y cambio de contraseña | `/session/*` |
 | `users` | Usuarios, cuenta propia y borrado lógico | `/users/*` |
 | `roles` | Roles, módulos y permisos RBAC | `/roles/*`, `/role-modules/*`, `/modules/*` |
