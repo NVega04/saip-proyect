@@ -5,7 +5,10 @@ import "../login/login.css";
 import "./RecoverPassword.css";
 import { useAlert } from "../../context/AlertContext";
 import PasswordStrengthBar from "../../components/passwordstrengthbar/PasswordStrengthBar";
-import { getPasswordStrength } from "../../utils/passwordStrength";
+import {
+  getPasswordStrength,
+  PASSWORD_POLICY_MESSAGE,
+} from "../../utils/passwordStrength";
 import { apiFetch } from "../../utils/api";
 
 export default function RecoverPassword() {
@@ -174,14 +177,9 @@ function ResetForm({ token }: { token: string }) {
         showAlert("warning", "Las contraseñas no coinciden.");
         return;
       }
-      if (newPassword.length < 8) {
-        setError("La contraseña debe tener al menos 8 caracteres.");
-        showAlert("warning", "La contraseña debe tener al menos 8 caracteres.");
-        return;
-      }
       if (!isStrong) {
-        setError("La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
-        showAlert("warning", "La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
+        setError(PASSWORD_POLICY_MESSAGE);
+        showAlert("warning", PASSWORD_POLICY_MESSAGE);
         return;
       }
         setError(null);
@@ -251,7 +249,7 @@ function ResetForm({ token }: { token: string }) {
               id="new-password"
               type={showNew ? "text" : "password"}
               className="field-input has-icon"
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Mínimo 12 caracteres"
               value={newPassword}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
               autoComplete="new-password"

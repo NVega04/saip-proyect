@@ -1,14 +1,15 @@
 """Configuración centralizada de la aplicación.
 
-En esta fase solo se centraliza la lectura de variables de entorno; los valores
-por defecto se mantienen idénticos a los que tenía el código previo. El
-endurecimiento de valores obligatorios corresponde a la Fase 2.
+Los valores de seguridad son obligatorios o tienen valores seguros por defecto:
+``JWT_SECRET`` y ``FRONTEND_URL`` deben venir del entorno, ``SQLALCHEMY_ECHO``
+está desactivado y ``CORS_ORIGINS`` se lee como lista separada por comas.
 """
 
-from typing import Optional
+from typing import Annotated, Optional
 
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 load_dotenv()
 
@@ -25,12 +26,15 @@ class Settings(BaseSettings):
     db_host: Optional[str] = None
     db_port: Optional[str] = None
     db_name: Optional[str] = None
-    sqlalchemy_echo: bool = True
+    sqlalchemy_echo: bool = False
 
     # Seguridad / sesiones
-    jwt_secret: str = "cambiar-en-produccion"
+    jwt_secret: str
     jwt_algorithm: str = "HS256"
     session_duration_hours: int = 8
+
+    # Orígenes permitidos por CORS (CSV en la variable de entorno)
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
 
     # Correo
     mail_host: Optional[str] = None
@@ -40,7 +44,43 @@ class Settings(BaseSettings):
     mail_from: Optional[str] = None
 
     # Frontend
-    frontend_url: Optional[str] = None
+    frontend_url: str
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def validate_jwt_secret(cls, value: str) -> str:
+        secret = value.strip()
+        if len(secret) < 32:
+            raise ValueError("JWT_SECRET debe tener al menos 32 caracteres.")
+        return secret
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value):
+        if isinstance(value, str):
+            value = value.split(",")
+        origins = [
+            str(origin).strip().rstrip("/")
+            for origin in value
+            if str(origin).strip()
+        ]
+        if not origins:
+            raise ValueError("CORS_ORIGINS debe contener al menos un origen.")
+        for origin in origins:
+            if (
+                "*" in origin
+                or not origin.startswith(("http://", "https://"))
+            ):
+                raise ValueError(f"Origen CORS inválido: {origin!r}")
+        return list(dict.fromkeys(origins))
+
+    @field_validator("frontend_url")
+    @classmethod
+    def validate_frontend_url(cls, value: str) -> str:
+        url = value.strip().rstrip("/")
+        if not url.startswith(("http://", "https://")):
+            raise ValueError("FRONTEND_URL debe ser una URL http:// o https://")
+        return url
 
     @property
     def mysql_url(self) -> str:
@@ -48,6 +88,10 @@ class Settings(BaseSettings):
             f"mysql+pymysql://{self.db_user}:{self.db_password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
+
+    def frontend_link(self, path: str) -> str:
+        """Construye un enlace al frontend sin duplicar barras ni hardcodearlo."""
+        return f"{self.frontend_url}/{path.lstrip('/')}"
 
 
 settings = Settings()
