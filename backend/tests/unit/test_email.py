@@ -9,7 +9,7 @@ import pytest
 from src.core import email as email_module
 from src.core.config import settings
 
-BACKEND_DIR = Path(__file__).resolve().parents[1]
+BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 SENT_MESSAGES = []
 

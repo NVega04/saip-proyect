@@ -8,7 +8,7 @@ import jwt
 from src.core import security
 from src.core.config import settings
 
-BACKEND_DIR = Path(__file__).resolve().parents[1]
+BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
 def _expiry() -> datetime:
