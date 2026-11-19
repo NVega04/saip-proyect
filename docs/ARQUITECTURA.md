@@ -120,7 +120,10 @@ siguen usando `HTTPException` porque forman parte de la capa de transporte.
 
 `src/models_registry.py` importa todos los modelos para que
 `SQLModel.metadata` los registre. `alembic/env.py` importa ese módulo y usa
-`src.core.database.mysql_url`. No se modificó el esquema de la base de datos.
+`src.core.database.mysql_url`. La Fase 1 no modificó el esquema; la única
+migración posterior es `756185c644ac`, que agrega las 6 FKs de auditoría que
+faltaban en las migraciones históricas para igualar la metadata. Está validada
+con `upgrade`, `downgrade` y `alembic check` sin cambios pendientes.
 
 ## Compatibilidad verificada
 
@@ -134,7 +137,7 @@ siguen usando `HTTPException` porque forman parte de la capa de transporte.
 
 ## Pendientes de fases posteriores
 
-- Fase 0: tests smoke, `conftest.py` y `docs/INVENTARIO.md`.
-- Verificar `alembic revision --autogenerate` sin cambios.
-- Verificar Docker dev/prod y healthchecks.
 - Fases 2 a 6: seguridad, reglas de negocio, testing y documentación ampliada.
+
+Ya verificados en Fase 0/1: tests smoke y `conftest.py`, `alembic check` sin
+cambios (tras la revisión `756185c644ac`), compose dev/prod y healthchecks.

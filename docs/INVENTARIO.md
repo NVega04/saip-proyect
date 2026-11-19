@@ -413,12 +413,12 @@ schemas; ignora solo `servers` (volátil según el host). Un cambio de
 contrato obliga a actualizar el snapshot con aprobación explícita. Ver
 `backend/tests/snapshots/README.md`.
 
-## 8. Deriva de Alembic (preexistente)
+## 8. Deriva de Alembic (corregida)
 
 Se comparó una base creada solo con `alembic upgrade head` contra
-`SQLModel.metadata`. Resultado: **21 tablas + `alembic_version` = 22**, sin
-tablas faltantes, pero con **6 foreign keys que existen en los modelos y no
-en las migraciones**:
+`SQLModel.metadata`. Resultado inicial: **21 tablas + `alembic_version` = 22**,
+sin tablas faltantes, pero con **6 foreign keys presentes en los modelos y
+ausentes en las migraciones**:
 
 | Tabla | Columna | Referencia |
 |---|---|---|
@@ -429,11 +429,17 @@ en las migraciones**:
 | `sales` | `deleted_by` | `users.id` |
 | `sales` | `updated_by` | `users.id` |
 
-Consecuencia: una base creada con migraciones no tiene esas restricciones de
-integridad; una base creada con `create_db_and_tables()` (el arranque actual)
-sí. Es deuda previa a la Fase 0 y no se corrige aquí porque implicaría una
-migración de esquema. Debe resolverse en una fase que autorice cambios de
-esquema.
+La deriva se cerró en la rama `fase-1-cierre-alembic` con la revisión
+`756185c644ac` (hija de `cd4e9f97101f`). Antes de escribirla se verificó que
+las 6 columnas no tenían filas huérfanas. La migración usa `use_alter=True` y
+no modifica revisiones ya aplicadas.
+
+Validación realizada en una base desechable: `upgrade head` dejó 0 FKs
+faltantes y 0 sobrantes frente a la metadata, `alembic check` terminó con
+`No new upgrade operations detected.`, y el ciclo
+`downgrade -1 → upgrade head` eliminó y restauró exactamente las 6
+restricciones. La misma revisión se aplicó a la base de desarrollo y la suite
+completa sigue en verde (227 tests).
 
 ## 9. Regla de mantenimiento
 

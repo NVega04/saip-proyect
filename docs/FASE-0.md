@@ -150,10 +150,12 @@ nombre, definir `TEST_DB_NAME` (debe terminar en `_test` y ser distinto de
 3. **`POST /session/logout` usa `session_token` (guion bajo).** Además ese
    header no está en `allow_headers` de CORS. Se documenta; no se corrige en
    esta fase.
-4. **Deriva de Alembic.** Una base creada solo con `alembic upgrade head`
-   carece de 6 FKs que sí están en los modelos (`commercial_products`,
-   `product_categories` y `sales`: `updated_by` y `deleted_by`). Es deuda
-   previa; requiere una migración y una fase que autorice cambios de esquema.
+4. **Deriva de Alembic (cerrada).** Una base creada solo con
+   `alembic upgrade head` carecía de 6 FKs que sí están en los modelos
+   (`commercial_products`, `product_categories` y `sales`: `updated_by` y
+   `deleted_by`). Se corrigió en `fase-1-cierre-alembic` con la revisión
+   `756185c644ac`, previa verificación de ausencia de filas huérfanas y con
+   validación de upgrade/downgrade y `alembic check` limpio.
 5. **`supply` no es un `item_type` válido en ventas.** El enum lo incluye,
    pero el servicio no lo resuelve y responde 404. Se documenta como
    comportamiento actual.
@@ -164,7 +166,6 @@ nombre, definir `TEST_DB_NAME` (debe terminar en `_test` y ser distinto de
 
 ## Deuda pendiente
 
-- Corregir la deriva de Alembic en una fase con cambios de esquema.
 - Proteger `POST /users/` y `POST /roles/` en la fase de seguridad.
 - Unificar el header de logout (`session_token` → `session-token`) y agregarlo
   a CORS.
