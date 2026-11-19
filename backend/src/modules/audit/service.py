@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Mapping, Optional
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from src.modules.audit.models import AuditLog
 from src.modules.audit.schemas import AuditLogPage, AuditLogResponse
@@ -98,7 +98,7 @@ class AuditReadService:
 
         total = len(self.session.exec(query).all())
         entries = self.session.exec(
-            query.order_by(AuditLog.timestamp.desc(), AuditLog.id.desc())
+            query.order_by(col(AuditLog.timestamp).desc(), col(AuditLog.id).desc())
             .offset((page - 1) * limit)
             .limit(limit)
         ).all()

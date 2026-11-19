@@ -10,7 +10,6 @@ from src.core.config import settings
 from src.core.email import send_reset_email
 from src.core.exceptions import (
     BusinessRuleError,
-    ConflictError,
     LockedError,
     NotFoundError,
     PermissionDeniedError,
