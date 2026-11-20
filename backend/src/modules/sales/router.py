@@ -3,10 +3,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 
-from src.core.dependencies import get_current_user
+from src.core.dependencies import get_current_user, require_module
 from src.modules.sales.dependencies import get_sales_service
 from src.modules.sales.models import ItemType, SaleStatus
 from src.modules.sales.schemas import (
+    SaleAnnulRequest,
     SaleAnnulResponse,
     SaleCreate,
     SaleCreateResponse,
@@ -85,7 +86,8 @@ def get_sale(
 )
 def annul_sale(
     sale_id: int,
+    data: SaleAnnulRequest,
     service: SalesService = Depends(get_sales_service),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_module("sales")),
 ):
-    return service.annul(sale_id, current_user)
+    return service.annul(sale_id, current_user, data.reason)

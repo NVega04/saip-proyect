@@ -1,9 +1,9 @@
 """El contrato OpenAPI no debe cambiar sin una decisión explícita.
 
 Convierte en test la comparación que antes vivía en
-``tests/check_openapi_snapshot.py``. El baseline se generó a partir del código
-de ``master`` (``0f86777``), antes del refactor de la Fase 1, y está verificado
-contra la aplicación actual.
+``tests/check_openapi_snapshot.py``. El baseline se generó originalmente desde
+``master`` (``0f86777``) y se actualizó en la Fase 4 para reflejar, con
+aprobación explícita, el endpoint de auditoría y el motivo de anulación.
 """
 
 import json
@@ -83,7 +83,7 @@ def _openapi_differences(
     return differences
 
 
-def test_openapi_matches_the_phase_zero_baseline():
+def test_openapi_matches_the_approved_baseline():
     differences = _openapi_differences(_load_baseline(), app.openapi())
 
     formatted = "\n".join(
@@ -99,5 +99,5 @@ def test_openapi_matches_the_phase_zero_baseline():
 def test_baseline_has_the_expected_shape():
     baseline = _load_baseline()
 
-    assert len(baseline["paths"]) == 59
-    assert len(baseline["components"]["schemas"]) == 120
+    assert len(baseline["paths"]) == 60
+    assert len(baseline["components"]["schemas"]) == 123

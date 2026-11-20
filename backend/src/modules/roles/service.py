@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlmodel import Session, select
 
@@ -8,14 +9,25 @@ from src.core.exceptions import (
     NotFoundError,
     PermissionDeniedError,
 )
+from src.modules.audit.service import AuditService
 from src.modules.roles.models import Module, Role, RoleModule, RoleStatus
 from src.modules.roles.schemas import RoleCreate, RoleModuleAssign, RoleUpdate
 from src.modules.users.models import User
 
 
+def _role_snapshot(role: Role) -> dict:
+    return {
+        "id": role.id,
+        "name": role.name,
+        "description": role.description,
+        "status": role.status.value if role.status else None,
+    }
+
+
 class RolesService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
 
     def create_role(self, data: RoleCreate) -> Role:
         existing = self.session.exec(
@@ -32,6 +44,14 @@ class RolesService:
         self.session.add(role)
         self.session.commit()
         self.session.refresh(role)
+        self.audit.log_action(
+            "role.created",
+            "role",
+            resource_id=role.id,
+            new_value=_role_snapshot(role),
+            user_id=None,
+            commit=True,
+        )
         return role
 
     def update_role(self, role_id: int, data: RoleUpdate, current_user: User) -> Role:
@@ -54,6 +74,7 @@ class RolesService:
             if existing:
                 raise ConflictError(f"Ya exixte un rol con el nombre '{data.name}'")
 
+        old_snapshot = _role_snapshot(role)
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(role, field, value)
 
@@ -61,6 +82,14 @@ class RolesService:
         role.updated_by = current_user.id
 
         self.session.add(role)
+        self.audit.log_action(
+            "role.updated",
+            "role",
+            resource_id=role.id,
+            old_value=old_snapshot,
+            new_value=_role_snapshot(role),
+            user_id=current_user.id,
+        )
         self.session.commit()
         self.session.refresh(role)
         return role
@@ -78,11 +107,20 @@ class RolesService:
                 f"No se puede desactivar el rol de sistema '{role.name}'"
             )
 
+        old_snapshot = _role_snapshot(role)
         role.status = RoleStatus.INACTIVE
         role.deleted_at = datetime.now(timezone.utc)
         role.deleted_by = current_user.id
 
         self.session.add(role)
+        self.audit.log_action(
+            "role.deactivated",
+            "role",
+            resource_id=role.id,
+            old_value=old_snapshot,
+            new_value={"status": RoleStatus.INACTIVE.value},
+            user_id=current_user.id,
+        )
         self.session.commit()
 
     def list_roles(self) -> list[Role]:
@@ -90,8 +128,9 @@ class RolesService:
 
 
 class RoleModulesService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
 
     def list_modules(self) -> list[Module]:
         return self.session.exec(select(Module)).all()
@@ -111,7 +150,10 @@ class RoleModulesService:
         return role_modules
 
     def assign_modules(
-        self, role_id: int, data: RoleModuleAssign
+        self,
+        role_id: int,
+        data: RoleModuleAssign,
+        current_user: Optional[User] = None,
     ) -> list[RoleModule]:
         role = self.session.get(Role, role_id)
         if not role:
@@ -120,6 +162,7 @@ class RoleModulesService:
         old_modules = self.session.exec(
             select(RoleModule).where(RoleModule.role_id == role_id)
         ).all()
+        old_module_ids = [module.module_id for module in old_modules]
         for module in old_modules:
             self.session.delete(module)
         self.session.flush()
@@ -133,6 +176,14 @@ class RoleModulesService:
             self.session.add(role_module)
             new_modules.append(role_module)
 
+        self.audit.log_action(
+            "role.modules_assigned",
+            "role",
+            resource_id=role_id,
+            old_value={"module_ids": old_module_ids},
+            new_value={"module_ids": list(data.module_ids)},
+            user_id=current_user.id if current_user else None,
+        )
         self.session.commit()
         for module in new_modules:
             self.session.refresh(module)

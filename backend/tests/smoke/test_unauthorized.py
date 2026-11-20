@@ -1,13 +1,13 @@
-"""Smoke de autorización sobre los 93 endpoints.
+"""Smoke de autorización sobre los 94 endpoints.
 
 Contrato observado en el código actual (Fase 0, no se corrige aquí):
 
 * Si falta el header ``session-token`` la respuesta es **422** (validación),
   no 401. El 401 aparece cuando el token existe pero es inválido.
 * ``POST /session/logout`` usa el alias ``session_token`` (guion bajo).
-* Solo ``POST /role-modules/{role_id}`` exige ``require_admin``.
-* Solo ``/inventory/report`` y ``/inventory/summary`` exigen el módulo
-  ``inventory``.
+* ``POST /role-modules/{role_id}`` y ``GET /audit/`` exigen ``require_admin``.
+* ``/inventory/report`` y ``/inventory/summary`` exigen el módulo
+  ``inventory``; ``PATCH /sales/{sale_id}/annul`` exige ``sales``.
 """
 
 import re

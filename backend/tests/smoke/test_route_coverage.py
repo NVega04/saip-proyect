@@ -52,8 +52,8 @@ def test_matrix_has_no_duplicates_and_expected_size():
     pairs = [(case.method, case.path) for case in ROUTE_MATRIX]
 
     assert len(pairs) == len(set(pairs)), "Hay rutas duplicadas en la matriz"
-    assert len(ROUTE_MATRIX) == 93, (
-        f"La matriz tiene {len(ROUTE_MATRIX)} rutas; se esperaban 93"
+    assert len(ROUTE_MATRIX) == 94, (
+        f"La matriz tiene {len(ROUTE_MATRIX)} rutas; se esperaban 94"
     )
 
 

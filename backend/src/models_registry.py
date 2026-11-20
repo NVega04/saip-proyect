@@ -5,6 +5,7 @@ registradas en ``SQLModel.metadata`` (requerido por Alembic y por la
 resolución de relaciones entre módulos).
 """
 
+from src.modules.audit.models import AuditLog  # noqa: F401
 from src.modules.commercial_products.models import (  # noqa: F401
     CommercialProduct,
     ProductCategory,
@@ -44,6 +45,7 @@ from src.modules.users.models import (  # noqa: F401
 )
 
 __all__ = [
+    "AuditLog",
     "CommercialProduct",
     "ProductCategory",
     "InventoryMovement",

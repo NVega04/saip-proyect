@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlmodel import Session, select
 
@@ -17,6 +18,7 @@ from src.core.security import (
     hash_password,
     verify_password,
 )
+from src.modules.audit.service import AuditService
 from src.modules.roles.models import Role
 from src.modules.users.models import SessionApp, User, UserStatus
 from src.modules.users.schemas import (
@@ -28,9 +30,23 @@ from src.modules.users.schemas import (
 logger = logging.getLogger(__name__)
 
 
+def _user_snapshot(user: User) -> dict:
+    return {
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "phone": user.phone,
+        "role_id": user.role_id,
+        "is_admin": user.is_admin,
+        "status": user.status.value if user.status else None,
+    }
+
+
 class UsersService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
 
     def create(self, data: UserCreate) -> User:
         role = self.session.get(Role, data.role_id)
@@ -61,6 +77,14 @@ class UsersService:
         self.session.add(new_user)
         self.session.commit()
         self.session.refresh(new_user)
+        self.audit.log_action(
+            "user.created",
+            "user",
+            resource_id=new_user.id,
+            new_value=_user_snapshot(new_user),
+            user_id=None,
+            commit=True,
+        )
 
         try:
             send_welcome_email(new_user.email, new_user.first_name, temp_password)
@@ -87,6 +111,7 @@ class UsersService:
                 "Contraseña incorrecta. No se puede eliminar la cuenta."
             )
 
+        old_snapshot = _user_snapshot(current_user)
         now = datetime.now(timezone.utc)
         current_user.deleted_at = now
         current_user.deleted_by = current_user.id
@@ -103,6 +128,14 @@ class UsersService:
             self.session.add(s)
 
         self.session.add(current_user)
+        self.audit.log_action(
+            "user.self_deleted",
+            "user",
+            resource_id=current_user.id,
+            old_value=old_snapshot,
+            new_value={"status": UserStatus.INACTIVE.value},
+            user_id=current_user.id,
+        )
         self.session.commit()
 
         return DeleteResponseUser(
@@ -129,6 +162,7 @@ class UsersService:
         if user_id == current_user.id:
             raise BusinessRuleError("No puedes eliminarte a ti mismo.")
 
+        old_snapshot = _user_snapshot(user)
         now = datetime.now(timezone.utc)
         user.deleted_at = now
         user.deleted_by = current_user.id
@@ -145,6 +179,14 @@ class UsersService:
             self.session.add(s)
 
         self.session.add(user)
+        self.audit.log_action(
+            "user.deleted",
+            "user",
+            resource_id=user.id,
+            old_value=old_snapshot,
+            new_value={"status": UserStatus.INACTIVE.value},
+            user_id=current_user.id,
+        )
         self.session.commit()
 
         try:
@@ -189,6 +231,7 @@ class UsersService:
                 )
 
         was_active = user.status == UserStatus.ACTIVE
+        old_snapshot = _user_snapshot(user)
 
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(user, field, value)
@@ -197,6 +240,14 @@ class UsersService:
         user.updated_by = current_user.id
 
         self.session.add(user)
+        self.audit.log_action(
+            "user.updated",
+            "user",
+            resource_id=user.id,
+            old_value=old_snapshot,
+            new_value=_user_snapshot(user),
+            user_id=current_user.id,
+        )
         self.session.commit()
         self.session.refresh(user)
 

@@ -26,5 +26,5 @@ def generate_report(
     current_user: User = Depends(get_current_user),
 ):
     return service.generate(
-        entity, fecha_inicio, fecha_fin, status, search, format
+        entity, fecha_inicio, fecha_fin, status, search, format, current_user
     )

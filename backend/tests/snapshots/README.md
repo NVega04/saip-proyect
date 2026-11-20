@@ -1,21 +1,25 @@
 # Snapshot OpenAPI — procedencia y política
 
-`openapi_baseline.json` es el contrato OpenAPI de SAIP **antes** del refactor de
-la Fase 1. Es la referencia contra la que `tests/test_openapi_snapshot.py`
-verifica que la API no cambió de forma accidental.
+`openapi_baseline.json` es el contrato OpenAPI aprobado de SAIP. Es la
+referencia contra la que `tests/test_openapi_snapshot.py` verifica que la API
+no cambie de forma accidental.
 
 ## Procedencia
 
 | Dato | Valor |
 |---|---|
 | Commit de origen | `0f86777` (`master`, previo a `fase-1-arquitectura`) |
-| Generado con | `app.openapi()` de la aplicación en ese commit |
-| Paths | 59 |
-| Schemas | 120 |
-| SHA-256 | `3f2bc1bef68fca4138e88d4abd996c7fafbd02958e1f08f948a6eeb3f1295902` |
+| Actualizado en | `fase-4-reglas-trazabilidad` (cambio aprobado) |
+| Generado con | `app.openapi()` de la aplicación actual |
+| Paths | 60 |
+| Schemas | 123 |
+| SHA-256 | `d5b5f24dcf9683f3a1b5d74bac9a4659cba801f519233407fbf06ced6350607a` |
 
-Se verificó en tres vías que el OpenAPI del commit `0f86777`, el de este
-snapshot y el de la rama `fase-1-arquitectura` son idénticos.
+## Cambio aprobado en Fase 4
+
+- Se agregó `GET /audit/` con los schemas `AuditLogResponse` y `AuditLogPage`.
+- Se agregó `SaleAnnulRequest.reason` al contrato de anulación de ventas.
+- El owner del endpoint de anulación pasó a ser el módulo RBAC `sales`.
 
 ## Política
 
@@ -28,7 +32,7 @@ snapshot y el de la rama `fase-1-arquitectura` son idénticos.
 3. Las diferencias de `servers` se ignoran por ser volátiles.
 4. Los cambios de comportamiento que no alteran el contrato (lógica interna,
    contenido de un Excel, envío de correos) **no** los detecta este test; para
-   eso están los tests de humo y, más adelante, los tests de integración.
+   eso están los tests de humo y los tests de integración.
 
 ## Cómo verificar
 

@@ -1,6 +1,6 @@
 """Happy path representativo por módulo (red de seguridad de la Fase 0).
 
-No busca cubrir los 93 endpoints uno por uno: ejercita el flujo principal de
+No busca cubrir los 94 endpoints uno por uno: ejercita el flujo principal de
 cada dominio para detectar regresiones gruesas en las fases siguientes.
 """
 
@@ -446,7 +446,11 @@ def test_sale_creation_listing_and_annulment(client, admin_headers, product):
     after_sale = client.get(f"/products/{product['id']}")
     assert after_sale.json()["available_quantity"] == 48
 
-    annulled = client.patch(f"/sales/{sale_id}/annul", headers=admin_headers)
+    annulled = client.patch(
+        f"/sales/{sale_id}/annul",
+        headers=admin_headers,
+        json={"reason": "Prueba de anulación de la suite smoke"},
+    )
     assert annulled.status_code == 200, annulled.text
     assert annulled.json()["status"] == "anulada"
 

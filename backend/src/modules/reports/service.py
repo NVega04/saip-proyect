@@ -7,6 +7,7 @@ from openpyxl import Workbook
 from sqlmodel import Session, select
 
 from src.core.exceptions import NotFoundError
+from src.modules.audit.service import AuditService
 from src.modules.commercial_products.models import CommercialProduct, ProductCategory
 from src.modules.production.models import ProductionOrder
 from src.modules.products.models import Product
@@ -599,8 +600,24 @@ BUILDERS = {
 
 
 class ReportsService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, ip_address: Optional[str] = None):
         self.session = session
+        self.audit = AuditService(session, ip_address=ip_address)
+
+    def _log_download(
+        self,
+        entity: str,
+        filters: Dict[str, object],
+        format: str,
+        current_user: Optional[User],
+    ) -> None:
+        self.audit.log_action(
+            "report.downloaded",
+            "report",
+            new_value={"entity": entity, "format": format, "filters": filters},
+            user_id=current_user.id if current_user else None,
+            commit=True,
+        )
 
     def generate(
         self,
@@ -610,6 +627,7 @@ class ReportsService:
         status: Optional[str],
         search: Optional[str],
         format: str,
+        current_user: Optional[User] = None,
     ) -> Any:
         if entity not in BUILDERS:
             raise NotFoundError(
@@ -625,7 +643,7 @@ class ReportsService:
 
         if format == "json":
             headers, data, applied = BUILDERS[entity](None, self.session, filters)
-            return JSONResponse(
+            response = JSONResponse(
                 {
                     "entity": entity,
                     "total": len(data),
@@ -634,6 +652,8 @@ class ReportsService:
                     "data": data,
                 }
             )
+            self._log_download(entity, filters, format, current_user)
+            return response
 
         wb = Workbook()
         ws = wb.active
@@ -656,6 +676,8 @@ class ReportsService:
         stream.seek(0)
 
         filename = f"reporte_{entity}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+        self._log_download(entity, filters, format, current_user)
 
         return StreamingResponse(
             stream,

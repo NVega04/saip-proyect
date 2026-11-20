@@ -9,6 +9,7 @@ from slowapi.util import get_remote_address
 
 from src.core.config import settings
 from src.core.exceptions import DomainError
+from src.modules.audit.router import router as audit_router
 from src.modules.auth.router import router as auth_router
 from src.modules.commercial_products.categories_router import (
     router as product_categories_router,
@@ -65,6 +66,7 @@ async def domain_error_handler(request, exc: DomainError):
 
 
 app.include_router(health_router)
+app.include_router(audit_router)
 app.include_router(users_router)
 app.include_router(roles_router)
 app.include_router(auth_router)
