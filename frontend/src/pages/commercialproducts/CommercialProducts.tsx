@@ -1,5 +1,6 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
@@ -9,6 +10,8 @@ import Badge from "../../components/badge/Badge";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery, usePagedQuery } from "../../hooks/queries";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import "./CommercialProducts.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
 
@@ -22,6 +25,7 @@ interface ProductCategory {
   id: number;
   token: string;
   name: string;
+  status: string;
 }
 
 interface Provider {
@@ -146,57 +150,53 @@ const columns: ColumnDef<CommercialProduct>[] = [
   },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function CommercialProducts(): JSX.Element {
-  const [products, setProducts] = useState<CommercialProduct[]>([]);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<CommercialProduct | null>(null);
   const [form, setForm] = useState<CommercialProductForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("commercial-products");
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [prodRes, catRes, unitRes, provRes] = await Promise.all([
-          apiFetch("/commercial-products/"),
-          apiFetch("/product-categories/"),
-          apiFetch("/units/"),
-          apiFetch("/providers/"),
-        ]);
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const productsQuery = usePagedQuery<CommercialProduct>("/commercial-products/", {
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch,
+  });
+  const categoriesQuery = useListQuery<ProductCategory>("/product-categories/");
+  const unitsQuery = useListQuery<Unit>("/units/");
+  const providersQuery = useListQuery<Provider>("/providers/");
 
-        if (prodRes.ok) {
-          const data: CommercialProduct[] = await prodRes.json();
-          setProducts(data);
-        }
-        if (catRes.ok) {
-          const data: ProductCategory[] = await catRes.json();
-          setCategories(data.filter((c) => c.status === "active"));
-        }
-        if (unitRes.ok) {
-          const data: Unit[] = await unitRes.json();
-          setUnits(data);
-        }
-        if (provRes.ok) {
-          const data: Provider[] = await provRes.json();
-          setProviders(data);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [reloadKey]);
+  const products = productsQuery.data?.items ?? [];
+  // El formulario solo ofrece categorías activas.
+  const categories = (categoriesQuery.data ?? []).filter(
+    (c) => c.status === "active"
+  );
+  const units = unitsQuery.data ?? [];
+  const providers = providersQuery.data ?? [];
+  const totalPages = Math.max(
+    1,
+    Math.ceil((productsQuery.data?.total ?? 0) / PAGE_SIZE)
+  );
+
+  // Si se eliminan filas y la página actual queda fuera de rango, retrocede.
+  if (productsQuery.data && page > totalPages) {
+    setPage(totalPages);
+  }
+
+  const invalidateProducts = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["paged", "/commercial-products/"],
+    });
 
   const handleCrear = () => {
     setEditTarget(null);
@@ -280,8 +280,7 @@ export default function CommercialProducts(): JSX.Element {
           return;
         }
 
-        const updated: CommercialProduct = await response.json();
-        setProducts((prev) => prev.map((p) => (p.id === editTarget.id ? updated : p)));
+        await invalidateProducts();
         showAlert("success", "Producto actualizado correctamente.");
       } else {
         const response = await apiFetch("/commercial-products/", {
@@ -306,8 +305,7 @@ export default function CommercialProducts(): JSX.Element {
           return;
         }
 
-        const created: CommercialProduct = await response.json();
-        setProducts((prev) => [...prev, created]);
+        await invalidateProducts();
         showAlert("success", "Producto creado correctamente.");
       }
 
@@ -335,7 +333,7 @@ export default function CommercialProducts(): JSX.Element {
             return;
           }
 
-          setProducts((prev) => prev.filter((p) => p.id !== id));
+          await invalidateProducts();
           showAlert("success", "Producto eliminado correctamente.");
         } catch {
           showAlert("error", "Error de conexion con el servidor.");
@@ -352,8 +350,15 @@ export default function CommercialProducts(): JSX.Element {
         { label: "Productos comerciales" },
       ]}
     >
-      {loading ? (
+      {productsQuery.isPending ||
+      categoriesQuery.isPending ||
+      unitsQuery.isPending ||
+      providersQuery.isPending ? (
         <div className="saip-loading">Cargando productos...</div>
+      ) : productsQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {productsQuery.error?.message || "No se pudieron cargar los productos."}
+        </div>
       ) : (
         <Table
           title="Productos comerciales"
@@ -361,6 +366,8 @@ export default function CommercialProducts(): JSX.Element {
           data={products}
           searchPlaceholder="Buscar producto"
           sortKey="name"
+          onSearch={setSearch}
+          serverPagination={{ page, totalPages, onPageChange: setPage }}
           headerActions={
             <>
             <Button variant="primary" onClick={handleCrear}>
@@ -592,7 +599,7 @@ export default function CommercialProducts(): JSX.Element {
         templateUrl="/commercial-products/bulk/template"
         importUrl="/commercial-products/bulk/import"
         importQuery="mode=upsert"
-        onImported={() => setReloadKey((k) => k + 1)}
+        onImported={() => void invalidateProducts()}
       />
     </Layout>
   );

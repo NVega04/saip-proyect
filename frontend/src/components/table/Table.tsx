@@ -14,6 +14,14 @@ export interface ColumnDef<T> {
   render?: (row: T) => React.ReactNode;
 }
 
+interface ServerPagination {
+  /** Página actual (1-based), controlada por el padre */
+  page: number;
+  /** Total de páginas según el ``total`` del servidor */
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
 interface SAIPTableProps<T extends { id: string | number }> {
   /** Título de la sección, ej: "Gestión de usuarios" */
   title: string;
@@ -37,6 +45,12 @@ interface SAIPTableProps<T extends { id: string | number }> {
   sortKey?: string;
   /** Clave numérica para ordenar por ID (default "id") */
   idKey?: string;
+  /**
+   * Paginación por servidor: ``data`` ya es una página y la tabla deja de
+   * cortar por su cuenta, delegando el control al padre. Úsalo junto a
+   * ``onSearch`` para que la búsqueda también la maneje el servidor.
+   */
+  serverPagination?: ServerPagination;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -54,11 +68,12 @@ export default function Table<T extends { id: string | number }>({
   onSearch,
   sortKey,
   idKey,
+  serverPagination,
 }: SAIPTableProps<T>) {
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const [sortCriteria, setSortCriteria] = useState<SortCriteria>("id");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalPage, setInternalPage] = useState(1);
 
   const filtered = onSearch
     ? data
@@ -91,12 +106,24 @@ export default function Table<T extends { id: string | number }>({
     });
   })();
 
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
-  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = serverPagination
+    ? Math.max(1, serverPagination.totalPages)
+    : Math.max(1, Math.ceil(sorted.length / pageSize));
+  // En modo servidor, ``data`` ya es la página: no se vuelve a cortar.
+  const paginated = serverPagination
+    ? sorted
+    : sorted.slice(
+        (internalPage - 1) * pageSize,
+        internalPage * pageSize
+      );
+  const currentPage = serverPagination ? serverPagination.page : internalPage;
+  const handlePageChange = serverPagination
+    ? serverPagination.onPageChange
+    : setInternalPage;
 
   const handleSearch = (val: string) => {
     setSearch(val);
-    setCurrentPage(1);
+    handlePageChange(1);
     onSearch?.(val);
   };
 
@@ -120,7 +147,7 @@ export default function Table<T extends { id: string | number }>({
               onSort={(order, criteria) => {
                 setSortOrder(order);
                 setSortCriteria(criteria);
-                setCurrentPage(1);
+                handlePageChange(1);
               }}
             />
           )}
@@ -185,7 +212,7 @@ export default function Table<T extends { id: string | number }>({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
           />
         )}
       </div>

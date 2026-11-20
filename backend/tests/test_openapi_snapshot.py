@@ -100,4 +100,4 @@ def test_baseline_has_the_expected_shape():
     baseline = _load_baseline()
 
     assert len(baseline["paths"]) == 60
-    assert len(baseline["components"]["schemas"]) == 123
+    assert len(baseline["components"]["schemas"]) == 126

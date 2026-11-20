@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import StreamingResponse
 
 from src.bulk.parser import template_response
-from src.core.dependencies import require_module
+from src.core.dependencies import get_current_user, require_module
 from src.modules.inventory.dependencies import get_inventory_service
 from src.modules.inventory.schemas import InventoryPage
 from src.modules.inventory.service import (
@@ -74,7 +74,9 @@ def inventory_report(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de movimientos de stock",
 )
-def bulk_movements_template():
+def bulk_movements_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_movimientos_inventario.xlsx",
         BULK_MOVEMENT_HEADERS,

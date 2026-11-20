@@ -1,11 +1,14 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
 import Badge from "../../components/badge/Badge";
 import { apiFetch } from "../../utils/api";
+import { useAlert } from "../../context/AlertContext";
+import { useListQuery } from "../../hooks/queries";
 import "./roles.css";
 import { useAuth } from "../../context/AuthContext";
 import { useReportDownload } from "../../hooks/useReportDownload";
@@ -61,42 +64,27 @@ const columns: ColumnDef<Role>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Roles(): JSX.Element {
-  const [roles, setRoles]           = useState<Role[]>([]);
-  const [modules, setModules]       = useState<Module[]>([]);
   const [modalOpen, setModalOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState<Role | null>(null);
   const [form, setForm]             = useState<RoleForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
-  const [loading, setLoading]       = useState(true);
-  
+
   const { currentUser } = useAuth();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
-  const { download: downloadReport, loading: reportLoading } = useReportDownload("roles"); 
+  const { download: downloadReport, loading: reportLoading } = useReportDownload("roles");
+  const { showAlert } = useAlert();
+  const queryClient = useQueryClient();
 
   // ── Cargar roles ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await apiFetch("/roles/");
-        if (!response.ok) throw new Error("Error al cargar roles");
-        const data: Role[] = await response.json();
-        setRoles(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRoles();
-  }, []);
+  const rolesQuery = useListQuery<Role>("/roles/");
+  const roles = rolesQuery.data ?? [];
 
   // ── Cargar módulos disponibles ─────────────────────────────────────────────
-  useEffect(() => {
-    apiFetch("/role-modules/modules")
-      .then((res) => res.json())
-      .then((data: Module[]) => setModules(data))
-      .catch((err) => console.error("Error al cargar módulos:", err));
-  }, []);
+  const modulesQuery = useListQuery<Module>("/role-modules/modules");
+  const modules = modulesQuery.data ?? [];
+
+  const invalidateRoles = () =>
+    queryClient.invalidateQueries({ queryKey: ["list", "/roles/"] });
 
   // ── Handlers modal ─────────────────────────────────────────────────────────
 
@@ -179,11 +167,10 @@ export default function Roles(): JSX.Element {
         });
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar rol");
+          showAlert("error", err.detail || "Error al actualizar rol");
           return;
         }
-        const updated: Role = await response.json();
-        setRoles((prev) => prev.map((r) => r.id === editTarget.id ? updated : r));
+        await invalidateRoles();
         roleId = editTarget.id;
 
       } else {
@@ -197,11 +184,11 @@ export default function Roles(): JSX.Element {
         });
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear rol");
+          showAlert("error", err.detail || "Error al crear rol");
           return;
         }
         const created: Role = await response.json();
-        setRoles((prev) => [...prev, { ...created, status: "active" }]);
+        await invalidateRoles();
         roleId = created.id;
       }
 
@@ -211,28 +198,28 @@ export default function Roles(): JSX.Element {
         body: JSON.stringify({ module_ids: form.module_ids }),
       });
       if (!modulesResponse.ok) {
-        alert("Rol guardado pero error al asignar módulos.");
+        showAlert("warning", "Rol guardado pero error al asignar módulos.");
       }
 
       handleCerrar();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
   const handleEliminar = async (id: number) => {
     try {
       const response = await apiFetch(`/roles/${id}`, { method: "DELETE" });
-      if (response.status === 410) { alert("El rol ya está desactivado."); return; }
-      if (response.status === 403) { alert("No se puede desactivar un rol del sistema."); return; }
+      if (response.status === 410) { showAlert("warning", "El rol ya está desactivado."); return; }
+      if (response.status === 403) { showAlert("warning", "No se puede desactivar un rol del sistema."); return; }
       if (!response.ok) {
         const err = await response.json();
-        alert(err.detail || "Error al desactivar rol");
+        showAlert("error", err.detail || "Error al desactivar rol");
         return;
       }
-      setRoles((prev) => prev.filter((r) => r.id !== id));
+      await invalidateRoles();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
@@ -246,8 +233,12 @@ export default function Roles(): JSX.Element {
       ]}
      >
       
-      {loading ? (
+      {rolesQuery.isPending || modulesQuery.isPending ? (
         <div className="saip-loading">Cargando roles...</div>
+      ) : rolesQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {rolesQuery.error?.message || "No se pudieron cargar los roles."}
+        </div>
       ) : (
         <Table
           title="Gestión de roles"

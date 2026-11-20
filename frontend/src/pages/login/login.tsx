@@ -73,6 +73,17 @@ export default function Login() {
         return;
       }
 
+      if (response.status === 429) {
+        // Rate limit: el backend devuelve 429 antes de validar credenciales.
+        setAlertType("warning");
+        setAlertMessage(
+          "Demasiados intentos de inicio de sesión. Espera unos segundos y vuelve a intentarlo."
+        );
+        setShowAlert(true);
+        setIsLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         const error = await response.json();
         setAlertType("error");

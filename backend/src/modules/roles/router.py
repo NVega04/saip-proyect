@@ -14,12 +14,23 @@ router = APIRouter(prefix="/roles", tags=["Roles"])
     response_model=RoleResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear nuevo rol",
+    responses={
+        401: {"description": "Sesión ausente o inválida"},
+        409: {"description": "Ya existe un rol con ese nombre"},
+    },
 )
 def create_role(
     role_data: RoleCreate,
     service: RolesService = Depends(get_roles_service),
+    current_user: User = Depends(get_current_user),
 ):
-    return service.create_role(role_data)
+    """Crea un rol en estado ``active``.
+
+    Exige sesión; el nombre no puede repetirse (409). Los módulos asignables
+    se configuran después con ``POST /role-modules/{role_id}``, que sí exige
+    permisos de administrador. La creación se audita con el actor.
+    """
+    return service.create_role(role_data, current_user)
 
 
 @router.patch(
@@ -29,9 +40,9 @@ def create_role(
     summary="Actualizar un rol",
     responses={
         404: {"description": "Rol no encontrado"},
-        409: {"descripcion": "Ya existe ese rol con ese nombre"},
-        410: {"descripcion": "El rol esta desactivado"},
-        403: {"descripcion": "No se puede modificar un rol protegido"},
+        409: {"description": "Ya existe ese rol con ese nombre"},
+        410: {"description": "El rol esta desactivado"},
+        403: {"description": "No se puede modificar un rol protegido"},
     },
 )
 def updated_role(
@@ -48,11 +59,11 @@ def updated_role(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Desactivar un rol",
     responses={
-        404: {"descripcion": "Rol no encontrado"},
+        404: {"description": "Rol no encontrado"},
         409: {
-            "descripcion": "No se puede desactivar: hay usuarios asignados o es rol protegido"
+            "description": "No se puede desactivar: hay usuarios asignados o es rol protegido"
         },
-        410: {"descripcion": "El rol ya esta desactivado"},
+        410: {"description": "El rol ya esta desactivado"},
     },
 )
 def desactivate_role(

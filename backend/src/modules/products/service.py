@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Literal
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from src.bulk.parser import (
@@ -13,6 +14,7 @@ from src.bulk.parser import (
     safe_float,
 )
 from src.core.exceptions import ConflictError, NotFoundError, PermissionDeniedError
+from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
 from src.modules.products.models import Product
 from src.modules.products.schemas import ProductCreate, ProductUpdate
@@ -36,10 +38,34 @@ class ProductsService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list(self) -> list[Product]:
-        return self.session.exec(
-            select(Product).where(Product.deleted_at == None)
+    def list(
+        self, pagination: PaginationParams, search: str | None = None
+    ) -> Page[Product]:
+        filters = [Product.deleted_at == None]  # noqa: E712
+        if search and search.strip():
+            pattern = like_pattern(search)
+            filters.append(
+                Product.name.like(pattern)
+                | Product.description.like(pattern)
+            )
+        total = self.session.exec(
+            select(func.count()).select_from(Product).where(*filters)
+        ).one()
+        # Orden estable por id: sin ORDER BY la paginación puede repetir o
+        # saltar filas entre páginas.
+        rows = self.session.exec(
+            select(Product)
+            .where(*filters)
+            .order_by(Product.id)
+            .offset(pagination.offset)
+            .limit(pagination.limit)
         ).all()
+        return Page[Product](
+            items=rows,
+            total=total,
+            page=pagination.page,
+            limit=pagination.limit,
+        )
 
     def get(self, product_id: int) -> Product:
         product = self.session.get(Product, product_id)

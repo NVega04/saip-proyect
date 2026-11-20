@@ -29,7 +29,7 @@ class RolesService:
         self.session = session
         self.audit = AuditService(session, ip_address=ip_address)
 
-    def create_role(self, data: RoleCreate) -> Role:
+    def create_role(self, data: RoleCreate, current_user: User) -> Role:
         existing = self.session.exec(
             select(Role).where(Role.name == data.name)
         ).first()
@@ -49,7 +49,7 @@ class RolesService:
             "role",
             resource_id=role.id,
             new_value=_role_snapshot(role),
-            user_id=None,
+            user_id=current_user.id,
             commit=True,
         )
         return role

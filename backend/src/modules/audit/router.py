@@ -25,4 +25,10 @@ def list_audit_log(
     service: AuditReadService = Depends(get_audit_read_service),
     current_user: User = Depends(require_admin),
 ):
+    """Consulta la auditoría con paginación y filtros opcionales.
+
+    Solo administradores (403 para el resto). Los registros se ordenan por
+    fecha descendente; los valores sensibles (contraseñas, tokens, secretos)
+    se eliminan antes de almacenarse. ``password``/``token`` nunca aparecen.
+    """
     return service.list(page, limit, action, user_id)

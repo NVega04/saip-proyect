@@ -1,11 +1,13 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
 import Badge from "../../components/badge/Badge";
 import { apiFetch } from "../../utils/api";
+import { useListQuery } from "../../hooks/queries";
 import "./user.css";
 import { useAuth } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
@@ -93,43 +95,27 @@ const columns: ColumnDef<User>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function User(): JSX.Element {
-  const [users, setUsers]           = useState<User[]>([]);
   const [modalOpen, setModalOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState<User | null>(null);
   const [form, setForm]             = useState<UserForm>(emptyForm());
   const [errors, setErrors]         = useState<FormErrors>({});
-  const [loading, setLoading]       = useState(true);
   const { currentUser } = useAuth();
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const isCurrentUserAdmin = currentUser?.is_admin ?? false;
   const { download: downloadReport, loading: reportLoading } = useReportDownload("users");
+  const queryClient = useQueryClient();
 
   // ── Cargar usuarios ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await apiFetch("/users/");
-        if (!response.ok) throw new Error("Error al cargar usuarios");
-        const data: User[] = await response.json();
-        setUsers(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  const usersQuery = useListQuery<User>("/users/");
+  const users = usersQuery.data ?? [];
 
-  const [roles, setRoles] = useState<Role[]>([]);
+  // ── Cargar roles ───────────────────────────────────────────────────────────
+  const rolesQuery = useListQuery<Role>("/roles/");
+  const roles = rolesQuery.data ?? [];
 
-  useEffect(() => {
-    apiFetch("/roles/")
-      .then((res) => res.json())
-      .then((data: Role[]) => setRoles(data))
-      .catch((err) => console.error("Error al cargar roles:", err));
-  }, []);
+  const invalidateUsers = () =>
+    queryClient.invalidateQueries({ queryKey: ["list", "/users/"] });
 
   // ── Handlers modal ─────────────────────────────────────────────────────────
 
@@ -228,16 +214,7 @@ export default function User(): JSX.Element {
           return;
         }
 
-        const updated: User = await response.json();
-
-        const updatedWithRole: User = {
-          ...updated,
-          role: roles.find((r) => r.id === updated.role_id) ?? editTarget.role,
-        };
-
-        setUsers((prev) =>
-          prev.map((u) => (u.id === editTarget.id ? updatedWithRole : u))
-        );
+        await invalidateUsers();
 
         showAlert("success", "Usuario actualizado correctamente.");
       } else {
@@ -259,8 +236,7 @@ export default function User(): JSX.Element {
           return;
         }
 
-        const created: User = await response.json();
-        setUsers((prev) => [...prev, created]);
+        await invalidateUsers();
 
         showAlert("success", "Usuario creado correctamente.");
       }
@@ -287,7 +263,7 @@ export default function User(): JSX.Element {
             return;
           }
 
-          setUsers((prev) => prev.filter((u) => u.id !== id));
+          await invalidateUsers();
           showAlert("success", "Usuario eliminado correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
@@ -304,8 +280,12 @@ export default function User(): JSX.Element {
       { label: "Gestión de usuarios" },
     ]}
     >
-      {loading ? (
+      {usersQuery.isPending || rolesQuery.isPending ? (
         <div className="saip-loading">Cargando usuarios...</div>
+      ) : usersQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {usersQuery.error?.message || "No se pudieron cargar los usuarios."}
+        </div>
       ) : (
         <Table
           sortKey="first_name"

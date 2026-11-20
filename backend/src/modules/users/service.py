@@ -48,7 +48,7 @@ class UsersService:
         self.session = session
         self.audit = AuditService(session, ip_address=ip_address)
 
-    def create(self, data: UserCreate) -> User:
+    def create(self, data: UserCreate, current_user: User) -> User:
         role = self.session.get(Role, data.role_id)
         if not role:
             raise NotFoundError(f"El rol con id '{data.role_id}' no existe.")
@@ -82,7 +82,7 @@ class UsersService:
             "user",
             resource_id=new_user.id,
             new_value=_user_snapshot(new_user),
-            user_id=None,
+            user_id=current_user.id,
             commit=True,
         )
 

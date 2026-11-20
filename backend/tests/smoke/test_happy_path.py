@@ -71,7 +71,9 @@ def test_users_me_and_listing(client, admin_headers, admin_user):
     assert any(user["id"] == admin_user.id for user in body)
 
 
-def test_public_user_creation_returns_created_user(client, limited_role):
+def test_admin_user_creation_returns_created_user(
+    client, admin_headers, limited_role
+):
     payload = {
         "first_name": "Nuevo",
         "last_name": "Usuario",
@@ -80,7 +82,7 @@ def test_public_user_creation_returns_created_user(client, limited_role):
         "is_admin": False,
     }
 
-    response = client.post("/users/", json=payload)
+    response = client.post("/users/", json=payload, headers=admin_headers)
 
     assert response.status_code == 201, response.text
     body = response.json()
@@ -88,13 +90,15 @@ def test_public_user_creation_returns_created_user(client, limited_role):
     assert body["email"] == payload["email"].lower()
 
 
-def test_roles_listing_and_public_creation(client, admin_headers):
+def test_roles_listing_and_creation(client, admin_headers):
     listing = client.get("/roles/", headers=admin_headers)
     assert listing.status_code == 200, listing.text
     assert isinstance(listing.json(), list)
 
     created = client.post(
-        "/roles/", json={"name": _unique("rol"), "description": "rol de prueba"}
+        "/roles/",
+        json={"name": _unique("rol"), "description": "rol de prueba"},
+        headers=admin_headers,
     )
     assert created.status_code == 201, created.text
     body = created.json()
@@ -230,7 +234,7 @@ def test_units_full_crud(client, admin_headers):
     assert created.status_code == 201, created.text
     unit_id = created.json()["id"]
 
-    fetched = client.get(f"/units/{unit_id}")
+    fetched = client.get(f"/units/{unit_id}", headers=admin_headers)
     assert fetched.status_code == 200, fetched.text
     assert fetched.json()["id"] == unit_id
 
@@ -243,7 +247,9 @@ def test_units_full_crud(client, admin_headers):
     deleted = client.delete(f"/units/{unit_id}", headers=admin_headers)
     assert deleted.status_code == 204
 
-    assert client.get(f"/units/{unit_id}").status_code == 404
+    assert client.get(
+        f"/units/{unit_id}", headers=admin_headers
+    ).status_code == 404
 
 
 def test_products_can_be_created_listed_and_locked(client, admin_headers, unit):
@@ -262,11 +268,14 @@ def test_products_can_be_created_listed_and_locked(client, admin_headers, unit):
     assert created.status_code == 201, created.text
     product_id = created.json()["id"]
 
-    listing = client.get("/products/")
+    listing = client.get("/products/", headers=admin_headers)
     assert listing.status_code == 200, listing.text
-    assert isinstance(listing.json(), list)
+    body = listing.json()
+    assert isinstance(body["items"], list)
+    assert body["page"] == 1
+    assert body["total"] >= 1
 
-    fetched = client.get(f"/products/{product_id}")
+    fetched = client.get(f"/products/{product_id}", headers=admin_headers)
     assert fetched.status_code == 200, fetched.text
     assert fetched.json()["is_locked"] is False
 
@@ -282,7 +291,7 @@ def test_supply_categories_and_supplies(client, admin_headers, supply_category, 
 
     supplies = client.get("/supplies/", headers=admin_headers)
     assert supplies.status_code == 200, supplies.text
-    assert any(item["id"] == supply["id"] for item in supplies.json())
+    assert any(item["id"] == supply["id"] for item in supplies.json()["items"])
 
     fetched = client.get(f"/supplies/{supply['id']}", headers=admin_headers)
     assert fetched.status_code == 200, fetched.text
@@ -306,7 +315,10 @@ def test_commercial_products_are_listed(
 
     listing = client.get("/commercial-products/", headers=admin_headers)
     assert listing.status_code == 200, listing.text
-    assert any(item["id"] == commercial_product["id"] for item in listing.json())
+    assert any(
+        item["id"] == commercial_product["id"]
+        for item in listing.json()["items"]
+    )
 
     fetched = client.get(
         f"/commercial-products/{commercial_product['id']}", headers=admin_headers
@@ -410,7 +422,9 @@ def test_production_order_lifecycle(client, admin_headers, recipe, product, supp
     assert len(body["snapshots"]) == 1
 
     # El producto sumó el rendimiento y el insumo consumió la cantidad usada.
-    product_after = client.get(f"/products/{product['id']}")
+    product_after = client.get(
+        f"/products/{product['id']}", headers=admin_headers
+    )
     assert product_after.json()["available_quantity"] == 60
 
     supply_after = client.get(f"/supplies/{supply['id']}", headers=admin_headers)
@@ -443,7 +457,9 @@ def test_sale_creation_listing_and_annulment(client, admin_headers, product):
     fetched = client.get(f"/sales/{sale_id}", headers=admin_headers)
     assert fetched.status_code == 200, fetched.text
 
-    after_sale = client.get(f"/products/{product['id']}")
+    after_sale = client.get(
+        f"/products/{product['id']}", headers=admin_headers
+    )
     assert after_sale.json()["available_quantity"] == 48
 
     annulled = client.patch(
@@ -454,7 +470,9 @@ def test_sale_creation_listing_and_annulment(client, admin_headers, product):
     assert annulled.status_code == 200, annulled.text
     assert annulled.json()["status"] == "anulada"
 
-    restored = client.get(f"/products/{product['id']}")
+    restored = client.get(
+        f"/products/{product['id']}", headers=admin_headers
+    )
     assert restored.json()["available_quantity"] == 50
 
 
@@ -530,8 +548,10 @@ BULK_TEMPLATES = [
 
 
 @pytest.mark.parametrize("url", BULK_TEMPLATES)
-def test_bulk_templates_are_public_excel_files(client, url):
-    response = client.get(url)
+def test_bulk_templates_require_session_and_return_excel(
+    client, admin_headers, url
+):
+    response = client.get(url, headers=admin_headers)
 
     assert response.status_code == 200, response.text
     assert response.headers["content-type"] == XLSX_MIME

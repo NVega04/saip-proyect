@@ -56,9 +56,10 @@ def test_audit_endpoint_filters_and_redacts_secrets(
     assert row["new_value"]["nested"]["safe"] == "ok"
 
 
-def test_public_user_creation_is_audited_without_actor(
+def test_admin_user_creation_is_audited_with_actor(
     client: TestClient,
     admin_headers: dict[str, str],
+    admin_user,
     limited_role,
 ) -> None:
     email = f"audit-{uuid4().hex[:10]}@saip.com"
@@ -66,18 +67,19 @@ def test_public_user_creation_is_audited_without_actor(
         "/users/",
         json={
             "first_name": "Auditoría",
-            "last_name": "Pública",
+            "last_name": "Administrada",
             "email": email,
             "role_id": limited_role.id,
             "is_admin": False,
         },
+        headers=admin_headers,
     )
     assert created.status_code == 201, created.text
 
     rows = _audit_rows(client, admin_headers, "user.created")
 
     assert any(
-        row["user_id"] is None
+        row["user_id"] == admin_user.id
         and row["new_value"]["email"] == email
         and "password" not in row["new_value"]
         for row in rows
@@ -103,6 +105,7 @@ def test_role_modules_assignment_is_audited(
     created = client.post(
         "/roles/",
         json={"name": f"Auditoría {uuid4().hex[:8]}", "description": "rol"},
+        headers=admin_headers,
     )
     assert created.status_code == 201, created.text
     role_id = created.json()["id"]

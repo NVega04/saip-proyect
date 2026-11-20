@@ -47,7 +47,14 @@ export default defineConfig([
     rules: {
       ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.flat.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // La regla core no entiende anotaciones de tipo de TypeScript y
+      // marca como "sin uso" parámetros de callbacks declarados en
+      // interfaces; se usa la variante de typescript-eslint.
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' },
+      ],
     },
   },
 ])

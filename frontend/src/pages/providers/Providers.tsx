@@ -1,12 +1,15 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
 import Button from "../../components/button/Button";
 import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import Badge from "../../components/badge/Badge";
+import { useAlert } from "../../context/AlertContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery } from "../../hooks/queries";
 import "./Providers.css";
 import { useReportDownload } from "../../hooks/useReportDownload";
 
@@ -82,8 +85,8 @@ const columns: ColumnDef<Provider>[] = [
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Providers(): JSX.Element {
-  const [providers, setProviders]             = useState<Provider[]>([]);
-  const [loading, setLoading]                 = useState(true);
+  const { showAlert } = useAlert();
+  const queryClient = useQueryClient();
 
   // Modal proveedor
   const [providerModalOpen, setProviderModalOpen] = useState(false);
@@ -104,24 +107,13 @@ export default function Providers(): JSX.Element {
   const { download: downloadReport, loading: reportLoading } = useReportDownload("providers");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkContactsOpen, setBulkContactsOpen] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
 
   // ── Cargar proveedores ─────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        const response = await apiFetch("/providers/");
-        if (!response.ok) throw new Error("Error al cargar proveedores");
-        const data: Provider[] = await response.json();
-        setProviders(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProviders();
-  }, [reloadKey]);
+  const providersQuery = useListQuery<Provider>("/providers/");
+  const providers = providersQuery.data ?? [];
+
+  const invalidateProviders = () =>
+    queryClient.invalidateQueries({ queryKey: ["list", "/providers/"] });
 
   // ── Refrescar un proveedor individual ─────────────────────────────────────
   const refreshProvider = async (id: number): Promise<Provider | null> => {
@@ -129,7 +121,7 @@ export default function Providers(): JSX.Element {
       const res = await apiFetch(`/providers/${id}`);
       if (!res.ok) return null;
       const updated: Provider = await res.json();
-      setProviders((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      await invalidateProviders();
       return updated;
     } catch {
       return null;
@@ -188,11 +180,11 @@ export default function Providers(): JSX.Element {
         });
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar proveedor");
+          showAlert("error", err.detail || "Error al actualizar proveedor");
           return;
         }
         const updated: Provider = await response.json();
-        setProviders((prev) => prev.map((p) => (p.id === editTarget.id ? updated : p)));
+        await invalidateProviders();
         // Actualizar detailProvider si está abierto
         if (detailProvider?.id === editTarget.id) setDetailProvider(updated);
       } else {
@@ -202,15 +194,14 @@ export default function Providers(): JSX.Element {
         });
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear proveedor");
+          showAlert("error", err.detail || "Error al crear proveedor");
           return;
         }
-        const created: Provider = await response.json();
-        setProviders((prev) => [...prev, created]);
+        await invalidateProviders();
       }
       handleCerrarProviderModal();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
@@ -220,14 +211,12 @@ export default function Providers(): JSX.Element {
       const response = await apiFetch(`/providers/${id}`, { method: "DELETE" });
       if (!response.ok) {
         const err = await response.json();
-        alert(err.detail || "Error al desactivar proveedor");
+        showAlert("error", err.detail || "Error al desactivar proveedor");
         return;
       }
-      setProviders((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, status: "inactive" as ProviderStatus } : p))
-      );
+      await invalidateProviders();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
@@ -307,7 +296,7 @@ export default function Providers(): JSX.Element {
         );
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al actualizar contacto");
+          showAlert("error", err.detail || "Error al actualizar contacto");
           return;
         }
       } else {
@@ -317,7 +306,7 @@ export default function Providers(): JSX.Element {
         );
         if (!response.ok) {
           const err = await response.json();
-          alert(err.detail || "Error al crear contacto");
+          showAlert("error", err.detail || "Error al crear contacto");
           return;
         }
       }
@@ -326,7 +315,7 @@ export default function Providers(): JSX.Element {
       if (updated) setDetailProvider(updated);
       handleCerrarContactModal();
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
@@ -340,13 +329,13 @@ export default function Providers(): JSX.Element {
       );
       if (!response.ok) {
         const err = await response.json();
-        alert(err.detail || "Error al eliminar contacto");
+        showAlert("error", err.detail || "Error al eliminar contacto");
         return;
       }
       const updated = await refreshProvider(detailProvider.id);
       if (updated) setDetailProvider(updated);
     } catch {
-      alert("Error de conexión con el servidor.");
+      showAlert("error", "Error de conexión con el servidor.");
     }
   };
 
@@ -361,8 +350,12 @@ export default function Providers(): JSX.Element {
         { label: "Proveedores" },
       ]}
     >
-      {loading ? (
+      {providersQuery.isPending ? (
         <div className="saip-loading">Cargando proveedores...</div>
+      ) : providersQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {providersQuery.error?.message || "No se pudieron cargar los proveedores."}
+        </div>
       ) : (
         <Table
           title="Gestión de proveedores"
@@ -719,7 +712,7 @@ export default function Providers(): JSX.Element {
         title="Carga masiva de proveedores"
         templateUrl="/providers/bulk/template"
         importUrl="/providers/bulk/import"
-        onImported={() => setReloadKey((k) => k + 1)}
+        onImported={() => void invalidateProviders()}
       />
       <BulkUploadModal
         isOpen={bulkContactsOpen}
@@ -727,7 +720,7 @@ export default function Providers(): JSX.Element {
         title="Carga masiva de contactos"
         templateUrl="/providers/contacts/bulk/template"
         importUrl="/providers/contacts/bulk/import"
-        onImported={() => setReloadKey((k) => k + 1)}
+        onImported={() => void invalidateProviders()}
       />
     </Layout>
   );

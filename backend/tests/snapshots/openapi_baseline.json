@@ -11,6 +11,7 @@
           "Audit"
         ],
         "summary": "Consultar el registro de auditoría (solo administradores)",
+        "description": "Consulta la auditoría con paginación y filtros opcionales.\n\nSolo administradores (403 para el resto). Los registros se ordenan por\nfecha descendente; los valores sensibles (contraseñas, tokens, secretos)\nse eliminan antes de almacenarse. ``password``/``token`` nunca aparecen.",
         "operationId": "list_audit_log_audit__get",
         "parameters": [
           {
@@ -90,6 +91,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -109,7 +131,19 @@
           "Users"
         ],
         "summary": "Crear nuevo usuario",
+        "description": "Crea un usuario con contraseña temporal.\n\nSolo administradores (403). El rol indicado debe existir (404) y el email\nno puede estar registrado (409). Se envía un correo de bienvenida con la\ncontraseña temporal; si el envío falla, la cuenta queda creada y el fallo\nse registra en los logs sin exponer la contraseña. La acción se audita con\nel id del administrador que la realizó.",
         "operationId": "create_new_user_users__post",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -130,6 +164,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Sesión ausente o inválida"
+          },
+          "403": {
+            "description": "Se requieren permisos de administrador"
+          },
+          "409": {
+            "description": "El email ya está registrado"
+          },
+          "404": {
+            "description": "El rol indicado no existe"
           },
           "422": {
             "description": "Validation Error",
@@ -175,6 +221,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -213,6 +280,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -266,6 +354,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -313,6 +422,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeleteResponseUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -376,6 +506,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -395,7 +546,19 @@
           "Roles"
         ],
         "summary": "Crear nuevo rol",
+        "description": "Crea un rol en estado ``active``.\n\nExige sesión; el nombre no puede repetirse (409). Los módulos asignables\nse configuran después con ``POST /role-modules/{role_id}``, que sí exige\npermisos de administrador. La creación se audita con el actor.",
         "operationId": "create_role_roles__post",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -416,6 +579,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Sesión ausente o inválida"
+          },
+          "409": {
+            "description": "Ya existe un rol con ese nombre"
           },
           "422": {
             "description": "Validation Error",
@@ -457,6 +626,27 @@
                     "$ref": "#/components/schemas/RolePublic"
                   },
                   "title": "Response Get Roles Roles  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -522,20 +712,38 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Rol no encontrado"
           },
           "409": {
-            "descripcion": "Ya existe ese rol con ese nombre",
-            "description": "Conflict"
+            "description": "Ya existe ese rol con ese nombre"
           },
           "410": {
-            "descripcion": "El rol esta desactivado",
-            "description": "Gone"
+            "description": "El rol esta desactivado"
           },
           "403": {
-            "descripcion": "No se puede modificar un rol protegido",
-            "description": "Forbidden"
+            "description": "No se puede modificar un rol protegido"
           },
           "422": {
             "description": "Validation Error",
@@ -579,17 +787,35 @@
           "204": {
             "description": "Successful Response"
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "404": {
-            "descripcion": "Rol no encontrado",
-            "description": "Not Found"
+            "description": "Rol no encontrado"
           },
           "409": {
-            "descripcion": "No se puede desactivar: hay usuarios asignados o es rol protegido",
-            "description": "Conflict"
+            "description": "No se puede desactivar: hay usuarios asignados o es rol protegido"
           },
           "410": {
-            "descripcion": "El rol ya esta desactivado",
-            "description": "Gone"
+            "description": "El rol ya esta desactivado"
           },
           "422": {
             "description": "Validation Error",
@@ -610,6 +836,7 @@
           "Session"
         ],
         "summary": "Iniciar sesión",
+        "description": "Valida credenciales y abre una sesión.\n\nReglas de negocio: la cuenta debe aceptar los términos (403), se bloquea\ntemporalmente tras varios intentos fallidos (423) y el endpoint admite\n5 peticiones por minuto por IP (429). La contraseña nunca se registra.",
         "operationId": "login_session_login_post",
         "requestBody": {
           "content": {
@@ -628,6 +855,72 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          },
+          "403": {
+            "description": "El usuario no tiene permisos para esta operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No tienes acceso al módulo 'sales'."
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "La cuenta fue bloqueada temporalmente por intentos fallidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Cuenta bloqueada temporalmente por intentos fallidos."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiadas peticiones en la ventana de tiempo permitida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Rate limit exceeded: 5 per 1 minute"
                 }
               }
             }
@@ -672,6 +965,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -712,6 +1026,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -731,6 +1066,7 @@
           "Session"
         ],
         "summary": "Solicitar recuperación de contraseña",
+        "description": "Envía un token de recuperación por correo.\n\nMáximo 3 peticiones por minuto por IP (429). Por seguridad, la respuesta\nes la misma aunque el correo no exista o la cuenta esté inactiva, y los\ntokens anteriores sin usar se invalidan al generar uno nuevo.",
         "operationId": "forgot_password_session_forgot_password_post",
         "requestBody": {
           "content": {
@@ -748,6 +1084,27 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiadas peticiones en la ventana de tiempo permitida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Rate limit exceeded: 5 per 1 minute"
+                }
               }
             }
           },
@@ -770,6 +1127,7 @@
           "Session"
         ],
         "summary": "Restablecer contraseña con token",
+        "description": "Cambia la contraseña con un token de recuperación.\n\nEl token debe existir, no haber sido usado y no estar expirado; la nueva\ncontraseña debe cumplir la política de contraseñas (400).",
         "operationId": "reset_password_session_reset_password_post",
         "requestBody": {
           "content": {
@@ -787,6 +1145,27 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "No se cumple una regla de negocio (stock, estado, ventana de tiempo, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No se cumple una regla de negocio."
+                }
               }
             }
           },
@@ -809,6 +1188,7 @@
           "Session"
         ],
         "summary": "Cambiar contraseña estando autenticado",
+        "description": "Cambia la contraseña del usuario autenticado.\n\nRequiere la contraseña actual correcta y una nueva que cumpla la política\n(mínimo 12 caracteres, mayúscula, minúscula, dígito y símbolo). La acción\nse registra en la auditoría sin guardar ninguna contraseña.",
         "operationId": "change_password_session_change_password_post",
         "parameters": [
           {
@@ -837,6 +1217,48 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "No se cumple una regla de negocio (stock, estado, ventana de tiempo, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No se cumple una regla de negocio."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
               }
             }
           },
@@ -882,6 +1304,27 @@
                     "$ref": "#/components/schemas/ModuleResponse"
                   },
                   "title": "Response Get All Modules Role Modules Modules Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -937,6 +1380,27 @@
                     "$ref": "#/components/schemas/RoleModuleResponse"
                   },
                   "title": "Response Get Role Modules Role Modules  Role Id  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -1004,6 +1468,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1024,6 +1509,17 @@
         ],
         "summary": "Get Units",
         "operationId": "get_units_units__get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1035,6 +1531,37 @@
                     "$ref": "#/components/schemas/UnitResponse"
                   },
                   "title": "Response Get Units Units  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1079,6 +1606,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1108,6 +1656,15 @@
               "type": "integer",
               "title": "Unit Id"
             }
+          },
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
           }
         ],
         "responses": {
@@ -1117,6 +1674,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UnitResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -1180,6 +1758,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1222,6 +1821,27 @@
           "204": {
             "description": "Successful Response"
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1241,18 +1861,99 @@
           "Products"
         ],
         "summary": "Get Products",
+        "description": "Lista productos con paginación y búsqueda.\n\nDevuelve el envelope ``{items, total, page, limit}``. ``page`` empieza en 1\ny ``limit`` admite de 1 a 100 (defecto 20). ``search`` filtra por nombre o\ndescripción con ``LIKE`` y escapa los comodines ``%`` y ``_``.",
         "operationId": "get_products_products__get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Busca por nombre o descripción",
+              "title": "Search"
+            },
+            "description": "Busca por nombre o descripción"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProductResponse"
+                  "$ref": "#/components/schemas/Page_ProductResponse_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
                   },
-                  "title": "Response Get Products Products  Get"
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1264,6 +1965,7 @@
           "Products"
         ],
         "summary": "Create Product",
+        "description": "Crea un producto.\n\nReglas de negocio: la unidad debe existir (404) y el nombre no puede\nrepetirse entre productos activos (409). La acción se registra en la auditoría.",
         "operationId": "create_product_products__post",
         "parameters": [
           {
@@ -1297,6 +1999,69 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1316,6 +2081,7 @@
           "Products"
         ],
         "summary": "Get Product",
+        "description": "Devuelve un producto por id, o 404 si no existe o está eliminado.",
         "operationId": "get_product_products__product_id__get",
         "parameters": [
           {
@@ -1326,6 +2092,15 @@
               "type": "integer",
               "title": "Product Id"
             }
+          },
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
           }
         ],
         "responses": {
@@ -1335,6 +2110,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -1356,6 +2152,7 @@
           "Products"
         ],
         "summary": "Update Product",
+        "description": "Actualiza un producto.\n\nUn producto bloqueado no se puede modificar (403); tampoco se puede\nrenombrar a un nombre ya existente (409) ni asignar una unidad inexistente\n(404).",
         "operationId": "update_product_products__product_id__patch",
         "parameters": [
           {
@@ -1398,6 +2195,90 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permisos para esta operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No tienes acceso al módulo 'sales'."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1415,6 +2296,7 @@
           "Products"
         ],
         "summary": "Delete Product",
+        "description": "Elimina un producto (soft delete).\n\nLa fila se marca con ``deleted_at``/``deleted_by``; no se borra físicamente.\nUn producto bloqueado no puede eliminarse (403) y un id inexistente\ndevuelve 404.",
         "operationId": "delete_product_products__product_id__delete",
         "parameters": [
           {
@@ -1440,6 +2322,69 @@
           "204": {
             "description": "Successful Response"
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permisos para esta operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No tienes acceso al módulo 'sales'."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1459,6 +2404,7 @@
           "Products"
         ],
         "summary": "Toggle Product Lock",
+        "description": "Alterna el bloqueo de un producto.\n\nMientras ``is_locked`` es ``true``, el producto no puede modificarse ni\neliminarse, pero sigue apareciendo en listados y se puede desbloquear con\nesta misma operación.",
         "operationId": "toggle_product_lock_products__product_id__lock_patch",
         "parameters": [
           {
@@ -1491,6 +2437,48 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1510,6 +2498,7 @@
           "Products"
         ],
         "summary": "Cargar productos por archivo Excel/CSV (create o upsert)",
+        "description": "Importa productos desde Excel/CSV.\n\n``mode=create`` rechaza los nombres ya existentes; ``mode=upsert``\nactualiza descripción y niveles de stock de los productos existentes\n(nunca los bloqueados). Los errores de fila se devuelven dentro de\n``BulkImportResult``, no como código HTTP; el resultado incluye cuántas\nfilas se crearon, actualizaron y fallaron.",
         "operationId": "bulk_import_products_products_bulk_import_post",
         "parameters": [
           {
@@ -1557,6 +2546,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1577,12 +2587,54 @@
         ],
         "summary": "Descargar plantilla de productos",
         "operationId": "bulk_products_template_products_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1595,6 +2647,7 @@
           "Reports"
         ],
         "summary": "Generar reporte por entidad (Excel o JSON)",
+        "description": "Genera un reporte de la entidad indicada en Excel (``xlsx``) o JSON.\n\nLas entidades admitidas y sus columnas se definen en el servicio de\nreportes; una entidad desconocida devuelve 404. Los filtros de fecha,\nestado y búsqueda son opcionales. El ``format`` solo admite ``xlsx`` o\n``json`` (422 en caso contrario).",
         "operationId": "generate_report_reports__entity__get",
         "parameters": [
           {
@@ -1703,6 +2756,48 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1755,6 +2850,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1795,6 +2911,27 @@
                     "$ref": "#/components/schemas/SupplyCategoryResponse"
                   },
                   "title": "Response Get All Supply Categories Supply Categories  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -1846,6 +2983,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SupplyCategoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -1909,6 +3067,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1958,6 +3137,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1977,6 +3177,7 @@
           "Supplies"
         ],
         "summary": "Crear nuevo insumo",
+        "description": "Crea un insumo.\n\nLa categoría y la unidad deben existir (404) y el nombre no puede\nrepetirse entre insumos activos (409).",
         "operationId": "create_supply_supplies__post",
         "parameters": [
           {
@@ -2010,6 +3211,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2026,9 +3248,52 @@
         "tags": [
           "Supplies"
         ],
-        "summary": "Listar todos los insumos activos",
+        "summary": "Listar insumos activos con paginación",
+        "description": "Lista insumos con paginación y búsqueda.\n\nEnvelope ``{items, total, page, limit}``; ``page`` >= 1, ``limit`` 1..100\n(defecto 20). ``search`` filtra por nombre o descripción con ``LIKE`` y\nescapa ``%`` y ``_`` para que no actúen como comodines.",
         "operationId": "get_all_supplies_supplies__get",
         "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Busca por nombre o descripción",
+              "title": "Search"
+            },
+            "description": "Busca por nombre o descripción"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
           {
             "name": "session-token",
             "in": "header",
@@ -2045,11 +3310,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SupplyResponse"
+                  "$ref": "#/components/schemas/Page_SupplyResponse_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
                   },
-                  "title": "Response Get All Supplies Supplies  Get"
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2101,6 +3383,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SupplyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2164,6 +3467,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2209,6 +3533,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeleteResponseSupply"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2265,6 +3610,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2285,12 +3651,54 @@
         ],
         "summary": "Descargar plantilla de insumos",
         "operationId": "bulk_supplies_template_supplies_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -2336,6 +3744,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2376,6 +3805,27 @@
                     "$ref": "#/components/schemas/ProviderResponse"
                   },
                   "title": "Response Get All Providers Providers  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2427,6 +3877,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProviderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2490,6 +3961,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2535,6 +4027,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProviderDeleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2596,6 +4109,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProviderContactResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2670,6 +4204,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2728,6 +4283,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2780,6 +4356,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2800,12 +4397,54 @@
         ],
         "summary": "Descargar plantilla de proveedores",
         "operationId": "bulk_providers_template_providers_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -2851,6 +4490,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -2871,12 +4531,54 @@
         ],
         "summary": "Descargar plantilla de contactos de proveedores",
         "operationId": "bulk_provider_contacts_template_providers_contacts_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -2912,6 +4614,27 @@
                     "$ref": "#/components/schemas/ProductCategoryResponse"
                   },
                   "title": "Response Get All Product Categories  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -2966,6 +4689,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3013,6 +4757,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductCategoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3076,6 +4841,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3125,6 +4911,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3143,9 +4950,52 @@
         "tags": [
           "CommercialProducts"
         ],
-        "summary": "Get All",
+        "summary": "Listar productos comerciales con paginación",
+        "description": "Lista productos comerciales con paginación y búsqueda.\n\nEnvelope ``{items, total, page, limit}``; ``page`` >= 1, ``limit`` 1..100\n(defecto 20). ``search`` filtra por nombre o descripción con ``LIKE`` y\nescapa ``%`` y ``_``.",
         "operationId": "get_all_commercial_products__get",
         "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Busca por nombre o descripción",
+              "title": "Search"
+            },
+            "description": "Busca por nombre o descripción"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
           {
             "name": "session-token",
             "in": "header",
@@ -3162,11 +5012,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CommercialProductResponse"
+                  "$ref": "#/components/schemas/Page_CommercialProductResponse_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
                   },
-                  "title": "Response Get All Commercial Products  Get"
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3188,6 +5055,7 @@
           "CommercialProducts"
         ],
         "summary": "Create",
+        "description": "Crea un producto comercial a partir de un producto terminado.\n\nEl producto de origen, la categoría y la unidad deben existir (404) y no\npuede existir otro producto comercial con el mismo nombre (409).",
         "operationId": "create_commercial_products__post",
         "parameters": [
           {
@@ -3217,6 +5085,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CommercialProductResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3268,6 +5157,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CommercialProductResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3331,6 +5241,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3376,6 +5307,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeleteResponseCommercialProduct"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3446,6 +5398,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3466,12 +5439,54 @@
         ],
         "summary": "Descargar plantilla de productos comerciales",
         "operationId": "bulk_commercial_template_commercial_products_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -3507,6 +5522,27 @@
                     "$ref": "#/components/schemas/RecipeResponse"
                   },
                   "title": "Response Get All Recipes  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3561,6 +5597,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3608,6 +5665,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RecipeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -3671,6 +5749,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3720,6 +5819,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3739,6 +5859,7 @@
           "Production"
         ],
         "summary": "Create",
+        "description": "Crea una orden de producción en estado ``pending``.\n\nReglas de negocio: la receta debe existir y estar activa (404/400) y el\nmultiplicador de cantidad debe ser mayor que cero. El consumo de insumos\nno se descuenta hasta que la orden se completa.",
         "operationId": "create_production_orders__post",
         "parameters": [
           {
@@ -3768,6 +5889,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductionOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se cumple una regla de negocio (stock, estado, ventana de tiempo, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No se cumple una regla de negocio."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
                 }
               }
             }
@@ -3832,6 +6016,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3888,6 +6093,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3939,6 +6165,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3958,6 +6205,7 @@
           "Production"
         ],
         "summary": "Start",
+        "description": "Inicia una orden pendiente.\n\nTransición permitida: ``pending`` → ``in_progress``. Cualquier otro\nestado devuelve 409; la orden inexistente devuelve 404.",
         "operationId": "start_production_orders__order_id__start_patch",
         "parameters": [
           {
@@ -3990,6 +6238,69 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El estado actual del recurso no permite la transición solicitada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Solo se pueden completar órdenes en estado 'in_progress'."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4009,6 +6320,7 @@
           "Production"
         ],
         "summary": "Cancel",
+        "description": "Cancela una orden con motivo.\n\nSolo se pueden cancelar órdenes en estados iniciales; el motivo es\nobligatorio y queda registrado en la auditoría. Transiciones inválidas\ndevuelven 409 y una orden inexistente 404.",
         "operationId": "cancel_production_orders__order_id__cancel_patch",
         "parameters": [
           {
@@ -4051,6 +6363,69 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El estado actual del recurso no permite la transición solicitada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Solo se pueden completar órdenes en estado 'in_progress'."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4070,6 +6445,7 @@
           "Production"
         ],
         "summary": "Complete",
+        "description": "Completa una orden: consume insumos y aumenta el stock del producto.\n\nReglas de negocio: exige estado ``in_progress`` (409), receta activa con\ningredientes y unidades compatibles con el inventario, y stock suficiente\nde cada insumo (400). Guarda un snapshot de la orden y movimientos de\ninventario; toda la operación es atómica.",
         "operationId": "complete_production_orders__order_id__complete_post",
         "parameters": [
           {
@@ -4098,6 +6474,90 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductionCompleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se cumple una regla de negocio (stock, estado, ventana de tiempo, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No se cumple una regla de negocio."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El estado actual del recurso no permite la transición solicitada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Solo se pueden completar órdenes en estado 'in_progress'."
                 }
               }
             }
@@ -4154,6 +6614,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4174,12 +6655,54 @@
         ],
         "summary": "Descargar plantilla de órdenes de producción",
         "operationId": "bulk_orders_template_production_orders_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -4192,6 +6715,7 @@
           "Sales"
         ],
         "summary": "Create Sale",
+        "description": "Registra una venta y descuenta el stock de cada artículo.\n\nReglas de negocio: se valida el stock disponible de productos e insumos\nantes de crear la venta (400), se agrupan las cantidades repetidas y se\ngenera un movimiento de inventario por artículo. La venta nace en estado\n``completed``; las operaciones se registran en la auditoría.",
         "operationId": "create_sale_sales__post",
         "parameters": [
           {
@@ -4225,6 +6749,69 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stock insuficiente para uno de los artículos de la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Stock insuficiente para 'Pan de yuca': disponible 3, solicitado 10."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4242,6 +6829,7 @@
           "Sales"
         ],
         "summary": "Get Sales",
+        "description": "Lista ventas con filtros y paginación.\n\nDevuelve el envelope ``{items, total, page, limit}``. Los filtros por\nfecha, estado, tipo de artículo y artículo son opcionales y combinables.",
         "operationId": "get_sales_sales__get",
         "parameters": [
           {
@@ -4370,6 +6958,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4460,6 +7069,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4511,6 +7141,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4530,6 +7181,7 @@
           "Sales"
         ],
         "summary": "Annul Sale",
+        "description": "Anula una venta y devuelve los artículos al inventario.\n\nReglas de negocio: exige el módulo RBAC ``sales`` (403); solo se pueden\nanular ventas en estado ``completed`` y dentro de las 24 horas siguientes\na la fecha de venta (400). Se registra un movimiento de inventario por\nartículo, el motivo de la anulación y la acción en la auditoría.",
         "operationId": "annul_sale_sales__sale_id__annul_patch",
         "parameters": [
           {
@@ -4568,6 +7220,90 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SaleAnnulResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se cumple una regla de negocio (stock, estado, ventana de tiempo, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No se cumple una regla de negocio."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permisos para esta operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "No tienes acceso al módulo 'sales'."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
                 }
               }
             }
@@ -4622,6 +7358,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
                 }
               }
             }
@@ -4786,6 +7543,27 @@
               }
             }
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4916,6 +7694,27 @@
           "200": {
             "description": "Successful Response"
           },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -4936,12 +7735,54 @@
         ],
         "summary": "Descargar plantilla de movimientos de stock",
         "operationId": "bulk_movements_template_inventory_bulk_template_get",
+        "parameters": [
+          {
+            "name": "session-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el header session-token, o la sesión es inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -6351,6 +9192,99 @@
           "label"
         ],
         "title": "ModuleResponse"
+      },
+      "Page_CommercialProductResponse_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommercialProductResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "title": "Page[CommercialProductResponse]"
+      },
+      "Page_ProductResponse_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProductResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "title": "Page[ProductResponse]"
+      },
+      "Page_SupplyResponse_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SupplyResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "title": "Page[SupplyResponse]"
       },
       "ProductCategoryBasic": {
         "properties": {

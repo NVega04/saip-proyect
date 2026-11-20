@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -9,6 +7,9 @@ from slowapi.util import get_remote_address
 
 from src.core.config import settings
 from src.core.exceptions import DomainError
+from src.core.logging import setup_logging
+from src.core.middleware import RequestIdMiddleware
+from src.core.openapi import AUTH_ERRORS
 from src.modules.audit.router import router as audit_router
 from src.modules.auth.router import router as auth_router
 from src.modules.commercial_products.categories_router import (
@@ -35,10 +36,7 @@ from src.modules.supplies.router import router as supplies_router
 from src.modules.units.router import router as units_router
 from src.modules.users.router import router as users_router
 
-logging.basicConfig(
-    level=logging.WARNING,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+setup_logging(settings.log_level, settings.log_format)
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -54,6 +52,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "session-token", "X-Confirm-Password"],
 )
 
+# Añadido el último para que sea el más externo: su cabecera X-Request-ID
+# también aparece en las respuestas CORS y en los errores.
+app.add_middleware(RequestIdMiddleware)
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -65,22 +67,25 @@ async def domain_error_handler(request, exc: DomainError):
     )
 
 
+# ``/health`` y ``/session`` (login/recuperación) son públicos; el resto
+# comparte la documentación del error 401. Las respuestas declaradas en cada
+# ruta prevalecen sobre estas (p. ej. 403/404/409 propios de cada operación).
 app.include_router(health_router)
-app.include_router(audit_router)
-app.include_router(users_router)
-app.include_router(roles_router)
+app.include_router(audit_router, responses=AUTH_ERRORS)
+app.include_router(users_router, responses=AUTH_ERRORS)
+app.include_router(roles_router, responses=AUTH_ERRORS)
 app.include_router(auth_router)
-app.include_router(role_modules_router)
-app.include_router(units_router)
-app.include_router(products_router)
-app.include_router(reports_router)
-app.include_router(supply_categories_router)
-app.include_router(supplies_router)
-app.include_router(providers_router)
-app.include_router(product_categories_router)
-app.include_router(commercial_products_router)
-app.include_router(recipes_router)
-app.include_router(production_router)
-app.include_router(sales_router)
-app.include_router(stats_router)
-app.include_router(inventory_router)
+app.include_router(role_modules_router, responses=AUTH_ERRORS)
+app.include_router(units_router, responses=AUTH_ERRORS)
+app.include_router(products_router, responses=AUTH_ERRORS)
+app.include_router(reports_router, responses=AUTH_ERRORS)
+app.include_router(supply_categories_router, responses=AUTH_ERRORS)
+app.include_router(supplies_router, responses=AUTH_ERRORS)
+app.include_router(providers_router, responses=AUTH_ERRORS)
+app.include_router(product_categories_router, responses=AUTH_ERRORS)
+app.include_router(commercial_products_router, responses=AUTH_ERRORS)
+app.include_router(recipes_router, responses=AUTH_ERRORS)
+app.include_router(production_router, responses=AUTH_ERRORS)
+app.include_router(sales_router, responses=AUTH_ERRORS)
+app.include_router(stats_router, responses=AUTH_ERRORS)
+app.include_router(inventory_router, responses=AUTH_ERRORS)

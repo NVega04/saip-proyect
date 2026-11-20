@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import Alerta from "../components/alert/Alert";
+import { SESSION_NOTICE_KEY } from "../utils/api";
 
 type AlertType = "success" | "error" | "warning" | "info";
 
@@ -29,6 +30,16 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     setAlert({ show: true, type, message, duration });
   };
 
+  // Aviso dejado por api.ts tras un 401: como la recarga de página borra
+  // el estado en memoria, se recupera y se muestra una sola vez. Se difiere
+  // a un microtask para no hacer setState síncrono dentro del effect.
+  useEffect(() => {
+    const notice = localStorage.getItem(SESSION_NOTICE_KEY);
+    if (notice) {
+      localStorage.removeItem(SESSION_NOTICE_KEY);
+      queueMicrotask(() => showAlert("warning", notice, 5000));
+    }
+  }, []);
   const hideAlert = () => {
     setAlert((prev) => ({ ...prev, show: false }));
   };

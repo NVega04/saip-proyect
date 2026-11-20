@@ -1,9 +1,11 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.openapi import CONFLICT, NOT_FOUND
+from src.core.pagination import Page, PaginationParams
 from src.core.schemas import BulkImportResult
 from src.modules.commercial_products.dependencies import (
     get_commercial_products_service,
@@ -26,14 +28,25 @@ router = APIRouter(prefix="/commercial-products", tags=["CommercialProducts"])
 
 @router.get(
     "/",
-    response_model=list[CommercialProductResponse],
+    response_model=Page[CommercialProductResponse],
     status_code=status.HTTP_200_OK,
+    summary="Listar productos comerciales con paginación",
 )
 def get_all(
+    pagination: PaginationParams = Depends(),
+    search: Optional[str] = Query(
+        default=None, max_length=100, description="Busca por nombre o descripción"
+    ),
     service: CommercialProductsService = Depends(get_commercial_products_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    """Lista productos comerciales con paginación y búsqueda.
+
+    Envelope ``{items, total, page, limit}``; ``page`` >= 1, ``limit`` 1..100
+    (defecto 20). ``search`` filtra por nombre o descripción con ``LIKE`` y
+    escapa ``%`` y ``_``.
+    """
+    return service.list(pagination, search)
 
 
 @router.get(
@@ -59,6 +72,11 @@ def create(
     service: CommercialProductsService = Depends(get_commercial_products_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Crea un producto comercial a partir de un producto terminado.
+
+    El producto de origen, la categoría y la unidad deben existir (404) y no
+    puede existir otro producto comercial con el mismo nombre (409).
+    """
     return service.create(data, current_user)
 
 
@@ -109,7 +127,9 @@ def bulk_import_commercial(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de productos comerciales",
 )
-def bulk_commercial_template():
+def bulk_commercial_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_productos_comerciales.xlsx",
         BULK_COMMERCIAL_HEADERS,

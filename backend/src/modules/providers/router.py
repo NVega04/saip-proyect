@@ -160,7 +160,9 @@ def bulk_import_providers(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de proveedores",
 )
-def bulk_providers_template():
+def bulk_providers_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_proveedores.xlsx", BULK_PROVIDER_HEADERS, BULK_PROVIDER_EXAMPLES
     )
@@ -185,7 +187,9 @@ def bulk_import_provider_contacts(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de contactos de proveedores",
 )
-def bulk_provider_contacts_template():
+def bulk_provider_contacts_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_contactos_proveedores.xlsx",
         BULK_CONTACT_HEADERS,

@@ -1,13 +1,16 @@
-"""Smoke de autorización sobre los 94 endpoints.
+"""Smoke de autorización sobre los endpoints de SAIP.
 
-Contrato observado en el código actual (Fase 0, no se corrige aquí):
+Contrato observado en el código actual (Fase 6):
 
 * Si falta el header ``session-token`` la respuesta es **422** (validación),
   no 401. El 401 aparece cuando el token existe pero es inválido.
 * ``POST /session/logout`` usa el alias ``session_token`` (guion bajo).
-* ``POST /role-modules/{role_id}`` y ``GET /audit/`` exigen ``require_admin``.
+* ``POST /users/``, ``POST /role-modules/{role_id}`` y ``GET /audit/``
+  exigen ``require_admin``; el resto de rutas de aplicación exigen sesión.
 * ``/inventory/report`` y ``/inventory/summary`` exigen el módulo
   ``inventory``; ``PATCH /sales/{sale_id}/annul`` exige ``sales``.
+* Solo ``/health`` y las tres rutas de recuperación/login de sesión son
+  públicas (``test_only_health_and_session_are_public``).
 """
 
 import re
@@ -51,6 +54,16 @@ def test_protected_route_with_invalid_token_returns_401(client, case):
     assert response.status_code == 401, (
         f"{case.method} {case.path} devolvió {response.status_code}; se esperaba 401"
     )
+
+
+def test_only_health_and_session_are_public():
+    """Ninguna ruta de negocio debe quedar expuesta sin sesión (Fase 6)."""
+    assert {case.method + " " + case.path for case in PUBLIC} == {
+        "GET /health",
+        "POST /session/forgot-password",
+        "POST /session/login",
+        "POST /session/reset-password",
+    }
 
 
 @pytest.mark.parametrize("case", PUBLIC, ids=route_id)

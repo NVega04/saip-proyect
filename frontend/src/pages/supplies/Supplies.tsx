@@ -1,5 +1,6 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
@@ -8,6 +9,8 @@ import BulkUploadModal from "../../components/bulkupload/BulkUploadModal";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery, usePagedQuery } from "../../hooks/queries";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import "./supplies.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
 
@@ -94,64 +97,54 @@ const columns: ColumnDef<Supply>[] = [
   { key: "expiration_date", header: "Vencimiento", width: "13%", render: (row) => formatDate(row.expiration_date) },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function Supplies(): JSX.Element {
-  const [supplies, setSupplies] = useState<Supply[]>([]);
-  const [categories, setCategories] = useState<SupplyCategoryBasic[]>([]);
-  const [units, setUnits] = useState<UnitBasic[]>([]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Supply | null>(null);
   const [form, setForm] = useState<SupplyForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("supplies");
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchSupplies = async () => {
-      try {
-        const response = await apiFetch("/supplies/");
-        if (!response.ok) throw new Error("Error al cargar insumos");
-        const data: Supply[] = await response.json();
-        setSupplies(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSupplies();
-  }, [reloadKey]);
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const suppliesQuery = usePagedQuery<Supply>("/supplies/", {
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch,
+  });
+  const categoriesQuery = useListQuery<SupplyCategoryBasic>("/supply-categories/");
+  const unitsQuery = useListQuery<UnitBasic>("/units/");
 
-  const loadFormData = async () => {
-    try {
-      const [catsRes, unitsRes] = await Promise.all([
-        apiFetch("/supply-categories/"),
-        apiFetch("/units/"),
-      ]);
+  const supplies = suppliesQuery.data?.items ?? [];
+  // El formulario solo ofrece categorías activas.
+  const categories = (categoriesQuery.data ?? []).filter(
+    (c) => c.status === "active"
+  );
+  const units = unitsQuery.data ?? [];
+  const totalPages = Math.max(
+    1,
+    Math.ceil((suppliesQuery.data?.total ?? 0) / PAGE_SIZE)
+  );
 
-      if (catsRes.ok) {
-        const catsData: SupplyCategoryBasic[] = await catsRes.json();
-        setCategories(catsData.filter((c) => c.status === "active"));
-      }
+  // Si se eliminan filas y la página actual queda fuera de rango, retrocede.
+  if (suppliesQuery.data && page > totalPages) {
+    setPage(totalPages);
+  }
 
-      if (unitsRes.ok) {
-        const unitsData: UnitBasic[] = await unitsRes.json();
-        setUnits(unitsData);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const invalidateSupplies = () =>
+    queryClient.invalidateQueries({ queryKey: ["paged", "/supplies/"] });
 
   const handleCrear = () => {
     setEditTarget(null);
     setForm(emptyForm());
     setErrors({});
-    loadFormData();
     setModalOpen(true);
   };
 
@@ -171,7 +164,6 @@ export default function Supplies(): JSX.Element {
         : "",
     });
     setErrors({});
-    loadFormData();
     setModalOpen(true);
   };
 
@@ -234,10 +226,7 @@ export default function Supplies(): JSX.Element {
           return;
         }
 
-        const updated: Supply = await response.json();
-        setSupplies((prev) =>
-          prev.map((s) => (s.id === editTarget.id ? updated : s))
-        );
+        await invalidateSupplies();
         showAlert("success", "Insumo actualizado correctamente.");
       } else {
         const response = await apiFetch("/supplies/", {
@@ -251,8 +240,7 @@ export default function Supplies(): JSX.Element {
           return;
         }
 
-        const created: Supply = await response.json();
-        setSupplies((prev) => [...prev, created]);
+        await invalidateSupplies();
         showAlert("success", "Insumo creado correctamente.");
       }
 
@@ -280,7 +268,7 @@ export default function Supplies(): JSX.Element {
             return;
           }
 
-          setSupplies((prev) => prev.filter((s) => s.id !== id));
+          await invalidateSupplies();
           showAlert("success", "Insumo eliminado correctamente.");
         } catch {
           showAlert("error", "Error de conexion con el servidor.");
@@ -297,8 +285,12 @@ export default function Supplies(): JSX.Element {
         { label: "Insumos" },
       ]}
     >
-      {loading ? (
+      {suppliesQuery.isPending || categoriesQuery.isPending || unitsQuery.isPending ? (
         <div className="saip-loading">Cargando insumos...</div>
+      ) : suppliesQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {suppliesQuery.error?.message || "No se pudieron cargar los insumos."}
+        </div>
       ) : (
         <Table
           title="Insumos"
@@ -306,6 +298,8 @@ export default function Supplies(): JSX.Element {
           data={supplies}
           searchPlaceholder="Buscar insumo"
           sortKey="name"
+          onSearch={setSearch}
+          serverPagination={{ page, totalPages, onPageChange: setPage }}
           headerActions={
             <>
             <Button variant="primary" onClick={handleCrear}>
@@ -540,7 +534,7 @@ export default function Supplies(): JSX.Element {
         title="Carga masiva de insumos"
         templateUrl="/supplies/bulk/template"
         importUrl="/supplies/bulk/import"
-        onImported={() => setReloadKey((k) => k + 1)}
+        onImported={() => void invalidateSupplies()}
       />
     </Layout>
   );

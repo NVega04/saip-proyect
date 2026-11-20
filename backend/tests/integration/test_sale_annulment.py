@@ -80,7 +80,7 @@ def test_annul_outside_window_keeps_stock_and_does_not_audit_success(
     assert response.status_code == 400
     assert "24 horas" in response.json()["detail"]
 
-    after = client.get(f"/products/{product['id']}")
+    after = client.get(f"/products/{product['id']}", headers=admin_headers)
     assert after.json()["available_quantity"] == 48
 
     assert not _audit_rows(client, admin_headers, "sale.annulled")
