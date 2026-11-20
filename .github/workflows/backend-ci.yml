@@ -58,6 +58,10 @@ jobs:
         working-directory: backend
         run: uv run mypy
 
+      - name: Apply Alembic migrations
+        working-directory: backend
+        run: uv run alembic upgrade head
+
       - name: Alembic drift check
         working-directory: backend
         run: uv run alembic check
