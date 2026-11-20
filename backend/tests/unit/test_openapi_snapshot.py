@@ -12,7 +12,7 @@ from typing import Any
 
 from src.main import app
 
-SNAPSHOT = Path(__file__).parent / "snapshots" / "openapi_baseline.json"
+SNAPSHOT = Path(__file__).parent.parent / "snapshots" / "openapi_baseline.json"
 
 # ``servers`` es volátil (depende del host que sirve la documentación) y
 # ``paths`` se compara por separado para producir mensajes más claros.
