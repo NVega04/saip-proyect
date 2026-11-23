@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from src.core.crypto import EncryptedString
 from src.core.time import BOGOTA_TZ
 
 
@@ -21,7 +22,7 @@ class User(SQLModel, table=True):
     first_name: str = Field(max_length=100)
     last_name: str = Field(max_length=100)
     email: str = Field(unique=True, index=True, max_length=150)
-    phone: Optional[str] = Field(default=None, max_length=20)
+    phone: Optional[str] = Field(default=None, sa_type=EncryptedString(255))
     password_hash: str = Field(max_length=255)
     created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))
     status: UserStatus = Field(default=UserStatus.ACTIVE)

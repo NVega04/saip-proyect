@@ -5,6 +5,7 @@ Los valores de seguridad son obligatorios o tienen valores seguros por defecto:
 está desactivado y ``CORS_ORIGINS`` se lee como lista separada por comas.
 """
 
+import base64
 from typing import Annotated, Optional
 
 from dotenv import load_dotenv
@@ -30,6 +31,8 @@ class Settings(BaseSettings):
 
     # Seguridad / sesiones
     jwt_secret: str
+    # CSV de claves Fernet. La primera cifra; todas pueden descifrar (rotación).
+    encryption_key: str
     jwt_algorithm: str = "HS256"
     session_duration_hours: int = 8
 
@@ -50,6 +53,21 @@ class Settings(BaseSettings):
 
     # Frontend
     frontend_url: str
+
+    @field_validator("encryption_key")
+    @classmethod
+    def validate_encryption_key(cls, value: str) -> str:
+        keys = [key.strip() for key in value.split(",") if key.strip()]
+        if not keys:
+            raise ValueError("ENCRYPTION_KEY es obligatoria")
+        for key in keys:
+            try:
+                decoded = base64.urlsafe_b64decode(key)
+            except Exception as exc:  # noqa: BLE001 - clave inválida
+                raise ValueError("ENCRYPTION_KEY debe ser base64 urlsafe") from exc
+            if len(decoded) != 32:
+                raise ValueError("Cada clave Fernet debe tener 32 bytes")
+        return ",".join(keys)
 
     @field_validator("jwt_secret")
     @classmethod

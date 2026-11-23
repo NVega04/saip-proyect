@@ -26,6 +26,13 @@ os.environ.setdefault("TEST_DB_NAME", "db_saip_test")
 # suite; nunca se lee ni se modifica el ``.env`` real.
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-con-al-menos-32-caracteres")
 os.environ.setdefault("FRONTEND_URL", "http://localhost:5173")
+# Fase 3: claves Fernet falsas, usadas solo por la suite. La segunda permite
+# probar la rotación sin tocar el ``.env`` real ni secretos de despliegue.
+os.environ.setdefault(
+    "ENCRYPTION_KEY",
+    "smtkqsJHxX01CFiTpIHWcIZXrEpMvub2Mm1TIcdme-Y=,"
+    "Nar9iorIwAUBeSVgqETB2ei86pd5a09hV2wl93FGAdk=",
+)
 
 import pymysql  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

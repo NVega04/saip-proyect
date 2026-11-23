@@ -10,6 +10,7 @@ from src.bulk.parser import (
     required_raw,
     run_bulk,
 )
+from src.core.crypto import blind_index
 from src.core.exceptions import ConflictError, NotFoundError
 from src.core.schemas import BulkImportResult
 from src.modules.providers.models import Provider, ProviderContact, ProviderStatus
@@ -55,7 +56,7 @@ class ProvidersService:
 
     def create(self, data: ProviderCreate, current_user: User) -> Provider:
         existing_nit = self.session.exec(
-            select(Provider).where(Provider.nit == data.nit)
+            select(Provider).where(Provider.nit_hash == blind_index(data.nit))
         ).first()
         if existing_nit:
             raise ConflictError(
@@ -101,7 +102,7 @@ class ProvidersService:
 
         if data.nit and data.nit != provider.nit:
             existing = self.session.exec(
-                select(Provider).where(Provider.nit == data.nit)
+                select(Provider).where(Provider.nit_hash == blind_index(data.nit))
             ).first()
             if existing:
                 raise ConflictError(
@@ -119,6 +120,8 @@ class ProvidersService:
 
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(provider, field, value)
+        if data.nit:
+            provider.nit_hash = blind_index(data.nit)
 
         provider.updated_at = datetime.now(timezone.utc)
         provider.updated_by = current_user.id
@@ -252,7 +255,7 @@ class ProvidersService:
                 )
 
             if self.session.exec(
-                select(Provider).where(Provider.nit == nit)
+                select(Provider).where(Provider.nit_hash == blind_index(nit))
             ).first():
                 raise RowError(
                     f"Ya existe un proveedor con el NIT '{row.get('nit')}'."
