@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     # Orígenes permitidos por CORS (CSV en la variable de entorno)
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
 
+    # Rate limiting
+    rate_limit_default: str = "100/minute"
+    # Solo se confía en X-Forwarded-For cuando el proxy está en esta lista.
+    trusted_proxy_hosts: Annotated[list[str], NoDecode] = []
+
     # Correo
     mail_host: Optional[str] = None
     mail_port: int = 587
@@ -73,6 +78,13 @@ class Settings(BaseSettings):
             ):
                 raise ValueError(f"Origen CORS inválido: {origin!r}")
         return list(dict.fromkeys(origins))
+
+    @field_validator("trusted_proxy_hosts", mode="before")
+    @classmethod
+    def parse_trusted_proxy_hosts(cls, value):
+        if isinstance(value, str):
+            value = value.split(",")
+        return list(dict.fromkeys(str(host).strip() for host in value if str(host).strip()))
 
     @field_validator("frontend_url")
     @classmethod

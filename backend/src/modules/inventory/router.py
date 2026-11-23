@@ -1,10 +1,11 @@
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import StreamingResponse
 
 from src.bulk.parser import template_response
 from src.core.dependencies import require_module
+from src.core.rate_limit import limiter
 from src.modules.inventory.dependencies import get_inventory_service
 from src.modules.inventory.schemas import InventoryPage
 from src.modules.inventory.service import (
@@ -49,7 +50,9 @@ def inventory_summary(
 
 
 @router.get("/report", response_class=StreamingResponse)
+@limiter.limit("5/minute")
 def inventory_report(
+    request: Request,
     item_type: Optional[Literal["supply", "product", "commercial"]] = Query(
         default=None
     ),

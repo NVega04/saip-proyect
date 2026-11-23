@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, Header, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from src.core.dependencies import get_current_user
+from src.core.rate_limit import limiter
 from src.modules.auth.dependencies import get_auth_service
 from src.modules.auth.schemas import (
     ChangePasswordRequest,
@@ -15,8 +14,6 @@ from src.modules.auth.service import AuthService
 from src.modules.users.models import User
 
 router = APIRouter(prefix="/session", tags=["Session"])
-
-limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post(

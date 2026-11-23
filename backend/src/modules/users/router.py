@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, Request, status
 
 from src.core.dependencies import get_current_user
+from src.core.rate_limit import limiter
 from src.modules.users.dependencies import get_users_service
 from src.modules.users.schemas import (
     DeleteResponseUser,
@@ -21,7 +22,9 @@ router = APIRouter(prefix="/users", tags=["Users"])
     status_code=status.HTTP_201_CREATED,
     summary="Crear nuevo usuario",
 )
+@limiter.limit("10/minute")
 def create_new_user(
+    request: Request,
     user_data: UserCreate,
     service: UsersService = Depends(get_users_service),
 ):
