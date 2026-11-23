@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from src.core.schemas import UppercaseMixin
 from src.modules.users.models import UserStatus
@@ -16,11 +16,11 @@ class RoleBasic(BaseModel):
 
 
 class UserCreate(UppercaseMixin, BaseModel):
-    first_name: str
-    last_name: str
-    email: EmailStr
-    phone: Optional[str] = None
-    role_id: int
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: EmailStr = Field(max_length=150)
+    phone: Optional[str] = Field(default=None, max_length=20)
+    role_id: int = Field(gt=0)
     is_admin: bool = False
 
 
@@ -49,11 +49,11 @@ class DeleteResponseUser(BaseModel):
 
 
 class UserUpdate(UppercaseMixin, BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    role_id: Optional[int] = None
+    first_name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    last_name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    email: Optional[EmailStr] = Field(default=None, max_length=150)
+    phone: Optional[str] = Field(default=None, max_length=20)
+    role_id: Optional[int] = Field(default=None, gt=0)
     is_admin: Optional[bool] = None
     status: Optional[UserStatus] = None
 

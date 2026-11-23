@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.schemas import UppercaseMixin
 from src.modules.recipes.models import RecipeStatus
@@ -10,10 +10,10 @@ from src.modules.units.schemas import UnitBasic
 
 
 class RecipeIngredientCreate(BaseModel):
-    supply_id: int
-    quantity: float
-    unit_id: int
-    notes: Optional[str] = None
+    supply_id: int = Field(gt=0)
+    quantity: float = Field(gt=0)
+    unit_id: int = Field(gt=0)
+    notes: Optional[str] = Field(default=None, max_length=255)
 
 
 class RecipeIngredientResponse(BaseModel):
@@ -31,22 +31,24 @@ class RecipeIngredientResponse(BaseModel):
 
 
 class RecipeCreate(UppercaseMixin, BaseModel):
-    name: str
-    description: Optional[str] = None
-    product_id: int
-    yield_quantity: float = 1
-    yield_unit_id: int
-    ingredients: list[RecipeIngredientCreate]
+    name: str = Field(min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    product_id: int = Field(gt=0)
+    yield_quantity: float = Field(default=1, gt=0)
+    yield_unit_id: int = Field(gt=0)
+    ingredients: list[RecipeIngredientCreate] = Field(min_length=1)
 
 
 class RecipeUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    product_id: Optional[int] = None
-    yield_quantity: Optional[float] = None
-    yield_unit_id: Optional[int] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    product_id: Optional[int] = Field(default=None, gt=0)
+    yield_quantity: Optional[float] = Field(default=None, gt=0)
+    yield_unit_id: Optional[int] = Field(default=None, gt=0)
     status: Optional[RecipeStatus] = None
-    ingredients: Optional[list[RecipeIngredientCreate]] = None
+    ingredients: Optional[list[RecipeIngredientCreate]] = Field(
+        default=None, min_length=1
+    )
 
 
 class RecipeResponse(BaseModel):

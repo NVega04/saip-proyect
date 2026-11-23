@@ -1,23 +1,23 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.core.schemas import UppercaseMixin
 
 
 class UnitCreate(UppercaseMixin, BaseModel):
-    name: str
-    abbreviation: str
-    description: Optional[str] = None
-    quantity: float
+    name: str = Field(min_length=1, max_length=100)
+    abbreviation: str = Field(min_length=1, max_length=20)
+    description: Optional[str] = Field(default=None, max_length=255)
+    quantity: float = Field(ge=0)
 
 
 class UnitUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    abbreviation: Optional[str] = None
-    description: Optional[str] = None
-    quantity: Optional[float] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    abbreviation: Optional[str] = Field(default=None, min_length=1, max_length=20)
+    description: Optional[str] = Field(default=None, max_length=255)
+    quantity: Optional[float] = Field(default=None, ge=0)
 
 
 class UnitResponse(BaseModel):

@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.core.schemas import UppercaseMixin
 from src.modules.roles.models import RoleStatus
 
 
 class RoleCreate(UppercaseMixin, BaseModel):
-    name: str
-    description: str
+    name: str = Field(min_length=1, max_length=100)
+    description: str = Field(max_length=500)
 
 
 class RoleResponse(BaseModel):
@@ -23,8 +23,8 @@ class RoleResponse(BaseModel):
 
 
 class RoleUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    description: Optional[str] = Field(default=None, max_length=500)
 
 
 class RolePublic(BaseModel):
@@ -53,7 +53,7 @@ class ModuleResponse(BaseModel):
 
 
 class RoleModuleAssign(BaseModel):
-    module_ids: list[int]
+    module_ids: list[int] = Field(min_length=1)
 
 
 class RoleModuleResponse(BaseModel):

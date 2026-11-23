@@ -1,23 +1,23 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from src.modules.providers.models import ProviderStatus
 
 
 class ProviderContactCreate(BaseModel):
-    name: str
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    name: str = Field(min_length=1, max_length=150)
+    email: Optional[EmailStr] = Field(default=None, max_length=150)
+    phone: Optional[str] = Field(default=None, max_length=20)
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class ProviderContactUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    email: Optional[EmailStr] = Field(default=None, max_length=150)
+    phone: Optional[str] = Field(default=None, max_length=20)
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class ProviderContactResponse(BaseModel):
@@ -40,15 +40,15 @@ class ProviderContactResponse(BaseModel):
 
 
 class ProviderCreate(BaseModel):
-    company: str
-    nit: str
-    email: EmailStr
+    company: str = Field(min_length=1, max_length=150)
+    nit: str = Field(min_length=1, max_length=20)
+    email: EmailStr = Field(max_length=150)
 
 
 class ProviderUpdate(BaseModel):
-    company: Optional[str] = None
-    nit: Optional[str] = None
-    email: Optional[EmailStr] = None
+    company: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    nit: Optional[str] = Field(default=None, min_length=1, max_length=20)
+    email: Optional[EmailStr] = Field(default=None, max_length=150)
 
 
 class ProviderResponse(BaseModel):

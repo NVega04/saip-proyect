@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.core.schemas import UppercaseMixin
 from src.modules.units.schemas import UnitBasic
@@ -27,13 +27,13 @@ class CommercialProductBasic(BaseModel):
 
 
 class ProductCategoryCreate(UppercaseMixin, BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(min_length=1, max_length=100)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
 class ProductCategoryUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
 class ProductCategoryResponse(BaseModel):
@@ -70,29 +70,29 @@ class ProviderBasic(BaseModel):
 
 
 class CommercialProductCreate(UppercaseMixin, BaseModel):
-    name: str
-    description: Optional[str] = None
-    category_id: int
-    unit_id: int
-    provider_id: Optional[int] = None
-    purchase_price: float = 0
-    sale_price: float = 0
-    available_quantity: float = 0
-    min_stock: float = 0
-    max_stock: float = 0
+    name: str = Field(min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    category_id: int = Field(gt=0)
+    unit_id: int = Field(gt=0)
+    provider_id: Optional[int] = Field(default=None, gt=0)
+    purchase_price: float = Field(default=0, ge=0)
+    sale_price: float = Field(default=0, ge=0)
+    available_quantity: float = Field(default=0, ge=0)
+    min_stock: float = Field(default=0, ge=0)
+    max_stock: float = Field(default=0, ge=0)
 
 
 class CommercialProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    provider_id: Optional[int] = None
-    purchase_price: Optional[float] = None
-    sale_price: Optional[float] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    category_id: Optional[int] = Field(default=None, gt=0)
+    unit_id: Optional[int] = Field(default=None, gt=0)
+    provider_id: Optional[int] = Field(default=None, gt=0)
+    purchase_price: Optional[float] = Field(default=None, ge=0)
+    sale_price: Optional[float] = Field(default=None, ge=0)
+    available_quantity: Optional[float] = Field(default=None, ge=0)
+    min_stock: Optional[float] = Field(default=None, ge=0)
+    max_stock: Optional[float] = Field(default=None, ge=0)
 
 
 class CommercialProductResponse(BaseModel):

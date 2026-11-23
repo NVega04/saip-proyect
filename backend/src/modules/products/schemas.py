@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.schemas import UppercaseMixin
 from src.modules.products.models import ProductStatus
@@ -9,22 +9,22 @@ from src.modules.units.schemas import UnitBasic
 
 
 class ProductCreate(UppercaseMixin, BaseModel):
-    name: str
-    description: Optional[str] = None
-    unit_id: int
-    available_quantity: float = 0
-    min_stock: float = 0
-    max_stock: float = 0
+    name: str = Field(min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    unit_id: int = Field(gt=0)
+    available_quantity: float = Field(default=0, ge=0)
+    min_stock: float = Field(default=0, ge=0)
+    max_stock: float = Field(default=0, ge=0)
     is_locked: bool = False
 
 
 class ProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    unit_id: Optional[int] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=150)
+    description: Optional[str] = Field(default=None, max_length=500)
+    unit_id: Optional[int] = Field(default=None, gt=0)
+    available_quantity: Optional[float] = Field(default=None, ge=0)
+    min_stock: Optional[float] = Field(default=None, ge=0)
+    max_stock: Optional[float] = Field(default=None, ge=0)
     is_locked: Optional[bool] = None
 
 

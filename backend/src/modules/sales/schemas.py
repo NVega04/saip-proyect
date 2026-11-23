@@ -18,7 +18,7 @@ class UserBasic(BaseModel):
 
 class SaleItemCreate(BaseModel):
     item_type: ItemType
-    item_id: int
+    item_id: int = Field(gt=0)
     quantity: float = Field(gt=0)
 
 

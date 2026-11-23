@@ -20,7 +20,7 @@ class RecipeBasic(BaseModel):
 
 
 class ProductionOrderCreate(BaseModel):
-    recipe_id: int
+    recipe_id: int = Field(gt=0)
     quantity_multiplier: float = Field(gt=0)
     scheduled_at: Optional[datetime] = None
     notes: Optional[str] = Field(default=None, max_length=500)
