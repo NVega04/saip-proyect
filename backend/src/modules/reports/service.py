@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from openpyxl import Workbook
 from sqlmodel import Session, select
 
-from src.core.exceptions import NotFoundError
+from src.core.exceptions import NotFoundError, UnprocessableError
 from src.modules.audit.service import AuditService
 from src.modules.commercial_products.models import CommercialProduct, ProductCategory
 from src.modules.production.models import ProductionOrder
@@ -25,6 +25,12 @@ from src.utils.excel import (
     fmt_bool,
     fmt_dt,
 )
+
+# Un reporte nunca debe construir un Excel completo a partir de una tabla
+# entera: se acota el número de filas y se registra el truncamiento.
+REPORT_ROW_LIMIT = 5000
+MAX_DATE_RANGE_DAYS = 366
+DATE_RANGE_REQUIRED = {"sessions", "production"}
 
 ENTITY_MAP = {
     "users": "Usuarios",
@@ -85,6 +91,33 @@ def _apply_filters(query, model, filters: Dict[str, object]):
     return query, applied
 
 
+def _fetch_rows(db: Session, query, applied: Dict[str, object]):
+    """Obtiene como máximo ``REPORT_ROW_LIMIT`` filas y avisa si truncó."""
+    rows = db.exec(query.limit(REPORT_ROW_LIMIT + 1)).all()
+    if len(rows) > REPORT_ROW_LIMIT:
+        applied["truncado"] = True
+        return rows[:REPORT_ROW_LIMIT]
+    applied["truncado"] = False
+    return rows
+
+
+def _validate_date_range(
+    entity: str, fecha_inicio: Optional[date], fecha_fin: Optional[date]
+) -> None:
+    if entity in DATE_RANGE_REQUIRED and (fecha_inicio is None or fecha_fin is None):
+        raise UnprocessableError(
+            "Este reporte requiere fecha_inicio y fecha_fin para evitar "
+            "lecturas completas de la tabla."
+        )
+    if fecha_inicio is not None and fecha_fin is not None:
+        if fecha_fin < fecha_inicio:
+            raise UnprocessableError("fecha_fin debe ser mayor o igual a fecha_inicio.")
+        if (fecha_fin - fecha_inicio).days > MAX_DATE_RANGE_DAYS:
+            raise UnprocessableError(
+                f"El rango de fechas no puede superar {MAX_DATE_RANGE_DAYS} días."
+            )
+
+
 def _build_users(ws, db: Session, filters: Dict[str, object]):
     headers = [
         "ID",
@@ -100,7 +133,7 @@ def _build_users(ws, db: Session, filters: Dict[str, object]):
     query = select(User).where(User.deleted_at == None)
     query, applied = _apply_filters(query, User, filters)
     apply_header_row(ws, headers)
-    users = db.exec(query).all()
+    users = _fetch_rows(db, query, applied)
     data = []
     for i, u in enumerate(users, start=2):
         role_name = u.role.name if u.role else "—"
@@ -140,7 +173,7 @@ def _build_roles(ws, db: Session, filters: Dict[str, object]):
     query = select(Role).where(Role.deleted_at == None)
     query, applied = _apply_filters(query, Role, filters)
     apply_header_row(ws, headers)
-    roles = db.exec(query).all()
+    roles = _fetch_rows(db, query, applied)
     data = []
     for i, r in enumerate(roles, start=2):
         apply_data_row(
@@ -165,7 +198,7 @@ def _build_sessions(ws, db: Session, filters: Dict[str, object]):
     query = select(SessionApp)
     query, applied = _apply_filters(query, SessionApp, filters)
     apply_header_row(ws, headers)
-    sessions = db.exec(query).all()
+    sessions = _fetch_rows(db, query, applied)
     data = []
     for i, s in enumerate(sessions, start=2):
         user_name = f"{s.user.first_name} {s.user.last_name}" if s.user else "—"
@@ -211,7 +244,7 @@ def _build_products(ws, db: Session, filters: Dict[str, object]):
     query = select(Product).where(Product.deleted_at == None)
     query, applied = _apply_filters(query, Product, filters)
     apply_header_row(ws, headers)
-    products = db.exec(query).all()
+    products = _fetch_rows(db, query, applied)
     data = []
     for i, p in enumerate(products, start=2):
         unit_name = p.unit.name if p.unit else "—"
@@ -265,7 +298,7 @@ def _build_supplies(ws, db: Session, filters: Dict[str, object]):
     query = select(Supply).where(Supply.deleted_at == None)
     query, applied = _apply_filters(query, Supply, filters)
     apply_header_row(ws, headers)
-    supplies = db.exec(query).all()
+    supplies = _fetch_rows(db, query, applied)
     data = []
     for i, s in enumerate(supplies, start=2):
         cat_name = s.category.name if s.category else "—"
@@ -310,7 +343,7 @@ def _build_supply_categories(ws, db: Session, filters: Dict[str, object]):
     query = select(SupplyCategory)
     query, applied = _apply_filters(query, SupplyCategory, filters)
     apply_header_row(ws, headers)
-    categories = db.exec(query).all()
+    categories = _fetch_rows(db, query, applied)
     data = []
     for i, c in enumerate(categories, start=2):
         apply_data_row(
@@ -340,7 +373,7 @@ def _build_units(ws, db: Session, filters: Dict[str, object]):
     query = select(Unit).where(Unit.deleted_at == None)
     query, applied = _apply_filters(query, Unit, filters)
     apply_header_row(ws, headers)
-    units = db.exec(query).all()
+    units = _fetch_rows(db, query, applied)
     data = []
     for i, u in enumerate(units, start=2):
         apply_data_row(
@@ -382,7 +415,7 @@ def _build_recipes(ws, db: Session, filters: Dict[str, object]):
     query = select(Recipe).where(Recipe.deleted_at == None)
     query, applied = _apply_filters(query, Recipe, filters)
     apply_header_row(ws, headers)
-    recipes = db.exec(query).all()
+    recipes = _fetch_rows(db, query, applied)
     data = []
     for i, r in enumerate(recipes, start=2):
         product_name = r.product.name if r.product else "—"
@@ -431,7 +464,7 @@ def _build_production(ws, db: Session, filters: Dict[str, object]):
     query = select(ProductionOrder).where(ProductionOrder.deleted_at == None)
     query, applied = _apply_filters(query, ProductionOrder, filters)
     apply_header_row(ws, headers)
-    orders = db.exec(query).all()
+    orders = _fetch_rows(db, query, applied)
     data = []
     for i, o in enumerate(orders, start=2):
         recipe_name = o.recipe.name if o.recipe else "—"
@@ -471,7 +504,7 @@ def _build_providers(ws, db: Session, filters: Dict[str, object]):
     query = select(Provider).where(Provider.deleted_at == None)
     query, applied = _apply_filters(query, Provider, filters)
     apply_header_row(ws, headers)
-    providers = db.exec(query).all()
+    providers = _fetch_rows(db, query, applied)
     data = []
     for i, p in enumerate(providers, start=2):
         apply_data_row(
@@ -504,7 +537,7 @@ def _build_product_categories(ws, db: Session, filters: Dict[str, object]):
     query = select(ProductCategory).where(ProductCategory.deleted_at == None)
     query, applied = _apply_filters(query, ProductCategory, filters)
     apply_header_row(ws, headers)
-    categories = db.exec(query).all()
+    categories = _fetch_rows(db, query, applied)
     data = []
     for i, c in enumerate(categories, start=2):
         apply_data_row(
@@ -540,7 +573,7 @@ def _build_commercial_products(ws, db: Session, filters: Dict[str, object]):
     query = select(CommercialProduct).where(CommercialProduct.deleted_at == None)
     query, applied = _apply_filters(query, CommercialProduct, filters)
     apply_header_row(ws, headers)
-    products = db.exec(query).all()
+    products = _fetch_rows(db, query, applied)
     data = []
     for i, p in enumerate(products, start=2):
         cat_name = p.category.name if p.category else "—"
@@ -634,6 +667,8 @@ class ReportsService:
                 f"Entidad '{entity}' no soportada. Opciones: {list(BUILDERS.keys())}"
             )
 
+        _validate_date_range(entity, fecha_inicio, fecha_fin)
+
         filters: Dict[str, object] = {
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
@@ -660,7 +695,8 @@ class ReportsService:
         ws.title = ENTITY_MAP.get(entity, entity.capitalize())
         ws.freeze_panes = "A3"
 
-        headers, _, _ = BUILDERS[entity](ws, self.session, filters)
+        headers, _, applied = BUILDERS[entity](ws, self.session, filters)
+        filters["truncado"] = applied.get("truncado", False)
 
         col_count = len(headers)
         add_title_row(
