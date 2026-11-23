@@ -20,7 +20,6 @@ from src.modules.commercial_products.models import CommercialProduct
 from src.modules.sales.models import ItemType, Sale, SaleItem, SaleStatus
 from src.modules.sales.schemas import (
     SaleAnnulResponse,
-    SaleAnnulRequest,
     SaleCreate,
     SaleCreateResponse,
     SaleListPage,

@@ -119,4 +119,4 @@ class Settings(BaseSettings):
         return f"{self.frontend_url}/{path.lstrip('/')}"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

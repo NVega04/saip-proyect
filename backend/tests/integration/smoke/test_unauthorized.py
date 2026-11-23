@@ -17,7 +17,7 @@ import re
 
 import pytest
 
-from tests.smoke.route_matrix import ROUTE_MATRIX, route_id
+from tests.integration.smoke.route_matrix import ROUTE_MATRIX, route_id
 
 PROTECTED = [case for case in ROUTE_MATRIX if case.auth != "public"]
 PUBLIC = [case for case in ROUTE_MATRIX if case.auth == "public"]

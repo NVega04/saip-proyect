@@ -7,7 +7,7 @@ Si este test falla, hay un endpoint nuevo o eliminado que no está clasificado e
 from fastapi.routing import APIRoute
 
 from src.main import app
-from tests.smoke.route_matrix import ROUTE_MATRIX
+from tests.integration.smoke.route_matrix import ROUTE_MATRIX
 
 EXCLUDED_PATHS = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
 IGNORED_METHODS = {"HEAD", "OPTIONS"}
