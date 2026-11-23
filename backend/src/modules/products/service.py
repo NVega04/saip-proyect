@@ -16,6 +16,7 @@ from src.bulk.parser import (
 from src.core.exceptions import ConflictError, NotFoundError, PermissionDeniedError
 from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
+from src.core.validation import validate_input
 from src.modules.products.models import Product
 from src.modules.products.schemas import ProductCreate, ProductUpdate
 from src.modules.units.models import Unit
@@ -74,6 +75,7 @@ class ProductsService:
         return product
 
     def create(self, data: ProductCreate, current_user: User) -> Product:
+        validate_input(data, "ProductCreate")
         unit = self.session.get(Unit, data.unit_id)
         if not unit or unit.deleted_at is not None:
             raise NotFoundError("Unidad no encontrada")
@@ -107,6 +109,7 @@ class ProductsService:
     def update(
         self, product_id: int, data: ProductUpdate, current_user: User
     ) -> Product:
+        validate_input(data, "ProductUpdate")
         product = self.get(product_id)
 
         if product.is_locked:

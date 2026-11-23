@@ -4,6 +4,7 @@ No busca cubrir los 94 endpoints uno por uno: ejercita el flujo principal de
 cada dominio para detectar regresiones gruesas en las fases siguientes.
 """
 
+from datetime import date, timedelta
 from uuid import uuid4
 
 import pytest
@@ -520,7 +521,14 @@ REPORT_ENTITIES = [
 def test_reports_generate_an_excel_file(
     client, admin_headers, supply, product, recipe, entity
 ):
-    response = client.get(f"/reports/{entity}", headers=admin_headers)
+    response = client.get(
+        f"/reports/{entity}",
+        headers=admin_headers,
+        params={
+            "fecha_inicio": (date.today() - timedelta(days=1)).isoformat(),
+            "fecha_fin": (date.today() + timedelta(days=1)).isoformat(),
+        },
+    )
 
     assert response.status_code == 200, response.text
     assert response.headers["content-type"] == XLSX_MIME

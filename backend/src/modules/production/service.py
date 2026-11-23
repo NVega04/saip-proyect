@@ -19,6 +19,7 @@ from src.bulk.parser import (
 from src.core.exceptions import BusinessRuleError, ConflictError, NotFoundError
 from src.core.schemas import BulkImportResult
 from src.core.time import BOGOTA_TZ
+from src.core.validation import validate_input
 from src.modules.production.models import (
     ProductionOrder,
     ProductionOrderSnapshot,
@@ -60,6 +61,7 @@ class ProductionService:
         return order
 
     def create(self, data: ProductionOrderCreate, current_user: User) -> ProductionOrder:
+        validate_input(data, "ProductionOrderCreate")
         recipe = self.session.get(Recipe, data.recipe_id)
         if not recipe or recipe.deleted_at is not None:
             raise NotFoundError(

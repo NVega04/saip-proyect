@@ -5,17 +5,28 @@ Deuda conocida y decisiones diferidas. **No está incluida** en la Fase 6
 
 ## Fases 3 y 5 del plan original
 
-El plan `_docs/rules/ajustes.md` contempla fases que **no se ejecutaron** en
-esta rama:
+La **Fase 3 (seguridad P1)** ya fue ejecutada e integrada con Fase 6: rate
+limit global y proxy de confianza, límites de reportes, validación de entrada
+en servicios, cifrado de NIT/teléfonos con índice ciego, migración
+`6ef9e1aec914`, scripts de respaldo y guía TLS/HSTS. Detalles en
+[`SEGURIDAD.md`](./SEGURIDAD.md) y [`DEPLOY-SEGURIDAD.md`](./DEPLOY-SEGURIDAD.md).
 
-- **Fase 3 — seguridad avanzada**: no hay rate limiting global (solo login
-  5/min y recuperación 3/min), no hay cifrado de datos en reposo y no hay
-  auditoría de acceso a registros individuales (solo acciones críticas).
-- **Fase 5 — infraestructura/CI**: no hay pipeline de CI (no existe
-  `.github/workflows`), no hay despliegue automatizado y no hay monitorización
-  centralizada de logs/métricas más allá del logging JSON con `X-Request-ID`.
-- No se añadió el prefijo `/api/v1`: decisión explícita de **no versionar** el
-  contrato (cualquier cambio de rutas debe aprobarse antes).
+Deuda derivada de las decisiones de integración:
+
+- Se conservó la **paginación de Fase 6** (`page`/`limit`) y el **baseline
+  OpenAPI aprobado**; por eso los límites de Fase 3 se validan en servicios en
+  lugar de `Field(...)` en los schemas, y los 8 listados planos siguen sin tope
+  (ver sección siguiente).
+- No se añadió auditoría de acceso a registros individuales; solo se registran
+  acciones críticas, con NIT/teléfonos sanitizados.
+
+La **Fase 5 (infraestructura/CI)** tiene pipeline en
+`.github/workflows/backend-ci.yml` (ruff, mypy, pytest y migraciones). Siguen
+pendientes el despliegue automatizado y la monitorización centralizada de
+logs/métricas más allá del logging JSON con `X-Request-ID`.
+
+No se añadió el prefijo `/api/v1`: decisión explícita de **no versionar** el
+contrato (cualquier cambio de rutas debe aprobarse antes).
 
 ## Paginación incompleta
 
@@ -71,7 +82,8 @@ doble prueba (positiva/negativa) en Selenium quedó como iniciativa separada
 
 - Los esquemas Pydantic con `class Config` (p. ej. `sales/schemas.py`) emiten
   `PydanticDeprecatedSince20`; migrar a `ConfigDict` antes de Pydantic 3.
-- No hay script automatizado de respaldo; el procedimiento manual está en
-  [`SEGURIDAD.md`](./SEGURIDAD.md).
+- Los scripts de respaldo/restauración existen en `scripts/`, pero su
+  programación (cron/job) y las pruebas periódicas de restauración siguen siendo
+  responsabilidad del operador; ver [`SEGURIDAD.md`](./SEGURIDAD.md).
 - La deuda de funcionalidad de negocio (p. ej. órdenes de compra) sigue en el
   README y en `docs/INVENTARIO.md`.

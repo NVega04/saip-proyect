@@ -13,6 +13,7 @@ from src.core.exceptions import (
     UnauthorizedError,
 )
 from src.core.password import validate_password
+from src.core.validation import validate_input
 from src.core.security import (
     generate_temp_password,
     hash_password,
@@ -49,6 +50,7 @@ class UsersService:
         self.audit = AuditService(session, ip_address=ip_address)
 
     def create(self, data: UserCreate, current_user: User) -> User:
+        validate_input(data, "UserCreate")
         role = self.session.get(Role, data.role_id)
         if not role:
             raise NotFoundError(f"El rol con id '{data.role_id}' no existe.")
@@ -205,6 +207,7 @@ class UsersService:
     def update(
         self, user_id: int, data: UserUpdate, current_user: User
     ) -> User:
+        validate_input(data, "UserUpdate")
         user = self.session.get(User, user_id)
         if not user:
             raise NotFoundError(f"El usuario con id '{user_id}' no existe.")

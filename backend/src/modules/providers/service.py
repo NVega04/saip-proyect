@@ -10,8 +10,10 @@ from src.bulk.parser import (
     required_raw,
     run_bulk,
 )
+from src.core.crypto import blind_index
 from src.core.exceptions import ConflictError, NotFoundError
 from src.core.schemas import BulkImportResult
+from src.core.validation import validate_input
 from src.modules.providers.models import Provider, ProviderContact, ProviderStatus
 from src.modules.providers.schemas import (
     ProviderContactCreate,
@@ -54,8 +56,9 @@ class ProvidersService:
         self.session = session
 
     def create(self, data: ProviderCreate, current_user: User) -> Provider:
+        validate_input(data, "ProviderCreate")
         existing_nit = self.session.exec(
-            select(Provider).where(Provider.nit == data.nit)
+            select(Provider).where(Provider.nit_hash == blind_index(data.nit))
         ).first()
         if existing_nit:
             raise ConflictError(
@@ -93,6 +96,7 @@ class ProvidersService:
     def update(
         self, provider_id: int, data: ProviderUpdate, current_user: User
     ) -> Provider:
+        validate_input(data, "ProviderUpdate")
         provider = self.get(provider_id)
         if provider.status == ProviderStatus.INACTIVE:
             raise ConflictError(
@@ -101,7 +105,7 @@ class ProvidersService:
 
         if data.nit and data.nit != provider.nit:
             existing = self.session.exec(
-                select(Provider).where(Provider.nit == data.nit)
+                select(Provider).where(Provider.nit_hash == blind_index(data.nit))
             ).first()
             if existing:
                 raise ConflictError(
@@ -119,6 +123,8 @@ class ProvidersService:
 
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(provider, field, value)
+        if data.nit:
+            provider.nit_hash = blind_index(data.nit)
 
         provider.updated_at = datetime.now(timezone.utc)
         provider.updated_by = current_user.id
@@ -154,6 +160,7 @@ class ProvidersService:
     def create_contact(
         self, provider_id: int, data: ProviderContactCreate, current_user: User
     ) -> ProviderContact:
+        validate_input(data, "ProviderContactCreate")
         provider = self.get(provider_id)
         if provider.status == ProviderStatus.INACTIVE:
             raise ConflictError(
@@ -177,6 +184,7 @@ class ProvidersService:
         data: ProviderContactUpdate,
         current_user: User,
     ) -> ProviderContact:
+        validate_input(data, "ProviderContactUpdate")
         self.get(provider_id)
 
         contact = self.session.get(ProviderContact, contact_id)
@@ -252,7 +260,7 @@ class ProvidersService:
                 )
 
             if self.session.exec(
-                select(Provider).where(Provider.nit == nit)
+                select(Provider).where(Provider.nit_hash == blind_index(nit))
             ).first():
                 raise RowError(
                     f"Ya existe un proveedor con el NIT '{row.get('nit')}'."

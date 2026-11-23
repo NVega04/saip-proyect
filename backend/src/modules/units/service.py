@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlmodel import Session, select
 
 from src.core.exceptions import ConflictError, NotFoundError
+from src.core.validation import validate_input
 from src.modules.units.models import Unit
 from src.modules.units.schemas import UnitCreate, UnitUpdate
 from src.modules.users.models import User
@@ -22,6 +23,7 @@ class UnitsService:
         return unit
 
     def create_unit(self, data: UnitCreate, current_user: User) -> Unit:
+        validate_input(data, "UnitCreate")
         existing = self.session.exec(
             select(Unit).where(
                 (Unit.name == data.name) | (Unit.abbreviation == data.abbreviation),
@@ -44,6 +46,7 @@ class UnitsService:
         return unit
 
     def update_unit(self, unit_id: int, data: UnitUpdate, current_user: User) -> Unit:
+        validate_input(data, "UnitUpdate")
         unit = self.get_unit(unit_id)
 
         if data.name is not None and data.name != unit.name:

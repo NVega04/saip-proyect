@@ -9,7 +9,8 @@ from src.modules.audit.models import AuditLog
 from src.modules.audit.schemas import AuditLogPage, AuditLogResponse
 
 SENSITIVE_KEY_PATTERN = re.compile(
-    r"(password|passwd|secret|token|hash|jwt|credential|authorization|reset)",
+    r"(password|passwd|secret|token|hash|jwt|credential|authorization|reset"
+    r"|nit|phone|telefono|celular)",
     re.IGNORECASE,
 )
 

@@ -1,9 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.rate_limit import limiter
 from src.core.openapi import BAD_REQUEST, CONFLICT_STATE, NOT_FOUND
 from src.core.schemas import BulkImportResult
 from src.modules.production.dependencies import get_production_service
@@ -64,7 +65,9 @@ def get_all(
     "/export",
     summary="Exportar órdenes de producción a Excel",
 )
+@limiter.limit("5/minute")
 def export_orders(
+    request: Request,
     status_filter: Optional[ProductionOrderStatus] = Query(
         default=None, alias="status"
     ),

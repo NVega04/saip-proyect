@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select
 
 from src.core.exceptions import ConflictError, NotFoundError
+from src.core.validation import validate_input
 from src.core.time import BOGOTA_TZ
 from src.modules.commercial_products.models import ProductCategory
 from src.modules.commercial_products.schemas import (
@@ -29,6 +30,7 @@ class ProductCategoriesService:
     def create(
         self, data: ProductCategoryCreate, current_user: User
     ) -> ProductCategory:
+        validate_input(data, "ProductCategoryCreate")
         existing = self.session.exec(
             select(ProductCategory).where(ProductCategory.name == data.name)
         ).first()
@@ -48,6 +50,7 @@ class ProductCategoriesService:
     def update(
         self, category_id: int, data: ProductCategoryUpdate, current_user: User
     ) -> ProductCategory:
+        validate_input(data, "ProductCategoryUpdate")
         category = self.get(category_id)
 
         if data.name and data.name != category.name:

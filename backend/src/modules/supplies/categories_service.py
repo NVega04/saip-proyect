@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlmodel import Session, select
 
 from src.core.exceptions import ConflictError, NotFoundError
+from src.core.validation import validate_input
 from src.modules.supplies.models import SupplyCategory
 from src.modules.supplies.schemas import (
     DeleteResponseSupplyCategory,
@@ -17,6 +18,7 @@ class SupplyCategoriesService:
         self.session = session
 
     def create(self, data: SupplyCategoryCreate, current_user: User) -> SupplyCategory:
+        validate_input(data, "SupplyCategoryCreate")
         existing = self.session.exec(
             select(SupplyCategory).where(SupplyCategory.name == data.name)
         ).first()
@@ -45,6 +47,7 @@ class SupplyCategoriesService:
     def update(
         self, category_id: int, data: SupplyCategoryUpdate, current_user: User
     ) -> SupplyCategory:
+        validate_input(data, "SupplyCategoryUpdate")
         category = self.get(category_id)
 
         if data.name and data.name != category.name:
