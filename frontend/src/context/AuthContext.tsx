@@ -19,12 +19,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
   });
-  const [loading, setLoading] = useState(true);
+  // Sin token no hay nada que esperar: loading arranca en false y el
+  // effect no necesita hacer setState de forma síncrona.
+  const [loading, setLoading] = useState<boolean>(
+    () => localStorage.getItem("session_token") !== null
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("session_token");
     if (!token) {
-      setLoading(false);
       return;
     }
     // Fetch en segundo plano para obtener datos frescos del backend

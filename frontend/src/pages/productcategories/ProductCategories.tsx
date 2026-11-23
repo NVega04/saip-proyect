@@ -1,5 +1,6 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
@@ -7,6 +8,7 @@ import Button from "../../components/button/Button";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery } from "../../hooks/queries";
 import "./ProductCategories.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
 
@@ -68,32 +70,24 @@ const columns: ColumnDef<ProductCategory>[] = [
 ];
 
 export default function ProductCategories(): JSX.Element {
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ProductCategory | null>(null);
   const [form, setForm] = useState<ProductCategoryForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("product-categories");
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await apiFetch("/product-categories/");
-        if (!response.ok) throw new Error("Error al cargar categorias");
-        const data: ProductCategory[] = await response.json();
-        setCategories(data.filter((c) => c.status === "active"));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const categoriesQuery = useListQuery<ProductCategory>("/product-categories/");
+  // La tabla solo muestra categorías activas.
+  const categories = (categoriesQuery.data ?? []).filter(
+    (c) => c.status === "active"
+  );
+
+  const invalidateCategories = () =>
+    queryClient.invalidateQueries({ queryKey: ["list", "/product-categories/"] });
 
   const handleCrear = () => {
     setEditTarget(null);
@@ -157,10 +151,7 @@ export default function ProductCategories(): JSX.Element {
           return;
         }
 
-        const updated: ProductCategory = await response.json();
-        setCategories((prev) =>
-          prev.map((c) => (c.id === editTarget.id ? updated : c))
-        );
+        await invalidateCategories();
         showAlert("success", "Categoria actualizada correctamente.");
       } else {
         const response = await apiFetch("/product-categories/", {
@@ -177,8 +168,7 @@ export default function ProductCategories(): JSX.Element {
           return;
         }
 
-        const created: ProductCategory = await response.json();
-        setCategories((prev) => [...prev, created]);
+        await invalidateCategories();
         showAlert("success", "Categoria creada correctamente.");
       }
 
@@ -206,7 +196,7 @@ export default function ProductCategories(): JSX.Element {
             return;
           }
 
-          setCategories((prev) => prev.filter((c) => c.id !== id));
+          await invalidateCategories();
           showAlert("success", "Categoria eliminada correctamente.");
         } catch {
           showAlert("error", "Error de conexion con el servidor.");
@@ -223,8 +213,12 @@ export default function ProductCategories(): JSX.Element {
         { label: "Categorias de productos" },
       ]}
     >
-      {loading ? (
+      {categoriesQuery.isPending ? (
         <div className="saip-loading">Cargando categorias...</div>
+      ) : categoriesQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {categoriesQuery.error?.message || "No se pudieron cargar las categorias."}
+        </div>
       ) : (
         <Table
           title="Categorias de productos"

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Header, status
 
-from src.core.dependencies import get_current_user
+from src.core.dependencies import get_current_user, require_admin
 from src.modules.users.dependencies import get_users_service
 from src.modules.users.schemas import (
     DeleteResponseUser,
@@ -20,12 +20,27 @@ router = APIRouter(prefix="/users", tags=["Users"])
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear nuevo usuario",
+    responses={
+        401: {"description": "Sesión ausente o inválida"},
+        403: {"description": "Se requieren permisos de administrador"},
+        409: {"description": "El email ya está registrado"},
+        404: {"description": "El rol indicado no existe"},
+    },
 )
 def create_new_user(
     user_data: UserCreate,
     service: UsersService = Depends(get_users_service),
+    current_user: User = Depends(require_admin),
 ):
-    return service.create(user_data)
+    """Crea un usuario con contraseña temporal.
+
+    Solo administradores (403). El rol indicado debe existir (404) y el email
+    no puede estar registrado (409). Se envía un correo de bienvenida con la
+    contraseña temporal; si el envío falla, la cuenta queda creada y el fallo
+    se registra en los logs sin exponer la contraseña. La acción se audita con
+    el id del administrador que la realizó.
+    """
+    return service.create(user_data, current_user)
 
 
 @router.get(

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from src.bulk.parser import (
@@ -13,6 +14,7 @@ from src.bulk.parser import (
     safe_float,
 )
 from src.core.exceptions import ConflictError, NotFoundError
+from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
 from src.core.time import BOGOTA_TZ
 from src.modules.commercial_products.models import CommercialProduct, ProductCategory
@@ -57,10 +59,34 @@ class CommercialProductsService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list(self) -> list[CommercialProduct]:
-        return self.session.exec(
-            select(CommercialProduct).where(CommercialProduct.deleted_at == None)
+    def list(
+        self, pagination: PaginationParams, search: str | None = None
+    ) -> Page[CommercialProduct]:
+        filters = [CommercialProduct.deleted_at == None]  # noqa: E712
+        if search and search.strip():
+            pattern = like_pattern(search)
+            filters.append(
+                CommercialProduct.name.like(pattern)
+                | CommercialProduct.description.like(pattern)
+            )
+        total = self.session.exec(
+            select(func.count())
+            .select_from(CommercialProduct)
+            .where(*filters)
+        ).one()
+        rows = self.session.exec(
+            select(CommercialProduct)
+            .where(*filters)
+            .order_by(CommercialProduct.id)
+            .offset(pagination.offset)
+            .limit(pagination.limit)
         ).all()
+        return Page[CommercialProduct](
+            items=rows,
+            total=total,
+            page=pagination.page,
+            limit=pagination.limit,
+        )
 
     def get(self, product_id: int) -> CommercialProduct:
         product = self.session.get(CommercialProduct, product_id)

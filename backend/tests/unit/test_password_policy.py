@@ -51,7 +51,7 @@ def test_generated_temp_password_meets_policy():
 
 
 def test_create_user_does_not_log_temp_password(
-    db_session, admin_role, monkeypatch, caplog
+    db_session, admin_user, admin_role, monkeypatch, caplog
 ):
     sentinel = "TempPassword123!"
     monkeypatch.setattr(
@@ -66,7 +66,8 @@ def test_create_user_does_not_log_temp_password(
                 last_name="Prueba",
                 email=f"temp-{uuid4().hex[:8]}@saip.com",
                 role_id=admin_role.id,
-            )
+            ),
+            admin_user,
         )
 
     assert sentinel not in caplog.text

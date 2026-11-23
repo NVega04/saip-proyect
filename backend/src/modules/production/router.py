@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.openapi import BAD_REQUEST, CONFLICT_STATE, NOT_FOUND
 from src.core.schemas import BulkImportResult
 from src.modules.production.dependencies import get_production_service
 from src.modules.production.models import ProductionOrderStatus
@@ -28,12 +29,19 @@ router = APIRouter(prefix="/production/orders", tags=["Production"])
     "/",
     response_model=ProductionOrderResponse,
     status_code=status.HTTP_201_CREATED,
+    responses={400: BAD_REQUEST, 404: NOT_FOUND},
 )
 def create(
     data: ProductionOrderCreate,
     service: ProductionService = Depends(get_production_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Crea una orden de producción en estado ``pending``.
+
+    Reglas de negocio: la receta debe existir y estar activa (404/400) y el
+    multiplicador de cantidad debe ser mayor que cero. El consumo de insumos
+    no se descuenta hasta que la orden se completa.
+    """
     return service.create(data, current_user)
 
 
@@ -83,12 +91,18 @@ def get_one(
     "/{order_id}/start",
     response_model=ProductionOrderStatusChangeResponse,
     status_code=status.HTTP_200_OK,
+    responses={404: NOT_FOUND, 409: CONFLICT_STATE},
 )
 def start(
     order_id: int,
     service: ProductionService = Depends(get_production_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Inicia una orden pendiente.
+
+    Transición permitida: ``pending`` → ``in_progress``. Cualquier otro
+    estado devuelve 409; la orden inexistente devuelve 404.
+    """
     return service.start(order_id, current_user)
 
 
@@ -96,6 +110,7 @@ def start(
     "/{order_id}/cancel",
     response_model=ProductionOrderStatusChangeResponse,
     status_code=status.HTTP_200_OK,
+    responses={404: NOT_FOUND, 409: CONFLICT_STATE},
 )
 def cancel(
     order_id: int,
@@ -103,6 +118,12 @@ def cancel(
     service: ProductionService = Depends(get_production_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Cancela una orden con motivo.
+
+    Solo se pueden cancelar órdenes en estados iniciales; el motivo es
+    obligatorio y queda registrado en la auditoría. Transiciones inválidas
+    devuelven 409 y una orden inexistente 404.
+    """
     return service.cancel(order_id, data, current_user)
 
 
@@ -110,12 +131,20 @@ def cancel(
     "/{order_id}/complete",
     response_model=ProductionCompleteResponse,
     status_code=status.HTTP_200_OK,
+    responses={400: BAD_REQUEST, 404: NOT_FOUND, 409: CONFLICT_STATE},
 )
 def complete(
     order_id: int,
     service: ProductionService = Depends(get_production_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Completa una orden: consume insumos y aumenta el stock del producto.
+
+    Reglas de negocio: exige estado ``in_progress`` (409), receta activa con
+    ingredientes y unidades compatibles con el inventario, y stock suficiente
+    de cada insumo (400). Guarda un snapshot de la orden y movimientos de
+    inventario; toda la operación es atómica.
+    """
     return service.complete(order_id, current_user)
 
 
@@ -138,7 +167,9 @@ def bulk_import_orders(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de órdenes de producción",
 )
-def bulk_orders_template():
+def bulk_orders_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_ordenes_produccion.xlsx",
         BULK_ORDER_HEADERS,

@@ -125,14 +125,21 @@ siguen usando `HTTPException` porque forman parte de la capa de transporte.
 
 `src/models_registry.py` importa todos los modelos para que
 `SQLModel.metadata` los registre. `alembic/env.py` importa ese módulo y usa
-`src.core.database.mysql_url`. La Fase 1 no modificó el esquema; la única
-migración posterior es `756185c644ac`, que agrega las 6 FKs de auditoría que
-faltaban en las migraciones históricas para igualar la metadata. Está validada
-con `upgrade`, `downgrade` y `alembic check` sin cambios pendientes.
+`src.core.database.mysql_url`. La Fase 1 no modificó el esquema. Las
+migraciones posteriores son:
+
+- `756185c644ac`: agrega las 6 FKs de auditoría que faltaban en las
+  migraciones históricas para igualar la metadata. Validada con `upgrade`,
+  `downgrade` y `alembic check` sin cambios pendientes.
+- `898807c7b86f` (**head actual**): crea la tabla `audit_log`, que no existía
+  en el esquema pese a estar registrada en el modelo. Sin aplicarla, las
+  operaciones auditadas devolvían 500. Aplicada en el entorno de desarrollo
+  durante la Fase 6; el entrypoint de producción la aplica automáticamente.
 
 ## Compatibilidad verificada
 
-- El OpenAPI generado conserva los **59 paths** del baseline.
+- El OpenAPI generado conserva los **60 paths** del baseline aprobado (el
+  original de 59 más `GET /audit/`, añadido y aprobado en Fase 4).
 - Coinciden métodos, `operationId`, tags, parámetros, request bodies, responses
   y componentes de schema.
 - Se conservaron los nombres originales de las funciones para no alterar los
@@ -142,10 +149,16 @@ con `upgrade`, `downgrade` y `alembic check` sin cambios pendientes.
 
 ## Pendientes de fases posteriores
 
-- Fases 3 a 6: seguridad P1, reglas de negocio, testing y documentación ampliada.
+- Fases 3 y 5: seguridad avanzada (rate limit global, cifrado) e
+  infraestructura/CI. Detalle en [`PENDIENTES.md`](./PENDIENTES.md).
 
 Ya verificados en Fase 0/1: tests smoke y `conftest.py`, `alembic check` sin
 cambios (tras la revisión `756185c644ac`), compose dev/prod y healthchecks.
 Ya verificados en Fase 2: JWT sin fallback, CORS por entorno, `echo` desactivo,
 política de contraseñas compartida con el frontend y enlaces de correo
 configurables (detalle en `docs/FASE-2.md`).
+Ya verificados en Fase 4: endpoint de auditoría, motivo de anulación y
+reglas de negocio de ventas (detalle en `docs/FASE-4.md`).
+Ya verificados en Fase 6: autorización de rutas expuestas, auditoría con actor,
+paginación y búsqueda, logging estructurado, OpenAPI documentado y guías del
+proyecto (detalle en `docs/FASE-6.md`).

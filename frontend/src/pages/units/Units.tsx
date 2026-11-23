@@ -1,5 +1,6 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
@@ -7,6 +8,7 @@ import Button from "../../components/button/Button";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery } from "../../hooks/queries";
 import "./units.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
 
@@ -43,32 +45,21 @@ const columns: ColumnDef<Unit>[] = [
 ];
 
 export default function Units(): JSX.Element {
-  const [units, setUnits] = useState<Unit[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Unit | null>(null);
   const [form, setForm] = useState<UnitForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("units");
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchUnits = async () => {
-      try {
-        const response = await apiFetch("/units/");
-        if (!response.ok) throw new Error("Error al cargar unidades");
-        const data: Unit[] = await response.json();
-        setUnits(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUnits();
-  }, []);
+  const unitsQuery = useListQuery<Unit>("/units/");
+  const units = unitsQuery.data ?? [];
+
+  const invalidateUnits = () =>
+    queryClient.invalidateQueries({ queryKey: ["list", "/units/"] });
 
   const handleCrear = () => {
     setEditTarget(null);
@@ -136,8 +127,7 @@ export default function Units(): JSX.Element {
           return;
         }
 
-        const updated: Unit = await response.json();
-        setUnits((prev) => prev.map((u) => (u.id === editTarget.id ? updated : u)));
+        await invalidateUnits();
         showAlert("success", "Unidad actualizada correctamente.");
       } else {
         const response = await apiFetch("/units/", {
@@ -156,8 +146,7 @@ export default function Units(): JSX.Element {
           return;
         }
 
-        const created: Unit = await response.json();
-        setUnits((prev) => [...prev, created]);
+        await invalidateUnits();
         showAlert("success", "Unidad creada correctamente.");
       }
 
@@ -183,7 +172,7 @@ export default function Units(): JSX.Element {
             return;
           }
 
-          setUnits((prev) => prev.filter((u) => u.id !== id));
+          await invalidateUnits();
           showAlert("success", "Unidad eliminada correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
@@ -199,8 +188,12 @@ export default function Units(): JSX.Element {
         { label: "Unidades" },
       ]}
     >
-      {loading ? (
+      {unitsQuery.isPending ? (
         <div className="saip-loading">Cargando unidades...</div>
+      ) : unitsQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {unitsQuery.error?.message || "No se pudieron cargar las unidades."}
+        </div>
       ) : (
         <Table
           title="Unidades de medida"

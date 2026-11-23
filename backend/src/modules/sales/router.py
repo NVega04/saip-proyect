@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
 
 from src.core.dependencies import get_current_user, require_module
+from src.core.openapi import BAD_REQUEST, FORBIDDEN, NOT_FOUND, STOCK_ERROR
 from src.modules.sales.dependencies import get_sales_service
 from src.modules.sales.models import ItemType, SaleStatus
 from src.modules.sales.schemas import (
@@ -21,17 +22,29 @@ router = APIRouter(prefix="/sales", tags=["Sales"])
 
 
 @router.post(
-    "/", response_model=SaleCreateResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=SaleCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={400: STOCK_ERROR, 404: NOT_FOUND},
 )
 def create_sale(
     data: SaleCreate,
     service: SalesService = Depends(get_sales_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Registra una venta y descuenta el stock de cada artículo.
+
+    Reglas de negocio: se valida el stock disponible de productos e insumos
+    antes de crear la venta (400), se agrupan las cantidades repetidas y se
+    genera un movimiento de inventario por artículo. La venta nace en estado
+    ``completed``; las operaciones se registran en la auditoría.
+    """
     return service.create(data, current_user)
 
 
-@router.get("/", response_model=SaleListPage, status_code=status.HTTP_200_OK)
+@router.get(
+    "/", response_model=SaleListPage, status_code=status.HTTP_200_OK
+)
 def get_sales(
     date_from: Optional[date] = Query(default=None),
     date_to: Optional[date] = Query(default=None),
@@ -43,6 +56,11 @@ def get_sales(
     service: SalesService = Depends(get_sales_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Lista ventas con filtros y paginación.
+
+    Devuelve el envelope ``{items, total, page, limit}``. Los filtros por
+    fecha, estado, tipo de artículo y artículo son opcionales y combinables.
+    """
     return service.list(
         date_from,
         date_to,
@@ -83,6 +101,7 @@ def get_sale(
     "/{sale_id}/annul",
     response_model=SaleAnnulResponse,
     status_code=status.HTTP_200_OK,
+    responses={400: BAD_REQUEST, 403: FORBIDDEN, 404: NOT_FOUND},
 )
 def annul_sale(
     sale_id: int,
@@ -90,4 +109,11 @@ def annul_sale(
     service: SalesService = Depends(get_sales_service),
     current_user: User = Depends(require_module("sales")),
 ):
+    """Anula una venta y devuelve los artículos al inventario.
+
+    Reglas de negocio: exige el módulo RBAC ``sales`` (403); solo se pueden
+    anular ventas en estado ``completed`` y dentro de las 24 horas siguientes
+    a la fecha de venta (400). Se registra un movimiento de inventario por
+    artículo, el motivo de la anulación y la acción en la auditoría.
+    """
     return service.annul(sale_id, current_user, data.reason)

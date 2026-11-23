@@ -1,5 +1,6 @@
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "../../components/layout/Layout";
 import Table, { ColumnDef } from "../../components/table/Table";
 import Modal from "../../components/modal/Modal";
@@ -9,6 +10,8 @@ import Badge from "../../components/badge/Badge";
 import { useAlert } from "../../context/AlertContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import { apiFetch } from "../../utils/api";
+import { useListQuery, usePagedQuery } from "../../hooks/queries";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import "./products.css";
 import { useReportDownload } from "../../hooks/useReportDownload.ts";
 
@@ -117,42 +120,44 @@ const columns: ColumnDef<Product>[] = [
   },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function Products(): JSX.Element {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(true);
 
   const { showAlert } = useAlert();
   const { showConfirm } = useConfirm();
+  const queryClient = useQueryClient();
   const { download: downloadReport, loading: reportLoading } = useReportDownload("products");
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, unitsRes] = await Promise.all([
-          apiFetch("/products/"),
-          apiFetch("/units/"),
-        ]);
-        if (productsRes.ok && unitsRes.ok) {
-          const productsData: Product[] = await productsRes.json();
-          const unitsData: Unit[] = await unitsRes.json();
-          setProducts(productsData);
-          setUnits(unitsData);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [reloadKey]);
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const productsQuery = usePagedQuery<Product>("/products/", {
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch,
+  });
+  const unitsQuery = useListQuery<Unit>("/units/");
+
+  const products = productsQuery.data?.items ?? [];
+  const units = unitsQuery.data ?? [];
+  const totalPages = Math.max(
+    1,
+    Math.ceil((productsQuery.data?.total ?? 0) / PAGE_SIZE)
+  );
+
+  // Si se eliminan filas y la página actual queda fuera de rango, retrocede.
+  if (productsQuery.data && page > totalPages) {
+    setPage(totalPages);
+  }
+
+  const invalidateProducts = () =>
+    queryClient.invalidateQueries({ queryKey: ["paged", "/products/"] });
 
   const handleCrear = () => {
     setEditTarget(null);
@@ -232,8 +237,7 @@ export default function Products(): JSX.Element {
           return;
         }
 
-        const updated: Product = await response.json();
-        setProducts((prev) => prev.map((p) => (p.id === editTarget.id ? updated : p)));
+        await invalidateProducts();
         showAlert("success", "Producto actualizado correctamente.");
       } else {
         const response = await apiFetch("/products/", {
@@ -255,8 +259,7 @@ export default function Products(): JSX.Element {
           return;
         }
 
-        const created: Product = await response.json();
-        setProducts((prev) => [...prev, created]);
+        await invalidateProducts();
         showAlert("success", "Producto creado correctamente.");
       }
 
@@ -294,7 +297,7 @@ export default function Products(): JSX.Element {
             return;
           }
 
-          setProducts((prev) => prev.filter((p) => p.id !== id));
+          await invalidateProducts();
           showAlert("success", "Producto eliminado correctamente.");
         } catch {
           showAlert("error", "Error de conexión con el servidor.");
@@ -314,7 +317,7 @@ export default function Products(): JSX.Element {
       }
 
       const updated: Product = await response.json();
-      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      await invalidateProducts();
 
       showAlert(
         "success",
@@ -334,8 +337,12 @@ export default function Products(): JSX.Element {
         { label: "Productos" },
       ]}
     >
-      {loading ? (
+      {productsQuery.isPending || unitsQuery.isPending ? (
         <div className="saip-loading">Cargando productos...</div>
+      ) : productsQuery.isError ? (
+        <div className="saip-loading" role="alert">
+          {productsQuery.error?.message || "No se pudieron cargar los productos."}
+        </div>
       ) : (
         <Table
           title="Productos terminados"
@@ -343,6 +350,8 @@ export default function Products(): JSX.Element {
           data={products}
           searchPlaceholder="Buscar producto"
           sortKey="name"
+          onSearch={setSearch}
+          serverPagination={{ page, totalPages, onPageChange: setPage }}
           headerActions={
             <>
             <Button variant="primary" onClick={handleCrear}>
@@ -538,7 +547,7 @@ export default function Products(): JSX.Element {
         templateUrl="/products/bulk/template"
         importUrl="/products/bulk/import"
         importQuery="mode=upsert"
-        onImported={() => setReloadKey((k) => k + 1)}
+        onImported={() => void invalidateProducts()}
       />
     </Layout>
   );

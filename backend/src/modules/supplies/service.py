@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from src.bulk.parser import (
@@ -13,6 +14,7 @@ from src.bulk.parser import (
     safe_float,
 )
 from src.core.exceptions import ConflictError, NotFoundError
+from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
 from src.modules.supplies.models import Supply, SupplyCategory
 from src.modules.supplies.schemas import (
@@ -91,10 +93,31 @@ class SuppliesService:
         self.session.refresh(new_supply)
         return new_supply
 
-    def list(self) -> list[Supply]:
-        return self.session.exec(
-            select(Supply).where(Supply.deleted_at == None)
+    def list(
+        self, pagination: PaginationParams, search: str | None = None
+    ) -> Page[Supply]:
+        filters = [Supply.deleted_at == None]  # noqa: E712
+        if search and search.strip():
+            pattern = like_pattern(search)
+            filters.append(
+                Supply.name.like(pattern) | Supply.description.like(pattern)
+            )
+        total = self.session.exec(
+            select(func.count()).select_from(Supply).where(*filters)
+        ).one()
+        rows = self.session.exec(
+            select(Supply)
+            .where(*filters)
+            .order_by(Supply.id)
+            .offset(pagination.offset)
+            .limit(pagination.limit)
         ).all()
+        return Page[Supply](
+            items=rows,
+            total=total,
+            page=pagination.page,
+            limit=pagination.limit,
+        )
 
     def get(self, supply_id: int) -> Supply:
         supply = self.session.get(Supply, supply_id)

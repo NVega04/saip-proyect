@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.openapi import CONFLICT, NOT_FOUND
+from src.core.pagination import Page, PaginationParams
 from src.core.schemas import BulkImportResult
 from src.modules.supplies.dependencies import get_supplies_service
 from src.modules.supplies.schemas import (
@@ -31,20 +35,35 @@ def create_supply(
     service: SuppliesService = Depends(get_supplies_service),
     current_user: User = Depends(get_current_user),
 ):
+    """Crea un insumo.
+
+    La categoría y la unidad deben existir (404) y el nombre no puede
+    repetirse entre insumos activos (409).
+    """
     return service.create(data, current_user)
 
 
 @router.get(
     "/",
-    response_model=list[SupplyResponse],
+    response_model=Page[SupplyResponse],
     status_code=status.HTTP_200_OK,
-    summary="Listar todos los insumos activos",
+    summary="Listar insumos activos con paginación",
 )
 def get_all_supplies(
+    pagination: PaginationParams = Depends(),
+    search: Optional[str] = Query(
+        default=None, max_length=100, description="Busca por nombre o descripción"
+    ),
     service: SuppliesService = Depends(get_supplies_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    """Lista insumos con paginación y búsqueda.
+
+    Envelope ``{items, total, page, limit}``; ``page`` >= 1, ``limit`` 1..100
+    (defecto 20). ``search`` filtra por nombre o descripción con ``LIKE`` y
+    escapa ``%`` y ``_`` para que no actúen como comodines.
+    """
+    return service.list(pagination, search)
 
 
 @router.get(
@@ -109,7 +128,9 @@ def bulk_import_supplies(
     status_code=status.HTTP_200_OK,
     summary="Descargar plantilla de insumos",
 )
-def bulk_supplies_template():
+def bulk_supplies_template(
+    current_user: User = Depends(get_current_user),
+):
     return template_response(
         "plantilla_insumos.xlsx", BULK_SUPPLY_HEADERS, BULK_SUPPLY_EXAMPLES
     )

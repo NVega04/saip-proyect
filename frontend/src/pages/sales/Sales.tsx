@@ -118,17 +118,19 @@ export default function Ventas(): JSX.Element {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Los listados de productos están paginados: los dropdowns piden la
+        // página máxima permitida (100) y leen el envelope {items, ...}.
         const [prodRes, comRes] = await Promise.all([
-          apiFetch("/products/"),
-          apiFetch("/commercial-products/"),
+          apiFetch("/products/?limit=100"),
+          apiFetch("/commercial-products/?limit=100"),
         ]);
         if (prodRes.ok) {
-          const data: Product[] = await prodRes.json();
-          setProducts(data.filter((p) => p.status === "active"));
+          const data: { items: Product[] } = await prodRes.json();
+          setProducts(data.items.filter((p) => p.status === "active"));
         }
         if (comRes.ok) {
-          const data: Product[] = await comRes.json();
-          setCommercial(data.filter((p) => p.status === "active"));
+          const data: { items: Product[] } = await comRes.json();
+          setCommercial(data.items.filter((p) => p.status === "active"));
         }
       } catch (err) {
         console.error(err);

@@ -13,6 +13,28 @@ interface SearchBarProps {
   onSort?: (order: SortOrder, criteria: SortCriteria) => void;
 }
 
+/** Definido fuera del componente: crear componentes en el render reinicia su estado. */
+function FilterIcon({ sortOrder }: { sortOrder: SortOrder }) {
+  if (sortOrder === "asc")  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
+      <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+    </svg>
+  );
+  if (sortOrder === "desc") return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
+      <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+    </svg>
+  );
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
+      <line x1="3" y1="5"  x2="21" y2="5"/>
+      <line x1="3" y1="10" x2="16" y2="10"/>
+      <line x1="3" y1="15" x2="11" y2="15"/>
+      <line x1="3" y1="20" x2="7"  y2="20"/>
+    </svg>
+  );
+}
+
 export default function SearchBar({
   value,
   onChange,
@@ -37,27 +59,6 @@ export default function SearchBar({
   onSort?.(order, criteria);
   setOpen(false);
 };
-
-  const FilterIcon = () => {
-    if (sortOrder === "asc")  return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
-        <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
-      </svg>
-    );
-    if (sortOrder === "desc") return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
-        <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
-      </svg>
-    );
-    return (
-   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a7ca5" strokeWidth="2">
-     <line x1="3" y1="5"  x2="21" y2="5"/>
-     <line x1="3" y1="10" x2="16" y2="10"/>
-     <line x1="3" y1="15" x2="11" y2="15"/>
-     <line x1="3" y1="20" x2="7"  y2="20"/>
-   </svg>
-  );
-  };
 
   const isActive = (order: SortOrder, criteria: SortCriteria) =>
     sortOrder === order && sortCriteria === criteria;
@@ -86,7 +87,7 @@ export default function SearchBar({
             type="button"
             title="Ordenar"
           >
-            <FilterIcon />
+            <FilterIcon sortOrder={sortOrder} />
           </button>
 
           {open && (

@@ -171,18 +171,23 @@ export default function Recetas(): JSX.Element {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Insumos y productos están paginados: los dropdowns piden la
+        // página máxima permitida (100) y leen el envelope {items, ...}.
         const [recRes, supRes, unitRes, prodRes] = await Promise.all([
           apiFetch("/recipes/"),
-          apiFetch("/supplies/"),
+          apiFetch("/supplies/?limit=100"),
           apiFetch("/units/"),
-          apiFetch("/products/"),
+          apiFetch("/products/?limit=100"),
         ]);
         if (recRes.ok) setRecipes(await recRes.json());
-        if (supRes.ok) setSupplies(await supRes.json());
+        if (supRes.ok) {
+          const data: { items: Supply[] } = await supRes.json();
+          setSupplies(data.items);
+        }
         if (unitRes.ok) setUnits(await unitRes.json());
         if (prodRes.ok) {
-          const data: ProductLite[] = await prodRes.json();
-          setProducts(data.filter((p) => p.status === "active"));
+          const data: { items: ProductLite[] } = await prodRes.json();
+          setProducts(data.items.filter((p) => p.status === "active"));
         }
       } catch (err) {
         console.error(err);

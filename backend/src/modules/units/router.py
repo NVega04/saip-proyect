@@ -10,12 +10,19 @@ router = APIRouter(prefix="/units", tags=["Units"])
 
 
 @router.get("/", response_model=list[UnitResponse], status_code=status.HTTP_200_OK)
-def get_units(service: UnitsService = Depends(get_units_service)):
+def get_units(
+    service: UnitsService = Depends(get_units_service),
+    current_user: User = Depends(get_current_user),
+):
     return service.list_units()
 
 
 @router.get("/{unit_id}", response_model=UnitResponse, status_code=status.HTTP_200_OK)
-def get_unit(unit_id: int, service: UnitsService = Depends(get_units_service)):
+def get_unit(
+    unit_id: int,
+    service: UnitsService = Depends(get_units_service),
+    current_user: User = Depends(get_current_user),
+):
     return service.get_unit(unit_id)
 
 

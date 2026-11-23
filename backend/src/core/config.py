@@ -3,6 +3,8 @@
 Los valores de seguridad son obligatorios o tienen valores seguros por defecto:
 ``JWT_SECRET`` y ``FRONTEND_URL`` deben venir del entorno, ``SQLALCHEMY_ECHO``
 está desactivado y ``CORS_ORIGINS`` se lee como lista separada por comas.
+El logging se configura con ``LOG_LEVEL`` (``INFO`` por defecto) y
+``LOG_FORMAT`` (``json`` por defecto, o ``text`` para consola legible).
 """
 
 from typing import Annotated, Optional
@@ -46,6 +48,10 @@ class Settings(BaseSettings):
     # Frontend
     frontend_url: str
 
+    # Logging (Fase 6): nivel y formato por entorno
+    log_level: str = "INFO"
+    log_format: str = "json"
+
     @field_validator("jwt_secret")
     @classmethod
     def validate_jwt_secret(cls, value: str) -> str:
@@ -81,6 +87,25 @@ class Settings(BaseSettings):
         if not url.startswith(("http://", "https://")):
             raise ValueError("FRONTEND_URL debe ser una URL http:// o https://")
         return url
+
+    @field_validator("log_level")
+    @classmethod
+    def validate_log_level(cls, value: str) -> str:
+        level = value.strip().upper()
+        allowed = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+        if level not in allowed:
+            raise ValueError(
+                f"LOG_LEVEL debe ser uno de: {', '.join(sorted(allowed))}."
+            )
+        return level
+
+    @field_validator("log_format")
+    @classmethod
+    def validate_log_format(cls, value: str) -> str:
+        fmt = value.strip().lower()
+        if fmt not in {"json", "text"}:
+            raise ValueError("LOG_FORMAT debe ser 'json' o 'text'.")
+        return fmt
 
     @property
     def mysql_url(self) -> str:

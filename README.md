@@ -17,37 +17,42 @@ El sistema se desarrolla de forma iterativa. A continuación se muestra el estad
 
 | Módulo | Backend | Frontend | Estado |
 |--------|---------|----------|--------|
-| **Autenticación** (login/logout, JWT, rate-limiting) | Completo | Completo | ✅ Completado |
+| **Autenticación** (login/logout, JWT, bloqueo, rate-limiting en login) | Completo | Completo | ✅ Completado |
 | **Usuarios** (CRUD, soft-delete, recuperación de contraseña) | Completo | Completo | ✅ Completado |
 | **Roles y permisos** (CRUD, asignación de módulos por rol) | Completo | Completo | ✅ Completado |
 | **Unidades de medida** (CRUD) | Completo | Completo | ✅ Completado |
 | **Categorías de insumos** (CRUD) | Completo | Completo | ✅ Completado |
-| **Insumos** (materias primas, CRUD) | Completo | Completo | ✅ Completado |
-| **Productos** (CRUD, bloqueo/desbloqueo) | Completo | Completo | ✅ Completado |
+| **Insumos** (materias primas, CRUD, importación Excel) | Completo | Completo | ✅ Completado |
+| **Productos** (CRUD, bloqueo, importación Excel) | Completo | Completo | ✅ Completado |
 | **Categorías de productos** (CRUD) | Completo | Completo | ✅ Completado |
-| **Productos comerciales** (CRUD) | Completo | Completo | ✅ Completado |
+| **Productos comerciales** (CRUD, importación Excel) | Completo | Completo | ✅ Completado |
 | **Proveedores y contactos** (CRUD con contactos anidados) | Completo | Completo | ✅ Completado |
 | **Recetas** (CRUD con ingredientes anidados) | Completo | Completo | ✅ Completado |
-| **Reportes** (9 tipos de reportes Excel descargables) | Completo | Completo | ✅ Completado |
-| **Órdenes de producción** | Modelos listos, sin endpoints | Página placeholder | 🔶 Parcial |
-| **Ventas** | No iniciado | Página placeholder | ❌ Pendiente |
-| **Historial de ventas** | No iniciado | Página placeholder | ❌ Pendiente |
-| **Control de inventario** | No iniciado | Página placeholder | ❌ Pendiente |
-| **Órdenes de compra** | No iniciado | No iniciado | ❌ Pendiente |
+| **Reportes** (reportes Excel/JSON descargables) | Completo | Completo | ✅ Completado |
+| **Órdenes de producción** (ciclo de vida y snapshot) | Completo | Completo | ✅ Completado |
+| **Ventas** (alta, listado, anulación en 24 h) | Completo | Completo | ✅ Completado |
+| **Inventario** (movimientos, summary y reporte) | Completo | Completo | ✅ Completado |
+| **Auditoría** (registro de acciones críticas, solo admin) | Completo | — | ✅ Completado |
+| **Órdenes de compra** | No implementado | No implementado | ❌ Pendiente |
+
+> El detalle de la deuda pendiente (fases 3 y 5, entre otros) está en
+> [`docs/PENDIENTES.md`](./docs/PENDIENTES.md).
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 |------|------------|
-| **Frontend** | React 19 + TypeScript + Vite + pnpm |
+| **Frontend** | React 19 + TypeScript + Vite + pnpm + TanStack Query |
 | **Backend** | Python 3.14 + FastAPI + SQLModel + PyMySQL |
 | **Base de datos** | MySQL 8.0 (Docker) |
 | **Migraciones** | Alembic |
 | **Autenticación** | JWT + bcrypt + sesiones por token |
 | **Reportes** | Pandas + openpyxl (Excel) |
-| **Rate-limiting** | SlowAPI |
+| **Rate-limiting** | SlowAPI (login 5/min, recuperación 3/min) |
+| **Logging** | JSON estructurado con `X-Request-ID` |
 | **Correo** | SMTP (bienvenida, recuperación, desactivación) |
-| **Orquestación** | Docker Compose |
+| **Pruebas** | pytest (backend) + ESLint/Vite build (frontend) |
+| **Orquestación** | Docker Compose (dev y prod) |
 
 ---
 
@@ -89,41 +94,60 @@ El sistema se desarrolla de forma iterativa. A continuación se muestra el estad
 
 5. **Iniciar la base de datos**
    ```bash
-   docker-compose up db -d
+   docker compose up -d db
    ```
 
-6. **Ejecutar migraciones y seed de datos**
+6. **Aplicar migraciones y seed (solo la primera vez)**
    ```bash
    cd backend
-   uv run python -m alembic upgrade head
+   uv run alembic upgrade head
    uv run python seed_data.py
    ```
+
+> `alembic upgrade head` debe ejecutarse también tras actualizar el código si
+> hay migraciones nuevas. El entrypoint de producción lo hace automáticamente.
+
+### Variables de entorno
+
+Copia `.env.example` a `.env` y revísalo. **Nunca versiones `.env`**; comparte
+solo `.env.example`.
+
+| Variable | Obligatoria | Descripción / valor por defecto |
+|----------|-------------|---------------------------------|
+| `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Sí | Credenciales y nombre de la base MySQL. |
+| `DB_HOST`, `DB_PORT` | No | `db` / `3306` dentro de Compose. |
+| `JWT_SECRET` | **Sí** | Mínimo 32 caracteres aleatorios. Genera con `python -c "import secrets; print(secrets.token_urlsafe(64))"`. Rotarlo invalida las sesiones activas. |
+| `CORS_ORIGINS` | Sí | Orígenes separados por coma, sin barra final. Ej. `http://localhost:5173,https://saip.lat`. Prohíbe `*`. |
+| `FRONTEND_URL` | **Sí** | URL base sin barra final; se usa en los enlaces de correo. |
+| `VITE_API_URL` | Sí | URL del API compilada en el frontend (`http://localhost:8000` en dev). |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | No | SMTP para correos de bienvenida/recuperación. Usa una **contraseña de aplicación**, nunca la real. Sin SMTP la app funciona y registra el fallo. |
+| `SQLALCHEMY_ECHO` | No | `false` por defecto; `true` solo para depuración puntual. |
+| `LOG_LEVEL` | No | `INFO` por defecto (`DEBUG`, `WARNING`, `ERROR`, `CRITICAL`). |
+| `LOG_FORMAT` | No | `json` por defecto (recomendado para centralizar), `text` para consola legible. |
 
 ---
 
 ## Ejecución del Proyecto
 
-### Modo desarrollo local
+### Modo desarrollo local (sin contenedores para frontend/backend)
 
 ```bash
-# Terminal 1: Base de datos
-docker-compose up db -d
+# Terminal 1: base de datos (puerto 3307 en el host)
+docker compose up -d db
 
-# Terminal 2: Backend (puerto 8000)
+# Terminal 2: backend (puerto 8000)
 cd backend
 uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Terminal 3: Frontend (puerto 5173)
+# Terminal 3: frontend (puerto 5173)
 cd frontend
 pnpm dev
 ```
 
-> **Nota:** La primera vez o tras reiniciar la DB, ejecuta `uv run alembic upgrade head` y `uv run python seed_data.py` para crear las tablas y el usuario administrador por defecto.
-
-### Modo Docker completo
+### Modo Docker (desarrollo)
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 | Servicio | URL |
@@ -132,155 +156,113 @@ docker-compose up --build
 | Backend (API) | http://localhost:8000 |
 | Documentación Swagger | http://localhost:8000/docs |
 
+Los contenedores de desarrollo montan el código y recargan automáticamente.
+
+### Modo producción
+
+```bash
+# 1. .env con JWT_SECRET robusto, CORS_ORIGINS y FRONTEND_URL de producción
+# 2. VITE_API_URL apunta a la URL pública del API (https)
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+- `Dockerfile.prod` construye imágenes inmutables (sin montajes de código) y
+  ejecuta `alembic upgrade head` antes de arrancar uvicorn (`UVICORN_WORKERS`,
+  2 por defecto).
+- El frontend se sirve con nginx en el puerto 80 del contenedor (5173 en el
+  host por defecto); la base de datos **no expone puertos al host**.
+- Termina TLS en un reverse proxy (nginx/Traefik) delante de los contenedores
+  y ajusta `CORS_ORIGINS` al dominio HTTPS. No expongas el API directamente.
+- Respaldo y rotación de secretos: [`docs/SEGURIDAD.md`](./docs/SEGURIDAD.md).
+
 ---
 
 ## Estructura del Proyecto
 
 ```
 saip-proyect/
-├── frontend/                        # Frontend (React + TypeScript + Vite)
+├── frontend/
 │   ├── src/
-│   │   ├── components/              # Componentes reutilizables (modulares)
-│   │   │   ├── alert/               # Sistema de notificaciones
-│   │   │   ├── badge/               # Etiquetas de estado
-│   │   │   ├── breadcrumb/          # Migas de pan
-│   │   │   ├── button/              # Botones reutilizables
-│   │   │   ├── confirmmodal/        # Modal de confirmación
-│   │   │   ├── deleteaccountmodal/  # Modal de baja de cuenta
-│   │   │   ├── detailmodal/         # Modal de detalle
-│   │   │   ├── footer/              # Pie de página
-│   │   │   ├── layout/              # Layout principal (Navbar + Sidebar + Footer)
-│   │   │   ├── modal/               # Modal genérico
-│   │   │   ├── navbar/              # Barra de navegación superior
-│   │   │   ├── pagination/          # Paginación
-│   │   │   ├── passwordstrengthbar/ # Indicador de fortaleza de contraseña
-│   │   │   ├── profilemodal/        # Modal de perfil
-│   │   │   ├── protectedroute/      # Ruta protegida por autenticación/módulo
-│   │   │   ├── searchbar/           # Barra de búsqueda
-│   │   │   ├── sidebar/             # Barra lateral de navegación
-│   │   │   └── table/               # Tabla genérica reutilizable
-│   │   ├── pages/                   # Páginas de la aplicación
-│   │   │   ├── acercade/            # Acerca de
-│   │   │   ├── commercialproducts/  # Productos comerciales
-│   │   │   ├── dashboard/           # Dashboard principal
-│   │   │   ├── inventory/           # Inventario (en construcción)
-│   │   │   ├── landing/             # Landing page
-│   │   │   ├── login/               # Inicio de sesión
-│   │   │   ├── productcategories/   # Categorías de productos
-│   │   │   ├── production/          # Producción (en construcción)
-│   │   │   ├── products/            # Productos
-│   │   │   ├── profile/             # Perfil de usuario
-│   │   │   ├── providers/           # Proveedores
-│   │   │   ├── recipes/             # Recetas
-│   │   │   ├── recoverpassword/     # Recuperación de contraseña
-│   │   │   ├── reports/             # Reportes
-│   │   │   ├── roles/               # Roles
-│   │   │   ├── sales/               # Ventas (en construcción)
-│   │   │   ├── saleshistory/        # Historial de ventas (en construcción)
-│   │   │   ├── supplies/            # Insumos (materias primas)
-│   │   │   ├── supplycategories/    # Categorías de insumos
-│   │   │   ├── units/               # Unidades de medida
-│   │   │   └── user/                # Usuarios
-│   │   ├── context/                 # Contextos de React
-│   │   │   ├── AlertContext.tsx      # Sistema de alertas
-│   │   │   ├── AuthContext.tsx       # Estado de autenticación
-│   │   │   └── ConfirmContext.tsx    # Confirmación de acciones
-│   │   ├── hooks/                   # Hooks personalizados
-│   │   │   └── useReportDownload.ts # Descarga de reportes Excel
-│   │   ├── utils/                   # Utilidades
-│   │   │   ├── api.ts               # Cliente HTTP (apiFetch)
-│   │   │   ├── permissions.ts       # Verificación de permisos por módulo
-│   │   │   └── passwordStrength.ts  # Cálculo de fortaleza de contraseña
-│   │   ├── App.tsx                  # App principal con routing
-│   │   ├── main.tsx                 # Punto de entrada
-│   │   └── variables.css            # Variables CSS globales
-│   ├── eslint.config.js             # ESLint 9 flat config
-│   └── vite.config.js
-├── backend/                         # Backend (Python + FastAPI)
+│   │   ├── components/        # Componentes reutilizables (table, modal, ...)
+│   │   ├── pages/             # Páginas por módulo
+│   │   ├── context/           # AuthContext, AlertContext, ConfirmContext
+│   │   ├── hooks/             # queries.ts (TanStack Query), useDebouncedValue, ...
+│   │   ├── utils/             # api.ts (session-token), permisos, passwordStrength
+│   │   ├── App.tsx            # Rutas y providers
+│   │   └── main.tsx           # QueryClientProvider + arranque
+│   └── eslint.config.js
+├── backend/
 │   ├── src/
-│   │   ├── main.py                  # Punto de entrada FastAPI (CORS, routers, rate-limit)
-│   │   ├── database.py              # Conexión a MySQL vía SQLModel
-│   │   ├── security.py              # Hashing bcrypt, JWT, generación de tokens
-│   │   ├── dependencies.py          # Dependencias (get_current_user, require_module, require_admin)
-│   │   ├── email.py                 # Envío de correos SMTP (bienvenida, recuperación, desactivación)
-│   │   ├── models/
-│   │   │   └── models.py            # 16 modelos SQLModel
-│   │   ├── schemas/
-│   │   │   └── schemas.py           # Schemas Pydantic de solicitud/respuesta
-│   │   ├── routers/
-│   │   │   ├── session.py           # Login, logout, recuperación de contraseña
-│   │   │   ├── users.py             # CRUD de usuarios
-│   │   │   ├── roles.py             # CRUD de roles
-│   │   │   ├── role_modules.py      # Asignación de módulos a roles
-│   │   │   ├── units.py             # CRUD de unidades de medida
-│   │   │   ├── products.py          # CRUD de productos (con bloqueo)
-│   │   │   ├── supplies.py          # CRUD de insumos
-│   │   │   ├── supply_categories.py # CRUD de categorías de insumos
-│   │   │   ├── providers.py         # CRUD de proveedores + contactos anidados
-│   │   │   ├── product_categories.py# CRUD de categorías de productos
-│   │   │   ├── commercial_products.py# CRUD de productos comerciales
-│   │   │   ├── recipes.py           # CRUD de recetas + ingredientes anidados
-│   │   │   └── reports.py           # Generación de reportes Excel (9 entidades)
-│   │   └── __init__.py
-│   ├── alembic/                     # Migraciones de base de datos
-│   │   ├── versions/                # 12+ migraciones incrementales
-│   │   └── alembic.ini
-│   ├── seed_data.py                 # Datos iniciales (roles Admin/Vendedor, admin por defecto)
-│   └── pyproject.toml
-├── docker-compose.yml               # Orquestación Docker (db + backend + frontend)
-├── saip.sql                         # Schema legacy de referencia (no usado por el código actual)
-├── .env                             # Variables de entorno (no versionado)
-└── _docs/                           # Documentación de requerimientos
-    ├── HUs/                         # 19 Historias de Usuario
-    ├── RFs/                         # 19 Requerimientos Funcionales
-    ├── RNFs/                        # 10 Requerimientos No Funcionales
-    └── restrictions/                # Restricciones del proyecto
+│   │   ├── main.py            # FastAPI: CORS, logging, routers, manejo de errores
+│   │   ├── core/              # config, database, security, dependencias,
+│   │   │                      # logging, middleware, openapi, paginación
+│   │   ├── bulk/              # Parser de Excel/CSV compartido
+│   │   └── modules/           # Un módulo por dominio:
+│   │       └── <modulo>/      #   router.py, service.py, schemas.py,
+│   │                          #   models.py, dependencies.py
+│   ├── alembic/versions/      # Migraciones (head: 898807c7b86f)
+│   ├── seed_data.py
+│   └── tests/                 # smoke, integration, snapshots OpenAPI
+├── docs/                      # Arquitectura, seguridad, contribución, fases
+├── _docs/                     # Requerimientos y plan de correcciones
+├── docker-compose.yml          # Desarrollo
+├── docker-compose.prod.yml     # Producción
+└── .env.example                # Plantilla de variables (nunca .env)
 ```
+
+Más detalle en [`docs/ARQUITECTURA.md`](./docs/ARQUITECTURA.md).
 
 ---
 
 ## Fases del Proyecto
 
 ### 1. Análisis y Levantamiento ✅ Completado
-- Identificación de requerimientos funcionales y no funcionales
-- Análisis de procesos actuales y oportunidades de mejora
-- Validación con actores clave (familia propietaria)
-- 19 requerimientos funcionales y 10 no funcionales documentados
+- 19 requerimientos funcionales y 10 no funcionales documentados.
 
 ### 2. Diseño ✅ Completado
-- Arquitectura y estructura del sistema definida
-- Modelado de base de datos (16 tablas, soft-delete, relaciones)
-- Diseño de componentes frontend reutilizables
-- Sistema de permisos basado en módulos por rol
-- Estándares de accesibilidad y UX definidos
+- Arquitectura por módulos, modelo de datos con soft-delete y RBAC por módulo.
 
-### 3. Desarrollo 🔶 En curso
-#### Completado:
-- Autenticación completa (JWT + sesiones + rate-limiting)
-- CRUD completo de usuarios, roles y asignación de módulos
-- CRUD de insumos, productos, productos comerciales y categorías
-- CRUD de unidades de medida
-- CRUD de proveedores con contactos anidados
-- CRUD de recetas con ingredientes anidados
-- Reportes descargables en Excel (9 tipos)
-- Recuperación de contraseña por correo
-- Componentes UI reutilizables (tabla, modal, paginación, etc.)
+### 3. Desarrollo ✅ Completado (con deuda anotada)
+- Autenticación, usuarios, roles, catálogos, proveedores, recetas, reportes,
+  producción, ventas e inventario.
+- Paginación en los listados principales y TanStack Query en el frontend.
 
-#### Pendiente:
-- Órdenes de producción (modelos listos, endpoints y UI pendientes)
-- Módulo de ventas y historial
-- Control de inventario (movimientos y stock)
-- Órdenes de compra
-- Conexión de páginas placeholder con datos reales
+### 4. Pruebas 🔶 En curso
+- 319 tests backend (smoke, integración, snapshots) en verde.
+- `pnpm lint` y `pnpm build` del frontend en verde. Sin framework de tests
+  frontend todavía (ver `docs/PENDIENTES.md`).
 
-### 4. Pruebas ⏳ Pendiente
-- Unitarias, integración, rendimiento y seguridad
-- Validación con usuarios reales
+### 5. Seguridad ✅ Parcial
+- Fases 2 y 4 completas: secretos, CORS, política de contraseñas, auditoría y
+  reglas de negocio. Fase 3 (rate limit global, cifrado, HTTPS) pendiente.
 
-### 5. Implementación y Soporte ⏳ Pendiente
-- Puesta en producción
-- Capacitación a usuarios
-- Monitoreo inicial y ajustes
+### 6. Frontend, logging y documentación ✅ Completado en esta rama
+- Logging estructurado con `X-Request-ID`, OpenAPI documentado y guías del
+  proyecto. Resumen en [`docs/FASE-6.md`](./docs/FASE-6.md).
+
+---
+
+## Verificación rápida
+
+```bash
+# Backend (dentro del contenedor, con la DB de desarrollo levantada)
+docker exec saip_backend uv run pytest -q
+
+# Frontend
+cd frontend && pnpm lint && pnpm build
+
+# Contrato OpenAPI
+docker exec saip_backend uv run pytest -q tests/test_openapi_snapshot.py
+```
+
+## Documentación
+
+- [Arquitectura del backend](./docs/ARQUITECTURA.md)
+- [Seguridad y operación](./docs/SEGURIDAD.md)
+- [Guía para contribuir](./docs/CONTRIBUIR.md)
+- [Trabajo pendiente](./docs/PENDIENTES.md)
+- [Detalle de la Fase 6](./docs/FASE-6.md)
+- [Historial de fases 0, 2 y 4](./docs/FASE-0.md) · [FASE-2](./docs/FASE-2.md) · [FASE-4](./docs/FASE-4.md)
 
 ---
 
@@ -348,6 +330,24 @@ const response = await apiFetch("/endpoint", {
   body: JSON.stringify(data),
 });
 ```
+
+### Datos del servidor
+
+Los listados usan TanStack Query (`useListQuery`/`usePagedQuery` en
+`src/hooks/queries.ts`); los Contextos quedan para sesión y UI:
+
+```tsx
+const query = usePagedQuery<Product>("/products/", {
+  page,
+  limit: 20,
+  search,
+});
+const products = query.data?.items ?? [];
+```
+
+Los errores de la API se muestran con `AlertContext` y `toApiError`, nunca con
+`alert()` nativo. Las respuestas paginadas tienen la forma
+`{ items, total, page, limit }`.
 
 ---
 
