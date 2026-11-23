@@ -91,9 +91,9 @@ class SuppliesService:
         self.session.refresh(new_supply)
         return new_supply
 
-    def list(self) -> list[Supply]:
+    def list(self, skip: int = 0, limit: int = 20) -> list[Supply]:
         return self.session.exec(
-            select(Supply).where(Supply.deleted_at == None)
+            select(Supply).where(Supply.deleted_at == None).offset(skip).limit(limit)
         ).all()
 
     def get(self, supply_id: int) -> Supply:

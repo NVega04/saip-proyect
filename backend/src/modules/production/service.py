@@ -83,12 +83,15 @@ class ProductionService:
         return order
 
     def list(
-        self, status_filter: Optional[ProductionOrderStatus]
+        self,
+        status_filter: Optional[ProductionOrderStatus],
+        skip: int = 0,
+        limit: int = 20,
     ) -> list[ProductionOrder]:
         query = select(ProductionOrder).where(ProductionOrder.deleted_at == None)
         if status_filter is not None:
             query = query.where(ProductionOrder.status == status_filter)
-        return self.session.exec(query).all()
+        return self.session.exec(query.offset(skip).limit(limit)).all()
 
     def export_orders(
         self, status_filter: Optional[ProductionOrderStatus]

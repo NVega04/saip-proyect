@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.core.schemas import BulkImportResult
 from src.modules.commercial_products.dependencies import (
     get_commercial_products_service,
@@ -30,10 +31,11 @@ router = APIRouter(prefix="/commercial-products", tags=["CommercialProducts"])
     status_code=status.HTTP_200_OK,
 )
 def get_all(
+    pagination: Pagination,
     service: CommercialProductsService = Depends(get_commercial_products_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(

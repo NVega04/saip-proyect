@@ -19,7 +19,7 @@ router = APIRouter(prefix="/audit", tags=["Audit"])
 )
 def list_audit_log(
     page: int = Query(default=1, ge=1),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1, le=100),
     action: Optional[str] = Query(default=None, max_length=100),
     user_id: Optional[int] = Query(default=None),
     service: AuditReadService = Depends(get_audit_read_service),

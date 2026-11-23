@@ -79,8 +79,8 @@ class ProvidersService:
         self.session.refresh(new_provider)
         return new_provider
 
-    def list(self) -> list[Provider]:
-        return self.session.exec(select(Provider)).all()
+    def list(self, skip: int = 0, limit: int = 20) -> list[Provider]:
+        return self.session.exec(select(Provider).offset(skip).limit(limit)).all()
 
     def get(self, provider_id: int) -> Provider:
         provider = self.session.get(Provider, provider_id)

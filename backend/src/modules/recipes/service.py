@@ -29,9 +29,9 @@ class RecipesService:
             select(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id)
         ).all()
 
-    def list(self) -> list[Recipe]:
+    def list(self, skip: int = 0, limit: int = 20) -> list[Recipe]:
         return self.session.exec(
-            select(Recipe).where(Recipe.deleted_at == None)
+            select(Recipe).where(Recipe.deleted_at == None).offset(skip).limit(limit)
         ).all()
 
     def get(self, recipe_id: int) -> Recipe:

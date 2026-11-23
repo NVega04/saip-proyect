@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.modules.recipes.dependencies import get_recipes_service
 from src.modules.recipes.schemas import (
     DeleteResponseRecipe,
@@ -18,10 +19,11 @@ router = APIRouter(prefix="/recipes", tags=["Recipes"])
     "/", response_model=list[RecipeResponse], status_code=status.HTTP_200_OK
 )
 def get_all(
+    pagination: Pagination,
     service: RecipesService = Depends(get_recipes_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(

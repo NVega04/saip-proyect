@@ -57,9 +57,12 @@ class CommercialProductsService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list(self) -> list[CommercialProduct]:
+    def list(self, skip: int = 0, limit: int = 20) -> list[CommercialProduct]:
         return self.session.exec(
-            select(CommercialProduct).where(CommercialProduct.deleted_at == None)
+            select(CommercialProduct)
+            .where(CommercialProduct.deleted_at == None)
+            .offset(skip)
+            .limit(limit)
         ).all()
 
     def get(self, product_id: int) -> CommercialProduct:

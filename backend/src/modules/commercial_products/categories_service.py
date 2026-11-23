@@ -17,8 +17,10 @@ class ProductCategoriesService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list(self) -> list[ProductCategory]:
-        return self.session.exec(select(ProductCategory)).all()
+    def list(self, skip: int = 0, limit: int = 20) -> list[ProductCategory]:
+        return self.session.exec(
+            select(ProductCategory).offset(skip).limit(limit)
+        ).all()
 
     def get(self, category_id: int) -> ProductCategory:
         category = self.session.get(ProductCategory, category_id)

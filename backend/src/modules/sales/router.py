@@ -40,7 +40,7 @@ def get_sales(
     item_type: Optional[ItemType] = Query(default=None),
     item_id: Optional[int] = Query(default=None),
     page: int = Query(default=1, ge=1),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1, le=100),
     service: SalesService = Depends(get_sales_service),
     current_user: User = Depends(get_current_user),
 ):

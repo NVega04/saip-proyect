@@ -261,5 +261,5 @@ class UsersService:
 
         return user
 
-    def list(self) -> list[User]:
-        return self.session.exec(select(User)).all()
+    def list(self, skip: int = 0, limit: int = 20) -> list[User]:
+        return self.session.exec(select(User).offset(skip).limit(limit)).all()

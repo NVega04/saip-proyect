@@ -33,8 +33,10 @@ class SupplyCategoriesService:
         self.session.refresh(new_category)
         return new_category
 
-    def list(self) -> list[SupplyCategory]:
-        return self.session.exec(select(SupplyCategory)).all()
+    def list(self, skip: int = 0, limit: int = 20) -> list[SupplyCategory]:
+        return self.session.exec(
+            select(SupplyCategory).offset(skip).limit(limit)
+        ).all()
 
     def get(self, category_id: int) -> SupplyCategory:
         category = self.session.get(SupplyCategory, category_id)

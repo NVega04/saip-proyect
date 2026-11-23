@@ -123,8 +123,8 @@ class RolesService:
         )
         self.session.commit()
 
-    def list_roles(self) -> list[Role]:
-        return self.session.exec(select(Role)).all()
+    def list_roles(self, skip: int = 0, limit: int = 20) -> list[Role]:
+        return self.session.exec(select(Role).offset(skip).limit(limit)).all()
 
 
 class RoleModulesService:
@@ -132,16 +132,21 @@ class RoleModulesService:
         self.session = session
         self.audit = AuditService(session, ip_address=ip_address)
 
-    def list_modules(self) -> list[Module]:
-        return self.session.exec(select(Module)).all()
+    def list_modules(self, skip: int = 0, limit: int = 20) -> list[Module]:
+        return self.session.exec(select(Module).offset(skip).limit(limit)).all()
 
-    def list_role_modules(self, role_id: int) -> list[RoleModule]:
+    def list_role_modules(
+        self, role_id: int, skip: int = 0, limit: int = 20
+    ) -> list[RoleModule]:
         role = self.session.get(Role, role_id)
         if not role:
             raise NotFoundError(f"El rol con id '{role_id}' no existe.")
 
         role_modules = self.session.exec(
-            select(RoleModule).where(RoleModule.role_id == role_id)
+            select(RoleModule)
+            .where(RoleModule.role_id == role_id)
+            .offset(skip)
+            .limit(limit)
         ).all()
 
         for rm in role_modules:

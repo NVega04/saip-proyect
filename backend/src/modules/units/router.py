@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.modules.units.dependencies import get_units_service
 from src.modules.units.schemas import UnitCreate, UnitResponse, UnitUpdate
 from src.modules.units.service import UnitsService
@@ -10,8 +11,11 @@ router = APIRouter(prefix="/units", tags=["Units"])
 
 
 @router.get("/", response_model=list[UnitResponse], status_code=status.HTTP_200_OK)
-def get_units(service: UnitsService = Depends(get_units_service)):
-    return service.list_units()
+def get_units(
+    pagination: Pagination,
+    service: UnitsService = Depends(get_units_service),
+):
+    return service.list_units(pagination.skip, pagination.limit)
 
 
 @router.get("/{unit_id}", response_model=UnitResponse, status_code=status.HTTP_200_OK)

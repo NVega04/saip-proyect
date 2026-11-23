@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.core.schemas import BulkImportResult
 from src.modules.providers.dependencies import get_providers_service
 from src.modules.providers.schemas import (
@@ -46,10 +47,11 @@ def create_provider(
     summary="Listar todos los proveedores",
 )
 def get_all_providers(
+    pagination: Pagination,
     service: ProvidersService = Depends(get_providers_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(

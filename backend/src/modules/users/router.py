@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Header, Request, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.core.rate_limit import limiter
 from src.modules.users.dependencies import get_users_service
 from src.modules.users.schemas import (
@@ -93,7 +94,8 @@ def update_user(
     summary="Listar todos los usuarios activos",
 )
 def get_all_users(
+    pagination: Pagination,
     service: UsersService = Depends(get_users_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)

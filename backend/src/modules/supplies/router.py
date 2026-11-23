@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.core.schemas import BulkImportResult
 from src.modules.supplies.dependencies import get_supplies_service
 from src.modules.supplies.schemas import (
@@ -41,10 +42,11 @@ def create_supply(
     summary="Listar todos los insumos activos",
 )
 def get_all_supplies(
+    pagination: Pagination,
     service: SuppliesService = Depends(get_supplies_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(

@@ -12,8 +12,10 @@ class UnitsService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list_units(self) -> list[Unit]:
-        return self.session.exec(select(Unit).where(Unit.deleted_at == None)).all()
+    def list_units(self, skip: int = 0, limit: int = 20) -> list[Unit]:
+        return self.session.exec(
+            select(Unit).where(Unit.deleted_at == None).offset(skip).limit(limit)
+        ).all()
 
     def get_unit(self, unit_id: int) -> Unit:
         unit = self.session.get(Unit, unit_id)

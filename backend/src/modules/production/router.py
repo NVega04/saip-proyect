@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.core.rate_limit import limiter
 from src.core.schemas import BulkImportResult
 from src.modules.production.dependencies import get_production_service
@@ -44,13 +45,14 @@ def create(
     status_code=status.HTTP_200_OK,
 )
 def get_all(
+    pagination: Pagination,
     status_filter: Optional[ProductionOrderStatus] = Query(
         default=None, alias="status"
     ),
     service: ProductionService = Depends(get_production_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list(status_filter)
+    return service.list(status_filter, pagination.skip, pagination.limit)
 
 
 @router.get(

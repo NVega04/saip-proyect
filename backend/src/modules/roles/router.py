@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.modules.roles.dependencies import get_roles_service
 from src.modules.roles.schemas import RoleCreate, RolePublic, RoleResponse, RoleUpdate
 from src.modules.roles.service import RolesService
@@ -71,7 +72,8 @@ def desactivate_role(
     summary="Listar todos los roles",
 )
 def get_roles(
+    pagination: Pagination,
     service: RolesService = Depends(get_roles_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list_roles()
+    return service.list_roles(pagination.skip, pagination.limit)

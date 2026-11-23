@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.modules.supplies.categories_service import SupplyCategoriesService
 from src.modules.supplies.dependencies import get_supply_categories_service
 from src.modules.supplies.schemas import (
@@ -35,10 +36,11 @@ def create_supply_category(
     summary="Listar todas las categorías de insumos",
 )
 def get_all_supply_categories(
+    pagination: Pagination,
     service: SupplyCategoriesService = Depends(get_supply_categories_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(

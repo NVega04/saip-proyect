@@ -36,9 +36,9 @@ class ProductsService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list(self) -> list[Product]:
+    def list(self, skip: int = 0, limit: int = 20) -> list[Product]:
         return self.session.exec(
-            select(Product).where(Product.deleted_at == None)
+            select(Product).where(Product.deleted_at == None).offset(skip).limit(limit)
         ).all()
 
     def get(self, product_id: int) -> Product:

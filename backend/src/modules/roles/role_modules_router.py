@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user, require_admin
+from src.core.pagination import Pagination
 from src.modules.roles.dependencies import get_role_modules_service
 from src.modules.roles.schemas import (
     ModuleResponse,
@@ -20,10 +21,11 @@ router = APIRouter(prefix="/role-modules", tags=["Role Modules"])
     summary="Listar todos los módulos disponibles",
 )
 def get_all_modules(
+    pagination: Pagination,
     service: RoleModulesService = Depends(get_role_modules_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list_modules()
+    return service.list_modules(pagination.skip, pagination.limit)
 
 
 @router.get(
@@ -34,10 +36,11 @@ def get_all_modules(
 )
 def get_role_modules(
     role_id: int,
+    pagination: Pagination,
     service: RoleModulesService = Depends(get_role_modules_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list_role_modules(role_id)
+    return service.list_role_modules(role_id, pagination.skip, pagination.limit)
 
 
 @router.post(

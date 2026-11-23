@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.core.dependencies import get_current_user
+from src.core.pagination import Pagination
 from src.modules.commercial_products.categories_service import (
     ProductCategoriesService,
 )
@@ -24,10 +25,11 @@ router = APIRouter(prefix="/product-categories", tags=["ProductCategories"])
     status_code=status.HTTP_200_OK,
 )
 def get_all(
+    pagination: Pagination,
     service: ProductCategoriesService = Depends(get_product_categories_service),
     current_user: User = Depends(get_current_user),
 ):
-    return service.list()
+    return service.list(pagination.skip, pagination.limit)
 
 
 @router.get(
