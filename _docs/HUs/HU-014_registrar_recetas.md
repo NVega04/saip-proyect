@@ -13,7 +13,7 @@
 
 ---
 
-## Historia
+## Historia de usuario
 
 Como usuario con permisos en el módulo de recetas, quiero registrar recetas de productos con sus ingredientes y cantidades, para definir los insumos necesarios en producción.
 
