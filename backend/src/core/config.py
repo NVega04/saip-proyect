@@ -7,6 +7,7 @@ El logging se configura con ``LOG_LEVEL`` (``INFO`` por defecto) y
 ``LOG_FORMAT`` (``json`` por defecto, o ``text`` para consola legible).
 """
 
+import base64
 from typing import Annotated, Optional
 
 from dotenv import load_dotenv
@@ -32,11 +33,18 @@ class Settings(BaseSettings):
 
     # Seguridad / sesiones
     jwt_secret: str
+    # CSV de claves Fernet. La primera cifra; todas pueden descifrar (rotación).
+    encryption_key: str
     jwt_algorithm: str = "HS256"
     session_duration_hours: int = 8
 
     # Orígenes permitidos por CORS (CSV en la variable de entorno)
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
+
+    # Rate limiting
+    rate_limit_default: str = "100/minute"
+    # Solo se confía en X-Forwarded-For cuando el proxy está en esta lista.
+    trusted_proxy_hosts: Annotated[list[str], NoDecode] = []
 
     # Correo
     mail_host: Optional[str] = None
@@ -51,6 +59,21 @@ class Settings(BaseSettings):
     # Logging (Fase 6): nivel y formato por entorno
     log_level: str = "INFO"
     log_format: str = "json"
+
+    @field_validator("encryption_key")
+    @classmethod
+    def validate_encryption_key(cls, value: str) -> str:
+        keys = [key.strip() for key in value.split(",") if key.strip()]
+        if not keys:
+            raise ValueError("ENCRYPTION_KEY es obligatoria")
+        for key in keys:
+            try:
+                decoded = base64.urlsafe_b64decode(key)
+            except Exception as exc:  # noqa: BLE001 - clave inválida
+                raise ValueError("ENCRYPTION_KEY debe ser base64 urlsafe") from exc
+            if len(decoded) != 32:
+                raise ValueError("Cada clave Fernet debe tener 32 bytes")
+        return ",".join(keys)
 
     @field_validator("jwt_secret")
     @classmethod
@@ -79,6 +102,13 @@ class Settings(BaseSettings):
             ):
                 raise ValueError(f"Origen CORS inválido: {origin!r}")
         return list(dict.fromkeys(origins))
+
+    @field_validator("trusted_proxy_hosts", mode="before")
+    @classmethod
+    def parse_trusted_proxy_hosts(cls, value):
+        if isinstance(value, str):
+            value = value.split(",")
+        return list(dict.fromkeys(str(host).strip() for host in value if str(host).strip()))
 
     @field_validator("frontend_url")
     @classmethod

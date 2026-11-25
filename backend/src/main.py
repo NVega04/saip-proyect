@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
 
 from src.core.config import settings
 from src.core.exceptions import DomainError
 from src.core.logging import setup_logging
 from src.core.middleware import RequestIdMiddleware
 from src.core.openapi import AUTH_ERRORS
+from src.core.rate_limit import limiter
 from src.modules.audit.router import router as audit_router
 from src.modules.auth.router import router as auth_router
 from src.modules.commercial_products.categories_router import (
@@ -38,8 +39,6 @@ from src.modules.users.router import router as users_router
 
 setup_logging(settings.log_level, settings.log_format)
 
-limiter = Limiter(key_func=get_remote_address)
-
 app = FastAPI(
     title="SAIP - Sistema administrativo integral de productos", version="1.0.0"
 )
@@ -52,12 +51,13 @@ app.add_middleware(
     allow_headers=["Content-Type", "session-token", "X-Confirm-Password"],
 )
 
-# Añadido el último para que sea el más externo: su cabecera X-Request-ID
-# también aparece en las respuestas CORS y en los errores.
-app.add_middleware(RequestIdMiddleware)
-
 app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Añadido el último para que sea el más externo: su cabecera X-Request-ID
+# también aparece en las respuestas CORS y en los errores (incluido el 429).
+app.add_middleware(RequestIdMiddleware)
 
 
 @app.exception_handler(DomainError)

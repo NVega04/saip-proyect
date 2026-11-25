@@ -1,10 +1,11 @@
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 
 from src.core.dependencies import get_current_user
 from src.core.openapi import NOT_FOUND
+from src.core.rate_limit import limiter
 from src.modules.reports.dependencies import get_reports_service
 from src.modules.reports.service import ReportsService
 from src.modules.users.models import User
@@ -17,7 +18,9 @@ router = APIRouter(prefix="/reports", tags=["Reports"])
     summary="Generar reporte por entidad (Excel o JSON)",
     responses={404: NOT_FOUND},
 )
+@limiter.limit("5/minute")
 def generate_report(
+    request: Request,
     entity: str,
     fecha_inicio: Optional[date] = Query(default=None),
     fecha_fin: Optional[date] = Query(default=None),

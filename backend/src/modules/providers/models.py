@@ -3,9 +3,10 @@ from enum import Enum
 from typing import List, Optional
 from uuid import uuid4
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, event
 from sqlmodel import Field, Relationship, SQLModel
 
+from src.core.crypto import EncryptedString, blind_index
 from src.core.time import BOGOTA_TZ
 
 
@@ -21,7 +22,8 @@ class Provider(SQLModel, table=True):
     token: str = Field(default_factory=lambda: str(uuid4()), unique=True, index=True)
 
     company: str = Field(max_length=150)
-    nit: str = Field(max_length=20, unique=True, index=True)
+    nit: str = Field(max_length=20, sa_type=EncryptedString(255))
+    nit_hash: str = Field(default="", max_length=64, unique=True, index=True)
     email: str = Field(max_length=150, unique=True, index=True)
     status: ProviderStatus = Field(default=ProviderStatus.ACTIVE)
 
@@ -55,6 +57,14 @@ class Provider(SQLModel, table=True):
     )
 
 
+@event.listens_for(Provider, "before_insert")
+@event.listens_for(Provider, "before_update")
+def set_provider_nit_hash(mapper, connection, target) -> None:  # noqa: ANN001, ARG001
+    """Mantiene el índice ciego sin depender de validadores de Pydantic."""
+    if target.nit:
+        target.nit_hash = blind_index(target.nit)
+
+
 class ProviderContact(SQLModel, table=True):
     __tablename__ = "provider_contacts"
 
@@ -66,7 +76,7 @@ class ProviderContact(SQLModel, table=True):
 
     name: str = Field(max_length=150)
     email: Optional[str] = Field(default=None, max_length=150)
-    phone: Optional[str] = Field(default=None, max_length=20)
+    phone: Optional[str] = Field(default=None, sa_type=EncryptedString(255))
     notes: Optional[str] = Field(default=None, max_length=500)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(BOGOTA_TZ))

@@ -9,6 +9,7 @@ from src.core.exceptions import (
     NotFoundError,
     PermissionDeniedError,
 )
+from src.core.validation import validate_input
 from src.modules.audit.service import AuditService
 from src.modules.roles.models import Module, Role, RoleModule, RoleStatus
 from src.modules.roles.schemas import RoleCreate, RoleModuleAssign, RoleUpdate
@@ -30,6 +31,7 @@ class RolesService:
         self.audit = AuditService(session, ip_address=ip_address)
 
     def create_role(self, data: RoleCreate, current_user: User) -> Role:
+        validate_input(data, "RoleCreate")
         existing = self.session.exec(
             select(Role).where(Role.name == data.name)
         ).first()
@@ -55,6 +57,7 @@ class RolesService:
         return role
 
     def update_role(self, role_id: int, data: RoleUpdate, current_user: User) -> Role:
+        validate_input(data, "RoleUpdate")
         role = self.session.get(Role, role_id)
         if role is None:
             raise NotFoundError("Rol no encontrado")
@@ -155,6 +158,7 @@ class RoleModulesService:
         data: RoleModuleAssign,
         current_user: Optional[User] = None,
     ) -> list[RoleModule]:
+        validate_input(data, "RoleModuleAssign")
         role = self.session.get(Role, role_id)
         if not role:
             raise NotFoundError(f"El rol con id '{role_id}' no existe.")

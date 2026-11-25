@@ -8,6 +8,7 @@ from src.core.exceptions import (
     NotFoundError,
 )
 from src.core.time import BOGOTA_TZ
+from src.core.validation import validate_input
 from src.modules.products.models import Product
 from src.modules.recipes.models import Recipe, RecipeIngredient, RecipeStatus
 from src.modules.recipes.schemas import (
@@ -41,6 +42,7 @@ class RecipesService:
         return recipe
 
     def create(self, data: RecipeCreate, current_user: User) -> Recipe:
+        validate_input(data, "RecipeCreate")
         existing = self.session.exec(
             select(Recipe).where(
                 Recipe.name == data.name, Recipe.deleted_at == None
@@ -103,6 +105,7 @@ class RecipesService:
     def update(
         self, recipe_id: int, data: RecipeUpdate, current_user: User
     ) -> Recipe:
+        validate_input(data, "RecipeUpdate")
         recipe = self.get(recipe_id)
 
         if data.name is not None and data.name != recipe.name:

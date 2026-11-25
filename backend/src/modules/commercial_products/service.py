@@ -16,6 +16,7 @@ from src.bulk.parser import (
 from src.core.exceptions import ConflictError, NotFoundError
 from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
+from src.core.validation import validate_input
 from src.core.time import BOGOTA_TZ
 from src.modules.commercial_products.models import CommercialProduct, ProductCategory
 from src.modules.commercial_products.schemas import (
@@ -97,6 +98,7 @@ class CommercialProductsService:
     def create(
         self, data: CommercialProductCreate, current_user: User
     ) -> CommercialProduct:
+        validate_input(data, "CommercialProductCreate")
         category = self.session.get(ProductCategory, data.category_id)
         if not category or category.status == "inactive":
             raise NotFoundError(
@@ -146,6 +148,7 @@ class CommercialProductsService:
     def update(
         self, product_id: int, data: CommercialProductUpdate, current_user: User
     ) -> CommercialProduct:
+        validate_input(data, "CommercialProductUpdate")
         product = self.get(product_id)
 
         if data.name and data.name != product.name:

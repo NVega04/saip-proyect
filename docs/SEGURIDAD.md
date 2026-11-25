@@ -30,12 +30,27 @@ El contador se reinicia tras un login correcto o al vencer el bloqueo.
 
 ### Rate limiting
 
-Implementado con SlowAPI por dirección IP:
+Implementado con SlowAPI. El middleware global aplica
+`RATE_LIMIT_DEFAULT=100/minute` por IP a **todas** las rutas; las operaciones
+sensibles tienen límites más estrictos:
 
 | Endpoint | Límite |
 |----------|--------|
+| Global (todas las rutas) | 100 peticiones/minuto (`RATE_LIMIT_DEFAULT`) |
 | `POST /session/login` | 5 peticiones/minuto |
 | `POST /session/forgot-password` | 3 peticiones/minuto |
+| `POST /users/` | 10 peticiones/minuto |
+| Reportes y exportaciones (inventario, producción, ventas, reportes) | 5 peticiones/minuto |
+
+El exceso devuelve **429** con `Retry-After`. `X-Forwarded-For` solo se tiene
+en cuenta cuando la petición llega desde una IP declarada en
+`TRUSTED_PROXY_HOSTS`; en cualquier otro caso se usa la IP de la conexión para
+no permitir suplantación. Detalles de despliegue en
+[`DEPLOY-SEGURIDAD.md`](./DEPLOY-SEGURIDAD.md).
+
+Los reportes de `sessions` y `production` exigen rango de fechas (máximo 366
+días) y todas las consultas están topadas en `REPORT_ROW_LIMIT=5000` filas; la
+respuesta JSON indica `truncado: true` cuando se alcanza el tope.
 
 La recuperación de contraseña devuelve **siempre el mismo mensaje** aunque el
 correo no exista o la cuenta esté inactiva (evita enumeración de usuarios). Los
@@ -68,8 +83,9 @@ auditoría (ver más abajo).
 
 ## Secretos y variables sensibles
 
-- `JWT_SECRET` y `FRONTEND_URL` **deben** venir del entorno: la aplicación
-  falla al arrancar si faltan. `JWT_SECRET` exige mínimo 32 caracteres.
+- `JWT_SECRET`, `FRONTEND_URL` y `ENCRYPTION_KEY` **deben** venir del entorno:
+  la aplicación falla al arrancar si faltan. `JWT_SECRET` exige mínimo 32
+  caracteres; `ENCRYPTION_KEY` es una lista CSV de claves Fernet de 32 bytes.
 - Genera un secreto con:
 
   ```bash
@@ -88,6 +104,22 @@ auditoría (ver más abajo).
   cuenta de correo. En producción prefiere un gestor de secretos (Vault, AWS
   Secrets Manager, etc.) sobre variables planas.
 
+## Cifrado en reposo
+
+El NIT de proveedores y el teléfono de usuarios se almacenan cifrados con
+Fernet (`src/core/crypto.py`), aplicado como `TypeDecorator` en el modelo.
+Para poder buscar por NIT sin descifrar toda la tabla se guarda además un
+índice ciego HMAC normalizado (`nit_hash`); la búsqueda usa ese índice y el
+NIT en claro nunca vuelve a la base de datos.
+
+- La migración `6ef9e1aec914` cifra los valores existentes y calcula el
+  índice ciego; `downgrade -1` revierte el proceso.
+- `ENCRYPTION_KEY` admite rotación: `nueva,anterior`. La primera clave cifra;
+  todas pueden descifrar. **Perder las claves antiguas impide leer los datos
+  cifrados**: guárdalas en un gestor de secretos y haz respaldos de ellas.
+- La auditoría elimina también `nit`, `phone`, `telefono` y `celular` de los
+  valores registrados.
+
 ## CORS y HTTPS
 
 - `CORS_ORIGINS` es una lista separada por coma. La configuración rechaza
@@ -95,6 +127,10 @@ auditoría (ver más abajo).
 - Producción debe servir el frontend por **HTTPS** y terminar TLS en un reverse
   proxy; `CORS_ORIGINS` debe contener solo el dominio HTTPS. La DB no expone
   puertos al host en `docker-compose.prod.yml`.
+- Configura HSTS y las cabeceras de seguridad siguiendo
+  [`DEPLOY-SEGURIDAD.md`](./DEPLOY-SEGURIDAD.md) y el ejemplo
+  `docs/examples/nginx-saip.conf`. Activa HSTS solo después de verificar HTTPS
+  en todo el dominio.
 
 ## Auditoría
 
@@ -103,8 +139,8 @@ auditoría (ver más abajo).
 - Es de solo lectura desde la API (`GET /audit/`, solo administradores).
 - Antes de guardarse, `sanitize_audit_value` elimina de forma recursiva
   cualquier clave que coincida con `password|passwd|secret|token|hash|jwt|
-  credential|authorization|reset`. Las contraseñas y tokens **nunca** se
-  escriben en la auditoría.
+  credential|authorization|reset|nit|phone|telefono|celular`. Contraseñas,
+  tokens, NIT y teléfonos **nunca** se escriben en la auditoría.
 
 ## Logging
 
@@ -119,22 +155,25 @@ auditoría (ver más abajo).
 
 ## Respaldo y restauración
 
-No hay un script de respaldo automático incluido; la responsabilidad es del
-operador. Procedimiento recomendado con el contenedor de MySQL de Compose:
+Hay scripts reproducibles en `scripts/` (programar su ejecución sigue siendo
+responsabilidad del operador):
 
 ```bash
-# Respaldo lógico (volcará datos, no contraseñas en claro: se guardan hashes)
-docker exec saip_db_container sh -c \
-  'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines \
-   --triggers db_saip_proyect' > respaldo_$(date +%F).sql
+# Respaldo lógico comprimido con retención de 7 días
+./scripts/backup_db.sh
 
-# Restauración (¡sobrescribe la base! ejecutar con cuidado)
-docker exec -i saip_db_container sh -c \
-  'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" db_saip_proyect' < respaldo_AAAA-MM-DD.sql
+# Restauración en una BD distinta; TARGET_DB por defecto es un nombre *_restore
+TARGET_DB=db_saip_restore ./scripts/restore_db.sh backups/db_saip_proyect_*.sql.gz
 
 # Tras restaurar, asegurar el esquema al-head y reiniciar el backend
 cd backend && uv run alembic upgrade head
 ```
+
+`BACKUP_DIR` y `RETENTION_DAYS` son configurables. Los volcados contienen
+datos cifrados (NIT/teléfonos) y hashes de contraseñas, nunca secretos en
+claro. No ejecutar la restauración sobre la base de producción sin antes
+verificarla en staging. Procedimiento detallado en
+[`DEPLOY-SEGURIDAD.md`](./DEPLOY-SEGURIDAD.md).
 
 Buenas prácticas:
 

@@ -16,6 +16,7 @@ from src.bulk.parser import (
 from src.core.exceptions import ConflictError, NotFoundError
 from src.core.pagination import Page, PaginationParams, like_pattern
 from src.core.schemas import BulkImportResult
+from src.core.validation import validate_input
 from src.modules.supplies.models import Supply, SupplyCategory
 from src.modules.supplies.schemas import (
     DeleteResponseSupply,
@@ -54,6 +55,7 @@ class SuppliesService:
         self.session = session
 
     def create(self, data: SupplyCreate, current_user: User) -> Supply:
+        validate_input(data, "SupplyCreate")
         category = self.session.get(SupplyCategory, data.category_id)
         if not category or category.status == "inactive":
             raise NotFoundError(
@@ -126,6 +128,7 @@ class SuppliesService:
         return supply
 
     def update(self, supply_id: int, data: SupplyUpdate, current_user: User) -> Supply:
+        validate_input(data, "SupplyUpdate")
         supply = self.get(supply_id)
 
         if data.name and data.name != supply.name:

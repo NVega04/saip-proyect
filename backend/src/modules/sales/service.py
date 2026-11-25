@@ -13,6 +13,7 @@ from src.core.exceptions import (
     ServerError,
 )
 from src.core.time import BOGOTA_TZ
+from src.core.validation import validate_input
 from src.modules.audit.service import AuditService
 from src.modules.inventory.models import InventoryMovement, MovementType
 from src.modules.products.models import Product
@@ -116,6 +117,7 @@ class SalesService:
         return sale
 
     def create(self, data: SaleCreate, current_user: User) -> SaleCreateResponse:
+        validate_input(data, "SaleCreate")
         aggregated: Dict[Tuple[str, int], float] = {}
         for item in data.items:
             key = (item.item_type.value, item.item_id)

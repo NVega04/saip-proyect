@@ -1,10 +1,11 @@
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 
 from src.core.dependencies import get_current_user, require_module
 from src.core.openapi import BAD_REQUEST, FORBIDDEN, NOT_FOUND, STOCK_ERROR
+from src.core.rate_limit import limiter
 from src.modules.sales.dependencies import get_sales_service
 from src.modules.sales.models import ItemType, SaleStatus
 from src.modules.sales.schemas import (
@@ -76,7 +77,9 @@ def get_sales(
     "/export",
     summary="Exportar ventas a Excel (con los filtros de la vista)",
 )
+@limiter.limit("5/minute")
 def export_sales(
+    request: Request,
     date_from: Optional[date] = Query(default=None),
     date_to: Optional[date] = Query(default=None),
     status_filter: Optional[SaleStatus] = Query(default=None, alias="status"),
