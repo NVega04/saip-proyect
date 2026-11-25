@@ -1,6 +1,6 @@
 # SAIP - Sistema Administrativo Integral de Productos
 
-## Objetivo del Proyecto
+## Objetivo del proyecto
 
 SAIP es un **Sistema Administrativo Integral de Productos** en plataforma web, diseñado específicamente para pequeñas panaderías como La Parmesana. El proyecto se encuentra en fase activa de desarrollo con los siguientes objetivos:
 
