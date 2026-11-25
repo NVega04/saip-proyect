@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from src.bulk.parser import template_response
 from src.core.dependencies import get_current_user
+from src.core.openapi import CONFLICT, NOT_FOUND
 from src.core.pagination import Page, PaginationParams
 from src.core.schemas import BulkImportResult
 from src.modules.commercial_products.dependencies import (

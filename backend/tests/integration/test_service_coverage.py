@@ -83,7 +83,6 @@ def test_auth_service_full_flow(client, admin_user, db_session):
 def test_users_service_lifecycle(client, admin_headers, admin_role, limited_headers):
     created = client.post(
         "/users/",
-        headers=admin_headers,
         json={
             "first_name": "Cobertura",
             "last_name": "Servicio",
@@ -354,7 +353,6 @@ def test_roles_service_lifecycle(client, admin_headers, admin_role, db_session):
 
     role = client.post(
         "/roles/",
-        headers=admin_headers,
         json={"name": _unique("rol-cobertura"), "description": "rol e2e"},
         headers=admin_headers,
     )
