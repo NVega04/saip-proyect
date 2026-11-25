@@ -3232,6 +3232,48 @@
               }
             }
           },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3408,6 +3450,27 @@
               }
             }
           },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3488,6 +3551,48 @@
               }
             }
           },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -3554,6 +3659,48 @@
                 },
                 "example": {
                   "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
                 }
               }
             }
@@ -5110,6 +5257,48 @@
               }
             }
           },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -5178,6 +5367,27 @@
                 },
                 "example": {
                   "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
                 }
               }
             }
@@ -5262,6 +5472,48 @@
               }
             }
           },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El recurso ya existe o su estado no permite la operación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "El email 'admin@saip.com' ya está registrado."
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -5328,6 +5580,27 @@
                 },
                 "example": {
                   "detail": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el recurso solicitado o está eliminado lógicamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "detail"
+                  ]
+                },
+                "example": {
+                  "detail": "Recurso no encontrado"
                 }
               }
             }

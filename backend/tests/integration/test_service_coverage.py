@@ -89,6 +89,7 @@ def test_users_service_lifecycle(client, admin_headers, admin_role, limited_head
             "email": f"{_unique('coverage-user')}@saip.com",
             "role_id": admin_role.id,
         },
+        headers=admin_headers,
     )
     assert created.status_code == 201
     user_id = created.json()["id"]
@@ -353,6 +354,7 @@ def test_roles_service_lifecycle(client, admin_headers, admin_role, db_session):
     role = client.post(
         "/roles/",
         json={"name": _unique("rol-cobertura"), "description": "rol e2e"},
+        headers=admin_headers,
     )
     assert role.status_code == 201
     role_id = role.json()["id"]

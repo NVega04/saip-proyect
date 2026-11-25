@@ -53,6 +53,7 @@ def get_all(
     "/{product_id}",
     response_model=CommercialProductResponse,
     status_code=status.HTTP_200_OK,
+    responses={404: NOT_FOUND},
 )
 def get_one(
     product_id: int,
@@ -66,6 +67,7 @@ def get_one(
     "/",
     response_model=CommercialProductResponse,
     status_code=status.HTTP_201_CREATED,
+    responses={404: NOT_FOUND, 409: CONFLICT},
 )
 def create(
     data: CommercialProductCreate,
@@ -84,6 +86,7 @@ def create(
     "/{product_id}",
     response_model=CommercialProductResponse,
     status_code=status.HTTP_200_OK,
+    responses={404: NOT_FOUND, 409: CONFLICT},
 )
 def update(
     product_id: int,
@@ -98,6 +101,7 @@ def update(
     "/{product_id}",
     response_model=DeleteResponseCommercialProduct,
     status_code=status.HTTP_200_OK,
+    responses={404: NOT_FOUND},
 )
 def delete(
     product_id: int,

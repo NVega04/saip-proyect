@@ -29,6 +29,7 @@ router = APIRouter(prefix="/supplies", tags=["Supplies"])
     response_model=SupplyResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear nuevo insumo",
+    responses={404: NOT_FOUND, 409: CONFLICT},
 )
 def create_supply(
     data: SupplyCreate,
@@ -71,6 +72,7 @@ def get_all_supplies(
     response_model=SupplyResponse,
     status_code=status.HTTP_200_OK,
     summary="Obtener insumo por ID",
+    responses={404: NOT_FOUND},
 )
 def get_supply(
     supply_id: int,
@@ -85,6 +87,7 @@ def get_supply(
     response_model=SupplyResponse,
     status_code=status.HTTP_200_OK,
     summary="Actualizar insumo",
+    responses={404: NOT_FOUND, 409: CONFLICT},
 )
 def update_supply(
     supply_id: int,
@@ -100,6 +103,7 @@ def update_supply(
     response_model=DeleteResponseSupply,
     status_code=status.HTTP_200_OK,
     summary="Eliminar insumo (soft delete)",
+    responses={404: NOT_FOUND, 409: CONFLICT},
 )
 def delete_supply(
     supply_id: int,
