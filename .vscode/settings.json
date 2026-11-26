@@ -11,9 +11,5 @@
     "editor.guides.indentation": false,
     "editor.guides.highlightActiveIndentation": false,
     "editor.overtypeCursorStyle": "line",
-    "terminal.integrated.cursorStyle": "line",
-    "sonarlint.connectedMode.project": {
-        "connectionId": "nvega04",
-        "projectKey": "NVega04_saip-proyect"
-    }
+    "terminal.integrated.cursorStyle": "line"
 }
