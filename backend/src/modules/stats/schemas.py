@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -27,8 +27,8 @@ class StockLevelPoint(BaseModel):
 class LowStockSupplyItem(BaseModel):
     id: int
     name: str
-    category: Optional[str] = None
-    unit: Optional[str] = None
+    category: str | None = None
+    unit: str | None = None
     available_quantity: float
     min_stock: float
 
@@ -104,7 +104,7 @@ class ProductStockPoint(BaseModel):
 class LowStockProduct(BaseModel):
     id: int
     name: str
-    unit: Optional[str] = None
+    unit: str | None = None
     available_quantity: float
     min_stock: float
     max_stock: float

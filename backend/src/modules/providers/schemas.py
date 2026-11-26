@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, EmailStr
 
@@ -8,16 +8,16 @@ from src.modules.providers.models import ProviderStatus
 
 class ProviderContactCreate(BaseModel):
     name: str
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    notes: str | None = None
 
 
 class ProviderContactUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    notes: Optional[str] = None
+    name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    notes: str | None = None
 
 
 class ProviderContactResponse(BaseModel):
@@ -25,15 +25,15 @@ class ProviderContactResponse(BaseModel):
     token: str
     provider_id: int
     name: str
-    email: Optional[str]
-    phone: Optional[str]
-    notes: Optional[str]
+    email: str | None
+    phone: str | None
+    notes: str | None
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -46,9 +46,9 @@ class ProviderCreate(BaseModel):
 
 
 class ProviderUpdate(BaseModel):
-    company: Optional[str] = None
-    nit: Optional[str] = None
-    email: Optional[EmailStr] = None
+    company: str | None = None
+    nit: str | None = None
+    email: EmailStr | None = None
 
 
 class ProviderResponse(BaseModel):
@@ -59,11 +59,11 @@ class ProviderResponse(BaseModel):
     email: str
     status: ProviderStatus
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
     contacts: List[ProviderContactResponse]
 
     class Config:

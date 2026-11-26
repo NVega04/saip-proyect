@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -19,7 +18,7 @@ class UserCreate(UppercaseMixin, BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     role_id: int
     is_admin: bool = False
 
@@ -29,14 +28,14 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: Optional[str]
+    phone: str | None
     role_id: int
     role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime
     accepted_terms: bool
-    accepted_terms_at: Optional[datetime]
+    accepted_terms_at: datetime | None
 
     class Config:
         from_attributes = True
@@ -49,13 +48,13 @@ class DeleteResponseUser(BaseModel):
 
 
 class UserUpdate(UppercaseMixin, BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    role_id: Optional[int] = None
-    is_admin: Optional[bool] = None
-    status: Optional[UserStatus] = None
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    role_id: int | None = None
+    is_admin: bool | None = None
+    status: UserStatus | None = None
 
 
 class UserUpdateResponse(BaseModel):
@@ -63,14 +62,14 @@ class UserUpdateResponse(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: Optional[str]
+    phone: str | None
     role_id: int
     role: RoleBasic
     is_admin: bool
     status: UserStatus
     created_at: datetime
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
+    updated_at: datetime | None
+    updated_by: int | None
 
     class Config:
         from_attributes = True

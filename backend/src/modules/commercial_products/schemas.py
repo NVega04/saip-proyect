@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -28,26 +28,26 @@ class CommercialProductBasic(BaseModel):
 
 class ProductCategoryCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class ProductCategoryUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class ProductCategoryResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
     commercial_products: List[CommercialProductBasic]
 
     class Config:
@@ -71,10 +71,10 @@ class ProviderBasic(BaseModel):
 
 class CommercialProductCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     category_id: int
     unit_id: int
-    provider_id: Optional[int] = None
+    provider_id: int | None = None
     purchase_price: float = 0
     sale_price: float = 0
     available_quantity: float = 0
@@ -83,29 +83,29 @@ class CommercialProductCreate(UppercaseMixin, BaseModel):
 
 
 class CommercialProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    provider_id: Optional[int] = None
-    purchase_price: Optional[float] = None
-    sale_price: Optional[float] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
+    name: str | None = None
+    description: str | None = None
+    category_id: int | None = None
+    unit_id: int | None = None
+    provider_id: int | None = None
+    purchase_price: float | None = None
+    sale_price: float | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
 
 
 class CommercialProductResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     category_id: int
     category: ProductCategoryBasic
     unit_id: int
     unit: UnitBasic
-    provider_id: Optional[int]
-    provider: Optional[ProviderBasic]
+    provider_id: int | None
+    provider: ProviderBasic | None
     purchase_price: float
     sale_price: float
     available_quantity: float
@@ -113,11 +113,11 @@ class CommercialProductResponse(BaseModel):
     max_stock: float
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
