@@ -43,6 +43,15 @@ app = FastAPI(
     title="SAIP - Sistema administrativo integral de productos", version="1.0.0"
 )
 
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORSMiddleware va último para que sea el más externo: así sus cabeceras
+# aparecen también en los errores (incluido el 429) y no se enmascaran
+# como errores CORS en el navegador.
+app.add_middleware(RequestIdMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -50,14 +59,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "session-token", "X-Confirm-Password"],
 )
-
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# Añadido el último para que sea el más externo: su cabecera X-Request-ID
-# también aparece en las respuestas CORS y en los errores (incluido el 429).
-app.add_middleware(RequestIdMiddleware)
 
 
 @app.exception_handler(DomainError)
