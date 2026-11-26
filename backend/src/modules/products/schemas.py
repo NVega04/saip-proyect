@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -10,7 +9,7 @@ from src.modules.units.schemas import UnitBasic
 
 class ProductCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     unit_id: int
     available_quantity: float = 0
     min_stock: float = 0
@@ -19,20 +18,20 @@ class ProductCreate(UppercaseMixin, BaseModel):
 
 
 class ProductUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    unit_id: Optional[int] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
-    is_locked: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    unit_id: int | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
+    is_locked: bool | None = None
 
 
 class ProductResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     unit_id: int
     unit: UnitBasic
     available_quantity: float
@@ -41,11 +40,11 @@ class ProductResponse(BaseModel):
     is_locked: bool
     status: ProductStatus
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True

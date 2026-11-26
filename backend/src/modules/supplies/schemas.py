@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -28,26 +28,26 @@ class SupplyCategoryBasic(BaseModel):
 
 class SupplyCategoryCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class SupplyCategoryUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class SupplyCategoryResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
     supplies: List[SupplyBasic]
 
     class Config:
@@ -62,33 +62,33 @@ class DeleteResponseSupplyCategory(BaseModel):
 
 class SupplyCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     category_id: int
     unit_id: int
     available_quantity: float = 0
     min_stock: float = 0
     max_stock: float = 0
-    supplier_id: Optional[int] = None
-    expiration_date: Optional[datetime] = None
+    supplier_id: int | None = None
+    expiration_date: datetime | None = None
 
 
 class SupplyUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
-    available_quantity: Optional[float] = None
-    min_stock: Optional[float] = None
-    max_stock: Optional[float] = None
-    supplier_id: Optional[int] = None
-    expiration_date: Optional[datetime] = None
+    name: str | None = None
+    description: str | None = None
+    category_id: int | None = None
+    unit_id: int | None = None
+    available_quantity: float | None = None
+    min_stock: float | None = None
+    max_stock: float | None = None
+    supplier_id: int | None = None
+    expiration_date: datetime | None = None
 
 
 class SupplyResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
+    description: str | None
     category_id: int
     category: SupplyCategoryBasic
     unit_id: int
@@ -96,15 +96,15 @@ class SupplyResponse(BaseModel):
     available_quantity: float
     min_stock: float
     max_stock: float
-    supplier_id: Optional[int]
-    expiration_date: Optional[datetime]
+    supplier_id: int | None
+    expiration_date: datetime | None
     status: str
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True

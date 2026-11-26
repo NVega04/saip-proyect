@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -9,15 +8,15 @@ from src.core.schemas import UppercaseMixin
 class UnitCreate(UppercaseMixin, BaseModel):
     name: str
     abbreviation: str
-    description: Optional[str] = None
+    description: str | None = None
     quantity: float
 
 
 class UnitUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    abbreviation: Optional[str] = None
-    description: Optional[str] = None
-    quantity: Optional[float] = None
+    name: str | None = None
+    abbreviation: str | None = None
+    description: str | None = None
+    quantity: float | None = None
 
 
 class UnitResponse(BaseModel):
@@ -25,14 +24,14 @@ class UnitResponse(BaseModel):
     token: str
     name: str
     abbreviation: str
-    description: Optional[str]
+    description: str | None
     quantity: float
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True

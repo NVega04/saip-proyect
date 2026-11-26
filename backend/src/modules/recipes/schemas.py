@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -13,7 +12,7 @@ class RecipeIngredientCreate(BaseModel):
     supply_id: int
     quantity: float
     unit_id: int
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class RecipeIngredientResponse(BaseModel):
@@ -24,7 +23,7 @@ class RecipeIngredientResponse(BaseModel):
     quantity: float
     unit_id: int
     unit: UnitBasic
-    notes: Optional[str]
+    notes: str | None
 
     class Config:
         from_attributes = True
@@ -32,7 +31,7 @@ class RecipeIngredientResponse(BaseModel):
 
 class RecipeCreate(UppercaseMixin, BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     product_id: int
     yield_quantity: float = 1
     yield_unit_id: int
@@ -40,32 +39,32 @@ class RecipeCreate(UppercaseMixin, BaseModel):
 
 
 class RecipeUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    product_id: Optional[int] = None
-    yield_quantity: Optional[float] = None
-    yield_unit_id: Optional[int] = None
-    status: Optional[RecipeStatus] = None
-    ingredients: Optional[list[RecipeIngredientCreate]] = None
+    name: str | None = None
+    description: str | None = None
+    product_id: int | None = None
+    yield_quantity: float | None = None
+    yield_unit_id: int | None = None
+    status: RecipeStatus | None = None
+    ingredients: list[RecipeIngredientCreate] | None = None
 
 
 class RecipeResponse(BaseModel):
     id: int
     token: str
     name: str
-    description: Optional[str]
-    product_id: Optional[int]
+    description: str | None
+    product_id: int | None
     yield_quantity: float
     yield_unit_id: int
     yield_unit: UnitBasic
     status: RecipeStatus
     ingredients: list[RecipeIngredientResponse]
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True

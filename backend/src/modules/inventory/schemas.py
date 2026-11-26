@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -14,9 +14,9 @@ class InventoryItem(BaseModel):
     id: int
     item_type: str
     name: str
-    description: Optional[str] = None
-    category_name: Optional[str] = None
-    unit_abbreviation: Optional[str] = None
+    description: str | None = None
+    category_name: str | None = None
+    unit_abbreviation: str | None = None
     available_quantity: float
     min_stock: float
     max_stock: float

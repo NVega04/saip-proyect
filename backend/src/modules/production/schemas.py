@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -11,7 +10,7 @@ from src.modules.units.schemas import UnitBasic
 class RecipeBasic(BaseModel):
     id: int
     name: str
-    product_id: Optional[int] = None
+    product_id: int | None = None
     yield_quantity: float
     yield_unit: UnitBasic
 
@@ -22,12 +21,12 @@ class RecipeBasic(BaseModel):
 class ProductionOrderCreate(BaseModel):
     recipe_id: int
     quantity_multiplier: float = Field(gt=0)
-    scheduled_at: Optional[datetime] = None
-    notes: Optional[str] = Field(default=None, max_length=500)
+    scheduled_at: datetime | None = None
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class ProductionOrderCancelRequest(BaseModel):
-    reason: Optional[str] = Field(default=None, max_length=500)
+    reason: str | None = Field(default=None, max_length=500)
 
 
 class ProductionOrderResponse(BaseModel):
@@ -38,17 +37,17 @@ class ProductionOrderResponse(BaseModel):
     quantity_multiplier: float
     total_yield: float
     status: ProductionOrderStatus
-    scheduled_at: Optional[datetime]
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
-    cancelled_at: Optional[datetime]
-    notes: Optional[str]
+    scheduled_at: datetime | None
+    started_at: datetime | None
+    completed_at: datetime | None
+    cancelled_at: datetime | None
+    notes: str | None
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -86,9 +85,9 @@ class ProductionCompleteResponse(BaseModel):
     status: ProductionOrderStatus
     total_yield: float
     completed_at: datetime
-    product_id: Optional[int] = None
-    product_name: Optional[str] = None
-    product_quantity_added: Optional[float] = None
+    product_id: int | None = None
+    product_name: str | None = None
+    product_quantity_added: float | None = None
     snapshots: list[ProductionSnapshotResponse]
     completed_by: int
 

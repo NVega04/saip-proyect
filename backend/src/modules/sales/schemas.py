@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -24,7 +24,7 @@ class SaleItemCreate(BaseModel):
 
 class SaleCreate(BaseModel):
     items: List[SaleItemCreate] = Field(min_length=1)
-    notes: Optional[str] = Field(default=None, max_length=500)
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class SaleItemResponse(BaseModel):
@@ -46,14 +46,14 @@ class SaleResponse(BaseModel):
     user: UserBasic
     sale_date: datetime
     status: SaleStatus
-    notes: Optional[str]
+    notes: str | None
     items: List[SaleItemResponse]
     created_at: datetime
-    created_by: Optional[int]
-    updated_at: Optional[datetime]
-    updated_by: Optional[int]
-    deleted_at: Optional[datetime]
-    deleted_by: Optional[int]
+    created_by: int | None
+    updated_at: datetime | None
+    updated_by: int | None
+    deleted_at: datetime | None
+    deleted_by: int | None
 
     class Config:
         from_attributes = True
@@ -73,7 +73,7 @@ class SaleListResponse(BaseModel):
     user: UserBasic
     sale_date: datetime
     status: SaleStatus
-    notes: Optional[str]
+    notes: str | None
     item_count: int
     total_quantity: float
     created_at: datetime

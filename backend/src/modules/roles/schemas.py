@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -23,8 +22,8 @@ class RoleResponse(BaseModel):
 
 
 class RoleUpdate(UppercaseMixin, BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
 
 class RolePublic(BaseModel):
@@ -33,10 +32,10 @@ class RolePublic(BaseModel):
     description: str
     created_at: datetime
     status: RoleStatus
-    updated_at: Optional[datetime] = None
-    updated_by: Optional[int] = None
-    deleted_at: Optional[datetime] = None
-    deleted_by: Optional[int] = None
+    updated_at: datetime | None = None
+    updated_by: int | None = None
+    deleted_at: datetime | None = None
+    deleted_by: int | None = None
 
     class Config:
         from_attributes = True
