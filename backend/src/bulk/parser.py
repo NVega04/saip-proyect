@@ -100,7 +100,7 @@ def _parse_rows(raw_rows) -> List[Dict[str, Any]]:
     headers: List[str] = []
     out: List[Dict[str, Any]] = []
     for values in raw_rows:
-        cells = list(values) if not isinstance(values, (list, tuple)) else list(values)
+        cells = list(values)
         if all(c is None or str(c).strip() == "" for c in cells):
             continue
         if not headers:
